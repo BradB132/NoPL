@@ -1,0 +1,428 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A2AB8159153B42B60080E9FB /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB8158153B42B60080E9FB /* main.c */; };
+		A2AB815B153B42B60080E9FB /* NoPLc.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = A2AB815A153B42B60080E9FB /* NoPLc.1 */; };
+		A2AB81A2153B42F20080E9FB /* antlr3baserecognizer.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB8185153B42F20080E9FB /* antlr3baserecognizer.c */; };
+		A2AB81A3153B42F20080E9FB /* antlr3basetree.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB8186153B42F20080E9FB /* antlr3basetree.c */; };
+		A2AB81A4153B42F20080E9FB /* antlr3basetreeadaptor.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB8187153B42F20080E9FB /* antlr3basetreeadaptor.c */; };
+		A2AB81A5153B42F20080E9FB /* antlr3bitset.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB8188153B42F20080E9FB /* antlr3bitset.c */; };
+		A2AB81A6153B42F20080E9FB /* antlr3collections.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB8189153B42F20080E9FB /* antlr3collections.c */; };
+		A2AB81A7153B42F20080E9FB /* antlr3commontoken.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB818A153B42F20080E9FB /* antlr3commontoken.c */; };
+		A2AB81A8153B42F20080E9FB /* antlr3commontree.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB818B153B42F20080E9FB /* antlr3commontree.c */; };
+		A2AB81A9153B42F20080E9FB /* antlr3commontreeadaptor.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB818C153B42F20080E9FB /* antlr3commontreeadaptor.c */; };
+		A2AB81AA153B42F20080E9FB /* antlr3commontreenodestream.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB818D153B42F20080E9FB /* antlr3commontreenodestream.c */; };
+		A2AB81AB153B42F20080E9FB /* antlr3convertutf.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB818E153B42F20080E9FB /* antlr3convertutf.c */; };
+		A2AB81AC153B42F20080E9FB /* antlr3cyclicdfa.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB818F153B42F20080E9FB /* antlr3cyclicdfa.c */; };
+		A2AB81AD153B42F20080E9FB /* antlr3debughandlers.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB8190153B42F20080E9FB /* antlr3debughandlers.c */; };
+		A2AB81AE153B42F20080E9FB /* antlr3encodings.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB8191153B42F20080E9FB /* antlr3encodings.c */; };
+		A2AB81AF153B42F20080E9FB /* antlr3exception.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB8192153B42F20080E9FB /* antlr3exception.c */; };
+		A2AB81B0153B42F20080E9FB /* antlr3filestream.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB8193153B42F20080E9FB /* antlr3filestream.c */; };
+		A2AB81B1153B42F20080E9FB /* antlr3inputstream.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB8194153B42F20080E9FB /* antlr3inputstream.c */; };
+		A2AB81B2153B42F20080E9FB /* antlr3intstream.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB8195153B42F20080E9FB /* antlr3intstream.c */; };
+		A2AB81B3153B42F20080E9FB /* antlr3lexer.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB8196153B42F20080E9FB /* antlr3lexer.c */; };
+		A2AB81B4153B42F20080E9FB /* antlr3parser.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB8197153B42F20080E9FB /* antlr3parser.c */; };
+		A2AB81B5153B42F20080E9FB /* antlr3rewritestreams.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB8198153B42F20080E9FB /* antlr3rewritestreams.c */; };
+		A2AB81B6153B42F20080E9FB /* antlr3string.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB8199153B42F20080E9FB /* antlr3string.c */; };
+		A2AB81B7153B42F20080E9FB /* antlr3stringstream.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB819A153B42F20080E9FB /* antlr3stringstream.c */; };
+		A2AB81B8153B42F20080E9FB /* antlr3tokenstream.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB819B153B42F20080E9FB /* antlr3tokenstream.c */; };
+		A2AB81B9153B42F20080E9FB /* antlr3treeparser.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB819C153B42F20080E9FB /* antlr3treeparser.c */; };
+		A2AB81BA153B42F20080E9FB /* antlr3ucs2inputstream.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB819D153B42F20080E9FB /* antlr3ucs2inputstream.c */; };
+		A2AB81BB153B42F20080E9FB /* NoPLLexer.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB819E153B42F20080E9FB /* NoPLLexer.c */; };
+		A2AB81BC153B42F20080E9FB /* NoPLParser.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB81A0153B42F20080E9FB /* NoPLParser.c */; };
+		A2AB81C1153B715A0080E9FB /* NoPLc.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB81C0153B715A0080E9FB /* NoPLc.c */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		A2AB8152153B42B60080E9FB /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+				A2AB815B153B42B60080E9FB /* NoPLc.1 in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		A29783E6154A467300903BDD /* NoPLValues.h */ = {isa = PBXFileReference; fileEncoding = 4; path = NoPLValues.h; sourceTree = "<group>"; };
+		A2AB8154153B42B60080E9FB /* NoPLc */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = NoPLc; sourceTree = BUILT_PRODUCTS_DIR; };
+		A2AB8158153B42B60080E9FB /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
+		A2AB815A153B42B60080E9FB /* NoPLc.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = NoPLc.1; sourceTree = "<group>"; };
+		A2AB8163153B42F20080E9FB /* antlr3config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = antlr3config.h; sourceTree = "<group>"; };
+		A2AB8165153B42F20080E9FB /* antlr3.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = antlr3.h; sourceTree = "<group>"; };
+		A2AB8166153B42F20080E9FB /* antlr3baserecognizer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = antlr3baserecognizer.h; sourceTree = "<group>"; };
+		A2AB8167153B42F20080E9FB /* antlr3basetree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = antlr3basetree.h; sourceTree = "<group>"; };
+		A2AB8168153B42F20080E9FB /* antlr3basetreeadaptor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = antlr3basetreeadaptor.h; sourceTree = "<group>"; };
+		A2AB8169153B42F20080E9FB /* antlr3bitset.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = antlr3bitset.h; sourceTree = "<group>"; };
+		A2AB816A153B42F20080E9FB /* antlr3collections.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = antlr3collections.h; sourceTree = "<group>"; };
+		A2AB816B153B42F20080E9FB /* antlr3commontoken.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = antlr3commontoken.h; sourceTree = "<group>"; };
+		A2AB816C153B42F20080E9FB /* antlr3commontree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = antlr3commontree.h; sourceTree = "<group>"; };
+		A2AB816D153B42F20080E9FB /* antlr3commontreeadaptor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = antlr3commontreeadaptor.h; sourceTree = "<group>"; };
+		A2AB816E153B42F20080E9FB /* antlr3commontreenodestream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = antlr3commontreenodestream.h; sourceTree = "<group>"; };
+		A2AB816F153B42F20080E9FB /* antlr3convertutf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = antlr3convertutf.h; sourceTree = "<group>"; };
+		A2AB8170153B42F20080E9FB /* antlr3cyclicdfa.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = antlr3cyclicdfa.h; sourceTree = "<group>"; };
+		A2AB8171153B42F20080E9FB /* antlr3debugeventlistener.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = antlr3debugeventlistener.h; sourceTree = "<group>"; };
+		A2AB8172153B42F20080E9FB /* antlr3defs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = antlr3defs.h; sourceTree = "<group>"; };
+		A2AB8173153B42F20080E9FB /* antlr3encodings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = antlr3encodings.h; sourceTree = "<group>"; };
+		A2AB8174153B42F20080E9FB /* antlr3errors.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = antlr3errors.h; sourceTree = "<group>"; };
+		A2AB8175153B42F20080E9FB /* antlr3exception.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = antlr3exception.h; sourceTree = "<group>"; };
+		A2AB8176153B42F20080E9FB /* antlr3filestream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = antlr3filestream.h; sourceTree = "<group>"; };
+		A2AB8177153B42F20080E9FB /* antlr3input.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = antlr3input.h; sourceTree = "<group>"; };
+		A2AB8178153B42F20080E9FB /* antlr3interfaces.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = antlr3interfaces.h; sourceTree = "<group>"; };
+		A2AB8179153B42F20080E9FB /* antlr3intstream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = antlr3intstream.h; sourceTree = "<group>"; };
+		A2AB817A153B42F20080E9FB /* antlr3lexer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = antlr3lexer.h; sourceTree = "<group>"; };
+		A2AB817B153B42F20080E9FB /* antlr3memory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = antlr3memory.h; sourceTree = "<group>"; };
+		A2AB817C153B42F20080E9FB /* antlr3parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = antlr3parser.h; sourceTree = "<group>"; };
+		A2AB817D153B42F20080E9FB /* antlr3parsetree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = antlr3parsetree.h; sourceTree = "<group>"; };
+		A2AB817E153B42F20080E9FB /* antlr3recognizersharedstate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = antlr3recognizersharedstate.h; sourceTree = "<group>"; };
+		A2AB817F153B42F20080E9FB /* antlr3rewritestreams.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = antlr3rewritestreams.h; sourceTree = "<group>"; };
+		A2AB8180153B42F20080E9FB /* antlr3string.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = antlr3string.h; sourceTree = "<group>"; };
+		A2AB8181153B42F20080E9FB /* antlr3stringstream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = antlr3stringstream.h; sourceTree = "<group>"; };
+		A2AB8182153B42F20080E9FB /* antlr3tokenstream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = antlr3tokenstream.h; sourceTree = "<group>"; };
+		A2AB8183153B42F20080E9FB /* antlr3treeparser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = antlr3treeparser.h; sourceTree = "<group>"; };
+		A2AB8185153B42F20080E9FB /* antlr3baserecognizer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = antlr3baserecognizer.c; sourceTree = "<group>"; };
+		A2AB8186153B42F20080E9FB /* antlr3basetree.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = antlr3basetree.c; sourceTree = "<group>"; };
+		A2AB8187153B42F20080E9FB /* antlr3basetreeadaptor.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = antlr3basetreeadaptor.c; sourceTree = "<group>"; };
+		A2AB8188153B42F20080E9FB /* antlr3bitset.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = antlr3bitset.c; sourceTree = "<group>"; };
+		A2AB8189153B42F20080E9FB /* antlr3collections.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = antlr3collections.c; sourceTree = "<group>"; };
+		A2AB818A153B42F20080E9FB /* antlr3commontoken.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = antlr3commontoken.c; sourceTree = "<group>"; };
+		A2AB818B153B42F20080E9FB /* antlr3commontree.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = antlr3commontree.c; sourceTree = "<group>"; };
+		A2AB818C153B42F20080E9FB /* antlr3commontreeadaptor.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = antlr3commontreeadaptor.c; sourceTree = "<group>"; };
+		A2AB818D153B42F20080E9FB /* antlr3commontreenodestream.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = antlr3commontreenodestream.c; sourceTree = "<group>"; };
+		A2AB818E153B42F20080E9FB /* antlr3convertutf.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = antlr3convertutf.c; sourceTree = "<group>"; };
+		A2AB818F153B42F20080E9FB /* antlr3cyclicdfa.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = antlr3cyclicdfa.c; sourceTree = "<group>"; };
+		A2AB8190153B42F20080E9FB /* antlr3debughandlers.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = antlr3debughandlers.c; sourceTree = "<group>"; };
+		A2AB8191153B42F20080E9FB /* antlr3encodings.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = antlr3encodings.c; sourceTree = "<group>"; };
+		A2AB8192153B42F20080E9FB /* antlr3exception.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = antlr3exception.c; sourceTree = "<group>"; };
+		A2AB8193153B42F20080E9FB /* antlr3filestream.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = antlr3filestream.c; sourceTree = "<group>"; };
+		A2AB8194153B42F20080E9FB /* antlr3inputstream.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = antlr3inputstream.c; sourceTree = "<group>"; };
+		A2AB8195153B42F20080E9FB /* antlr3intstream.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = antlr3intstream.c; sourceTree = "<group>"; };
+		A2AB8196153B42F20080E9FB /* antlr3lexer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = antlr3lexer.c; sourceTree = "<group>"; };
+		A2AB8197153B42F20080E9FB /* antlr3parser.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = antlr3parser.c; sourceTree = "<group>"; };
+		A2AB8198153B42F20080E9FB /* antlr3rewritestreams.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = antlr3rewritestreams.c; sourceTree = "<group>"; };
+		A2AB8199153B42F20080E9FB /* antlr3string.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = antlr3string.c; sourceTree = "<group>"; };
+		A2AB819A153B42F20080E9FB /* antlr3stringstream.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = antlr3stringstream.c; sourceTree = "<group>"; };
+		A2AB819B153B42F20080E9FB /* antlr3tokenstream.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = antlr3tokenstream.c; sourceTree = "<group>"; };
+		A2AB819C153B42F20080E9FB /* antlr3treeparser.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = antlr3treeparser.c; sourceTree = "<group>"; };
+		A2AB819D153B42F20080E9FB /* antlr3ucs2inputstream.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = antlr3ucs2inputstream.c; sourceTree = "<group>"; };
+		A2AB819E153B42F20080E9FB /* NoPLLexer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = NoPLLexer.c; sourceTree = "<group>"; };
+		A2AB819F153B42F20080E9FB /* NoPLLexer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NoPLLexer.h; sourceTree = "<group>"; };
+		A2AB81A0153B42F20080E9FB /* NoPLParser.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = NoPLParser.c; sourceTree = "<group>"; };
+		A2AB81A1153B42F20080E9FB /* NoPLParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NoPLParser.h; sourceTree = "<group>"; };
+		A2AB81BD153B71280080E9FB /* NoPLc.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NoPLc.h; sourceTree = "<group>"; };
+		A2AB81C0153B715A0080E9FB /* NoPLc.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = NoPLc.c; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		A2AB8151153B42B60080E9FB /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		A2AB8149153B42B60080E9FB = {
+			isa = PBXGroup;
+			children = (
+				A2AB8157153B42B60080E9FB /* NoPLc */,
+				A2AB8155153B42B60080E9FB /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		A2AB8155153B42B60080E9FB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A2AB8154153B42B60080E9FB /* NoPLc */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		A2AB8157153B42B60080E9FB /* NoPLc */ = {
+			isa = PBXGroup;
+			children = (
+				A2AB8161153B42F20080E9FB /* ANTLR */,
+				A2AB8158153B42B60080E9FB /* main.c */,
+				A2AB815A153B42B60080E9FB /* NoPLc.1 */,
+			);
+			path = NoPLc;
+			sourceTree = "<group>";
+		};
+		A2AB8161153B42F20080E9FB /* ANTLR */ = {
+			isa = PBXGroup;
+			children = (
+				A2AB8162153B42F20080E9FB /* antlr3 */,
+				A2AB81BD153B71280080E9FB /* NoPLc.h */,
+				A2AB81C0153B715A0080E9FB /* NoPLc.c */,
+				A2AB819F153B42F20080E9FB /* NoPLLexer.h */,
+				A2AB819E153B42F20080E9FB /* NoPLLexer.c */,
+				A2AB81A1153B42F20080E9FB /* NoPLParser.h */,
+				A2AB81A0153B42F20080E9FB /* NoPLParser.c */,
+				A29783E6154A467300903BDD /* NoPLValues.h */,
+			);
+			path = ANTLR;
+			sourceTree = "<group>";
+		};
+		A2AB8162153B42F20080E9FB /* antlr3 */ = {
+			isa = PBXGroup;
+			children = (
+				A2AB8163153B42F20080E9FB /* antlr3config.h */,
+				A2AB8164153B42F20080E9FB /* include */,
+				A2AB8184153B42F20080E9FB /* src */,
+			);
+			path = antlr3;
+			sourceTree = "<group>";
+		};
+		A2AB8164153B42F20080E9FB /* include */ = {
+			isa = PBXGroup;
+			children = (
+				A2AB8165153B42F20080E9FB /* antlr3.h */,
+				A2AB8166153B42F20080E9FB /* antlr3baserecognizer.h */,
+				A2AB8167153B42F20080E9FB /* antlr3basetree.h */,
+				A2AB8168153B42F20080E9FB /* antlr3basetreeadaptor.h */,
+				A2AB8169153B42F20080E9FB /* antlr3bitset.h */,
+				A2AB816A153B42F20080E9FB /* antlr3collections.h */,
+				A2AB816B153B42F20080E9FB /* antlr3commontoken.h */,
+				A2AB816C153B42F20080E9FB /* antlr3commontree.h */,
+				A2AB816D153B42F20080E9FB /* antlr3commontreeadaptor.h */,
+				A2AB816E153B42F20080E9FB /* antlr3commontreenodestream.h */,
+				A2AB816F153B42F20080E9FB /* antlr3convertutf.h */,
+				A2AB8170153B42F20080E9FB /* antlr3cyclicdfa.h */,
+				A2AB8171153B42F20080E9FB /* antlr3debugeventlistener.h */,
+				A2AB8172153B42F20080E9FB /* antlr3defs.h */,
+				A2AB8173153B42F20080E9FB /* antlr3encodings.h */,
+				A2AB8174153B42F20080E9FB /* antlr3errors.h */,
+				A2AB8175153B42F20080E9FB /* antlr3exception.h */,
+				A2AB8176153B42F20080E9FB /* antlr3filestream.h */,
+				A2AB8177153B42F20080E9FB /* antlr3input.h */,
+				A2AB8178153B42F20080E9FB /* antlr3interfaces.h */,
+				A2AB8179153B42F20080E9FB /* antlr3intstream.h */,
+				A2AB817A153B42F20080E9FB /* antlr3lexer.h */,
+				A2AB817B153B42F20080E9FB /* antlr3memory.h */,
+				A2AB817C153B42F20080E9FB /* antlr3parser.h */,
+				A2AB817D153B42F20080E9FB /* antlr3parsetree.h */,
+				A2AB817E153B42F20080E9FB /* antlr3recognizersharedstate.h */,
+				A2AB817F153B42F20080E9FB /* antlr3rewritestreams.h */,
+				A2AB8180153B42F20080E9FB /* antlr3string.h */,
+				A2AB8181153B42F20080E9FB /* antlr3stringstream.h */,
+				A2AB8182153B42F20080E9FB /* antlr3tokenstream.h */,
+				A2AB8183153B42F20080E9FB /* antlr3treeparser.h */,
+			);
+			path = include;
+			sourceTree = "<group>";
+		};
+		A2AB8184153B42F20080E9FB /* src */ = {
+			isa = PBXGroup;
+			children = (
+				A2AB8185153B42F20080E9FB /* antlr3baserecognizer.c */,
+				A2AB8186153B42F20080E9FB /* antlr3basetree.c */,
+				A2AB8187153B42F20080E9FB /* antlr3basetreeadaptor.c */,
+				A2AB8188153B42F20080E9FB /* antlr3bitset.c */,
+				A2AB8189153B42F20080E9FB /* antlr3collections.c */,
+				A2AB818A153B42F20080E9FB /* antlr3commontoken.c */,
+				A2AB818B153B42F20080E9FB /* antlr3commontree.c */,
+				A2AB818C153B42F20080E9FB /* antlr3commontreeadaptor.c */,
+				A2AB818D153B42F20080E9FB /* antlr3commontreenodestream.c */,
+				A2AB818E153B42F20080E9FB /* antlr3convertutf.c */,
+				A2AB818F153B42F20080E9FB /* antlr3cyclicdfa.c */,
+				A2AB8190153B42F20080E9FB /* antlr3debughandlers.c */,
+				A2AB8191153B42F20080E9FB /* antlr3encodings.c */,
+				A2AB8192153B42F20080E9FB /* antlr3exception.c */,
+				A2AB8193153B42F20080E9FB /* antlr3filestream.c */,
+				A2AB8194153B42F20080E9FB /* antlr3inputstream.c */,
+				A2AB8195153B42F20080E9FB /* antlr3intstream.c */,
+				A2AB8196153B42F20080E9FB /* antlr3lexer.c */,
+				A2AB8197153B42F20080E9FB /* antlr3parser.c */,
+				A2AB8198153B42F20080E9FB /* antlr3rewritestreams.c */,
+				A2AB8199153B42F20080E9FB /* antlr3string.c */,
+				A2AB819A153B42F20080E9FB /* antlr3stringstream.c */,
+				A2AB819B153B42F20080E9FB /* antlr3tokenstream.c */,
+				A2AB819C153B42F20080E9FB /* antlr3treeparser.c */,
+				A2AB819D153B42F20080E9FB /* antlr3ucs2inputstream.c */,
+			);
+			path = src;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		A2AB8153153B42B60080E9FB /* NoPLc */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A2AB815E153B42B60080E9FB /* Build configuration list for PBXNativeTarget "NoPLc" */;
+			buildPhases = (
+				A2AB8150153B42B60080E9FB /* Sources */,
+				A2AB8151153B42B60080E9FB /* Frameworks */,
+				A2AB8152153B42B60080E9FB /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = NoPLc;
+			productName = NoPLc;
+			productReference = A2AB8154153B42B60080E9FB /* NoPLc */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A2AB814B153B42B60080E9FB /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0430;
+				ORGANIZATIONNAME = "Small Planet Digital";
+			};
+			buildConfigurationList = A2AB814E153B42B60080E9FB /* Build configuration list for PBXProject "NoPLc" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = A2AB8149153B42B60080E9FB;
+			productRefGroup = A2AB8155153B42B60080E9FB /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				A2AB8153153B42B60080E9FB /* NoPLc */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A2AB8150153B42B60080E9FB /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A2AB8159153B42B60080E9FB /* main.c in Sources */,
+				A2AB81A2153B42F20080E9FB /* antlr3baserecognizer.c in Sources */,
+				A2AB81A3153B42F20080E9FB /* antlr3basetree.c in Sources */,
+				A2AB81A4153B42F20080E9FB /* antlr3basetreeadaptor.c in Sources */,
+				A2AB81A5153B42F20080E9FB /* antlr3bitset.c in Sources */,
+				A2AB81A6153B42F20080E9FB /* antlr3collections.c in Sources */,
+				A2AB81A7153B42F20080E9FB /* antlr3commontoken.c in Sources */,
+				A2AB81A8153B42F20080E9FB /* antlr3commontree.c in Sources */,
+				A2AB81A9153B42F20080E9FB /* antlr3commontreeadaptor.c in Sources */,
+				A2AB81AA153B42F20080E9FB /* antlr3commontreenodestream.c in Sources */,
+				A2AB81AB153B42F20080E9FB /* antlr3convertutf.c in Sources */,
+				A2AB81AC153B42F20080E9FB /* antlr3cyclicdfa.c in Sources */,
+				A2AB81AD153B42F20080E9FB /* antlr3debughandlers.c in Sources */,
+				A2AB81AE153B42F20080E9FB /* antlr3encodings.c in Sources */,
+				A2AB81AF153B42F20080E9FB /* antlr3exception.c in Sources */,
+				A2AB81B0153B42F20080E9FB /* antlr3filestream.c in Sources */,
+				A2AB81B1153B42F20080E9FB /* antlr3inputstream.c in Sources */,
+				A2AB81B2153B42F20080E9FB /* antlr3intstream.c in Sources */,
+				A2AB81B3153B42F20080E9FB /* antlr3lexer.c in Sources */,
+				A2AB81B4153B42F20080E9FB /* antlr3parser.c in Sources */,
+				A2AB81B5153B42F20080E9FB /* antlr3rewritestreams.c in Sources */,
+				A2AB81B6153B42F20080E9FB /* antlr3string.c in Sources */,
+				A2AB81B7153B42F20080E9FB /* antlr3stringstream.c in Sources */,
+				A2AB81B8153B42F20080E9FB /* antlr3tokenstream.c in Sources */,
+				A2AB81B9153B42F20080E9FB /* antlr3treeparser.c in Sources */,
+				A2AB81BA153B42F20080E9FB /* antlr3ucs2inputstream.c in Sources */,
+				A2AB81BB153B42F20080E9FB /* NoPLLexer.c in Sources */,
+				A2AB81BC153B42F20080E9FB /* NoPLParser.c in Sources */,
+				A2AB81C1153B715A0080E9FB /* NoPLc.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		A2AB815C153B42B60080E9FB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = YES;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		A2AB815D153B42B60080E9FB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = YES;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		A2AB815F153B42B60080E9FB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		A2AB8160153B42B60080E9FB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A2AB814E153B42B60080E9FB /* Build configuration list for PBXProject "NoPLc" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A2AB815C153B42B60080E9FB /* Debug */,
+				A2AB815D153B42B60080E9FB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A2AB815E153B42B60080E9FB /* Build configuration list for PBXNativeTarget "NoPLc" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A2AB815F153B42B60080E9FB /* Debug */,
+				A2AB8160153B42B60080E9FB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = A2AB814B153B42B60080E9FB /* Project object */;
+}
