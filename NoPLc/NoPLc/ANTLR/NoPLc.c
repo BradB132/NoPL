@@ -164,6 +164,7 @@ NoPL_DataType dataTypeForTree(const pANTLR3_BASE_TREE tree, NoPL_CompileContext*
 		case NUMBER:
 		case NUMERIC_NEGATION:
 		case SUBTRACT:
+		case DECL_NUMBER:
 			return NoPL_type_Number;
 		case GREATER_THAN:
 		case GREATER_THAN_EQUAL:
@@ -176,10 +177,13 @@ NoPL_DataType dataTypeForTree(const pANTLR3_BASE_TREE tree, NoPL_CompileContext*
 		case LOGICAL_INEQUALITY:
 		case LOGICAL_NEGATION:
 		case LOGICAL_OR:
+		case DECL_BOOL:
 			return NoPL_type_Boolean;
 		case LITERAL_NULL:
+		case DECL_OBJ:
 			return NoPL_type_Object;
 		case STRING:
+		case DECL_STRING:
 			return NoPL_type_String;
 		case TYPE_CAST:
 			return dataTypeForTree(treeIndex(tree,0), context);
@@ -327,22 +331,47 @@ void traverseAST(pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* options, NoP
 			}
 		}
 			break;
-	}
-	
-	/*//example loop
-	ANTLR3_UINT32 i;
-	ANTLR3_UINT32 size;
-	pANTLR3_BASE_TREE childTree;
-	if(tree->children != NULL)
-	{
-		size = tree->children->size(tree->children);
-		for	(i = 0; i < size; i++)
+		case ARGUMENTS:
 		{
-			childTree = (pANTLR3_BASE_TREE)(tree->children->get(tree->children, i));
-			traverseAST(childTree, options, context);
+			//get the arg count
+			NoPL_Index argCount = 0;
+			if(tree->children)
+				argCount = (NoPL_Index)tree->children->size(tree->children);
+			
+			//append bytes for count
+			addBytesToContext(&argCount, sizeof(NoPL_Index), context);
+			
+			//loop through all children to add args
+			ANTLR3_UINT32 i;
+			pANTLR3_BASE_TREE childArg;
+			for(i = 0; i < argCount; i++)
+			{
+				//get the type for each arg
+				childArg = (pANTLR3_BASE_TREE)(tree->children->get(tree->children, i));
+				NoPL_DataType argType = dataTypeForTree(childArg, context);
+				
+				if(argType == NoPL_type_Number)
+					addOperator(NoPL_BYTE_ARG_NUMBER, context);
+				else if(argType == NoPL_type_String)
+					addOperator(NoPL_BYTE_ARG_STRING, context);
+				else if(argType == NoPL_type_Boolean)
+					addOperator(NoPL_BYTE_ARG_BOOLEAN, context);
+				else if(argType == NoPL_type_Object || argType == NoPL_type_FunctionResult)
+					addOperator(NoPL_BYTE_ARG_OBJECT, context);
+				else
+					nopl_error(childArg, "cannot determine the type of this argument");
+				
+				//append the arg
+				traverseAST(childArg, options, context);
+			}
 		}
+			break;
+		case ASSIGN:
+		{
+			//TODO:pick back up here
+		}
+			break;
 	}
-	//*/
 }
 
 void compileWithInputStream(pANTLR3_INPUT_STREAM stream, const NoPL_CompileOptions* options, NoPL_CompileContext* context)
