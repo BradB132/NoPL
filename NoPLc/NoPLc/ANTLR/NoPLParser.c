@@ -604,50 +604,50 @@ static pANTLR3_UINT8    *getTokenNames()
     //	errorStrings->add(errorStrings, errDesc, NULL);
     //	errorTokens->add(errorTokens, errToken, NULL);
     //}
-
-    void parsingWillStart()
-    {
-    	//create the stacks if this is the first time we've needed them
-    	if(!variableStack)
-    		variableStack = antlr3StackNew(NoPL_StackSizeHint);
-    	
-    	//push the first scope
-    	pushScope();
-    }
-
-    void parsingDidFinish()
-    {
-    	//pop the last scope
-    	popScope();
-    }
-
-    int variableExistsInStack(pANTLR3_STRING varName)
-    {
-    	//search the stack for the given variable name
-    	for(int i = 0; i < variableStack->size(variableStack); i++)
-    	{
-    		pANTLR3_VECTOR vect = (pANTLR3_VECTOR)(variableStack->get(variableStack, i));
-    		for(int j = 0; j < vect->size(vect); j++)
-    		{
-    			pANTLR3_STRING str = (pANTLR3_STRING)(vect->get(vect,j));
-    			if(!strcmp((const char*)str->chars, (const char*)varName->chars))
-    				return 1;
-    		}
-    	}
-    	return 0;
-    }
-
-    void declareVariable(pANTLR3_STRING name)
-    {
-    	pANTLR3_VECTOR vect = (pANTLR3_VECTOR)(variableStack->peek(variableStack));
-    	vect->add(vect, name, NULL);
-    }
-
-    pANTLR3_STRING nextString(pNoPLParser ctx)
-    {
-    	pANTLR3_COMMON_TOKEN tok = LT(1);
-    	return tok->getText(tok);
-    }
+//
+//    void parsingWillStart()
+//    {
+//    	//create the stacks if this is the first time we've needed them
+//    	if(!variableStack)
+//    		variableStack = antlr3StackNew(NoPL_StackSizeHint);
+//    	
+//    	//push the first scope
+//    	pushScope();
+//    }
+//
+//    void parsingDidFinish()
+//    {
+//    	//pop the last scope
+//    	popScope();
+//    }
+//
+//    int variableExistsInStack(pANTLR3_STRING varName)
+//    {
+//    	//search the stack for the given variable name
+//    	for(int i = 0; i < variableStack->size(variableStack); i++)
+//    	{
+//    		pANTLR3_VECTOR vect = (pANTLR3_VECTOR)(variableStack->get(variableStack, i));
+//    		for(int j = 0; j < vect->size(vect); j++)
+//    		{
+//    			pANTLR3_STRING str = (pANTLR3_STRING)(vect->get(vect,j));
+//    			if(!strcmp((const char*)str->chars, (const char*)varName->chars))
+//    				return 1;
+//    		}
+//    	}
+//    	return 0;
+//    }
+//
+//    void declareVariable(pANTLR3_STRING name)
+//    {
+//    	pANTLR3_VECTOR vect = (pANTLR3_VECTOR)(variableStack->peek(variableStack));
+//    	vect->add(vect, name, NULL);
+//    }
+//
+//    pANTLR3_STRING nextString(pNoPLParser ctx)
+//    {
+//    	pANTLR3_COMMON_TOKEN tok = LT(1);
+//    	return tok->getText(tok);
+//    }
 
 
 

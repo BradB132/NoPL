@@ -26,7 +26,9 @@ NoPL_DataType dataTypeForTree(const pANTLR3_BASE_TREE tree, NoPL_CompileContext*
 void nopl_pushScope(NoPL_CompileContext* context);
 void nopl_popScope(NoPL_CompileContext* context);
 void nopl_error(const pANTLR3_BASE_TREE tree, const char* desc);
-int variableExistsInStack(pANTLR3_STRING varName, pANTLR3_STACK whichStack);
+int variableExistsInStack(const pANTLR3_STRING varName, const pANTLR3_STACK whichStack);
+int declareVariableInStack(const pANTLR3_STRING varName, const pANTLR3_STACK whichStack);
+NoPL_Index indexOfVariableInStack(const pANTLR3_STRING varName, const pANTLR3_STACK whichStack, const pANTLR3_BASE_TREE tree);
 
 #pragma mark -
 #pragma mark Compilation
@@ -90,7 +92,7 @@ void nopl_popScope(NoPL_CompileContext* context)
 	context->objectStack->pop(context->objectStack);
 }
 
-int variableExistsInStack(pANTLR3_STRING varName, pANTLR3_STACK whichStack)
+int variableExistsInStack(const pANTLR3_STRING varName, const  pANTLR3_STACK whichStack)
 {
 	//search the stack for the given variable name
 	for(int i = 0; i < whichStack->size(whichStack); i++)
@@ -104,6 +106,39 @@ int variableExistsInStack(pANTLR3_STRING varName, pANTLR3_STACK whichStack)
 		}
 	}
 	return 0;
+}
+
+int declareVariableInStack(const pANTLR3_STRING varName, const pANTLR3_STACK whichStack)
+{
+	//fail if this variable is already declared in the stack
+	if(variableExistsInStack(varName, whichStack))
+		return 0;
+	
+	pANTLR3_VECTOR topVector = whichStack->peek(whichStack);
+	topVector->add(topVector, varName, NULL);
+	
+	return 1;
+}
+
+NoPL_Index indexOfVariableInStack(const pANTLR3_STRING varName, const pANTLR3_STACK whichStack, const pANTLR3_BASE_TREE tree)
+{
+	NoPL_Index currentIndex = 0;
+	for(int i = 0; i < whichStack->size(whichStack); i++)
+	{
+		pANTLR3_VECTOR vect = (pANTLR3_VECTOR)(whichStack->get(whichStack, i));
+		for(int j = 0; j < vect->size(vect); j++)
+		{
+			pANTLR3_STRING str = (pANTLR3_STRING)(vect->get(vect,j));
+			if(!strcmp((const char*)str->chars, (const char*)varName->chars))
+				return currentIndex;
+			
+			currentIndex++;
+		}
+	}
+	
+	//we didn't find the variable
+	nopl_error(tree, "attempted to use a variable that was not declared");
+	return (NoPL_Index)0;
 }
 
 NoPL_DataType dataTypeForTree(const pANTLR3_BASE_TREE tree, NoPL_CompileContext* context)
@@ -249,42 +284,52 @@ void traverseAST(pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* options, NoP
 			
 			//check the object on the left-hand side to make sure that it is the correct type
 			NoPL_DataType assignToType = dataTypeForTree(assignTo, context);
+			NoPL_DataType incrementType = dataTypeForTree(incrementVal, context);
 			if(assignToType == NoPL_type_Number)
 			{
 				//use the numeric increment
 				addOperator(NoPL_BYTE_NUMERIC_ADD_ASSIGN, context);
 				
-				//add the index for the numeric variable
-				
-				
-				
-				NoPL_Index index = 0;//TODO: variable tables
-				
-				
-				
-				
+				//add the index for the variable which will be incremented
+				NoPL_Index index = indexOfVariableInStack(assignTo->getText(assignTo), context->numberStack, assignTo);
 				addBytesToContext(&index, sizeof(NoPL_Index), context);
 				
 				//cast if necessary
-				if(dataTypeForTree(incrementVal, context) == NoPL_type_FunctionResult)
+				if(incrementType == NoPL_type_FunctionResult)
 					addOperator(NoPL_BYTE_CAST_OBJECT_TO_NUMBER, context);
+				else if(incrementType != NoPL_type_Number)
+					nopl_error(incrementVal, "this expression must evaluate to a numeric value");
 				
 				//add the increment value
 				traverseAST(incrementVal, options, context);
 			}
 			else if(assignToType == NoPL_type_String)
 			{
+				//use the string concat
+				addOperator(NoPL_BYTE_STRING_CONCAT_ASSIGN, context);
 				
+				//add the index for the variable which will be incremented
+				NoPL_Index index = indexOfVariableInStack(assignTo->getText(assignTo), context->stringStack, assignTo);
+				addBytesToContext(&index, sizeof(NoPL_Index), context);
+				
+				//cast if necessary
+				if(incrementType == NoPL_type_FunctionResult)
+					addOperator(NoPL_BYTE_CAST_OBJECT_TO_STRING, context);
+				else if(incrementType != NoPL_type_String)
+					nopl_error(incrementVal, "this expression must evaluate to a string value");
+				
+				//add the increment value
+				traverseAST(incrementVal, options, context);
 			}
 			else
 			{
-				nopl_error(assignTo, "Cannot use this assign operator on a variable of this type");
+				nopl_error(assignTo, "Cannot use this increment operator on a variable of this type");
 			}
 		}
 			break;
 	}
 	
-	/*
+	/*//example loop
 	ANTLR3_UINT32 i;
 	ANTLR3_UINT32 size;
 	pANTLR3_BASE_TREE childTree;
@@ -297,7 +342,7 @@ void traverseAST(pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* options, NoP
 			traverseAST(childTree, options, context);
 		}
 	}
-	*/
+	//*/
 }
 
 void compileWithInputStream(pANTLR3_INPUT_STREAM stream, const NoPL_CompileOptions* options, NoPL_CompileContext* context)
