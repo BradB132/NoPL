@@ -15,6 +15,23 @@
 #define NoPL_StackSizeHint 16
 #define NoPL_VectorSizeHint 8
 
+//error codes
+const char* NoPL_ErrStr_ExpressionMustBeNumeric = "This expression must evaluate to a numeric value";
+const char* NoPL_ErrStr_ExpressionMustBeString = "This expression must evaluate to a string value";
+const char* NoPL_ErrStr_ExpressionMustBeBoolean = "This expression must evaluate to a boolean value";
+const char* NoPL_ErrStr_ExpressionMustBeObject = "This expression must evaluate to a object value";
+
+//enum for checking AST node types
+typedef enum
+{
+	NoPL_type_Number,
+	NoPL_type_String,
+	NoPL_type_Boolean,
+	NoPL_type_Object,
+	NoPL_type_FunctionResult,
+	NoPL_type_Error,
+} NoPL_DataType;
+
 #pragma mark -
 #pragma mark Internal functions
 
@@ -282,7 +299,7 @@ void traverseAST(pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* options, NoP
 			break;
 		case ADD_ASSIGN:
 		{
-			//this is a unary operator
+			//this is an assignment operator
 			pANTLR3_BASE_TREE assignTo = treeIndex(tree,0);
 			pANTLR3_BASE_TREE incrementVal = treeIndex(tree,1);
 			
@@ -302,7 +319,7 @@ void traverseAST(pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* options, NoP
 				if(incrementType == NoPL_type_FunctionResult)
 					addOperator(NoPL_BYTE_CAST_OBJECT_TO_NUMBER, context);
 				else if(incrementType != NoPL_type_Number)
-					nopl_error(incrementVal, "this expression must evaluate to a numeric value");
+					nopl_error(incrementVal, NoPL_ErrStr_ExpressionMustBeNumeric);
 				
 				//add the increment value
 				traverseAST(incrementVal, options, context);
@@ -320,7 +337,7 @@ void traverseAST(pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* options, NoP
 				if(incrementType == NoPL_type_FunctionResult)
 					addOperator(NoPL_BYTE_CAST_OBJECT_TO_STRING, context);
 				else if(incrementType != NoPL_type_String)
-					nopl_error(incrementVal, "this expression must evaluate to a string value");
+					nopl_error(incrementVal,NoPL_ErrStr_ExpressionMustBeString);
 				
 				//add the increment value
 				traverseAST(incrementVal, options, context);
@@ -368,7 +385,87 @@ void traverseAST(pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* options, NoP
 			break;
 		case ASSIGN:
 		{
+			//this is an assignment operator
+			pANTLR3_BASE_TREE assignTo = treeIndex(tree,0);
+			pANTLR3_BASE_TREE expression = treeIndex(tree,1);
+			
+			//check the object on the left-hand side to what type should be assigned
+			NoPL_DataType assignToType = dataTypeForTree(assignTo, context);
+			NoPL_DataType expressionType = dataTypeForTree(expression, context);
+			if(assignToType == NoPL_type_Number)
+			{
+				//use the numeric assign
+				addOperator(NoPL_BYTE_NUMERIC_ASSIGN, context);
+				
+				//cast if necessary
+				if(expressionType == NoPL_type_FunctionResult)
+					addOperator(NoPL_BYTE_CAST_OBJECT_TO_NUMBER, context);
+				else if(expressionType != NoPL_type_Number)
+					nopl_error(expression, NoPL_ErrStr_ExpressionMustBeNumeric);
+				
+				//append the expression
+				traverseAST(expression, options, context);
+			}
+			else if(assignToType == NoPL_type_String)
+			{
+				//use the string assign
+				addOperator(NoPL_BYTE_STRING_ASSIGN, context);
+				
+				//cast if necessary
+				if(expressionType == NoPL_type_FunctionResult)
+					addOperator(NoPL_BYTE_CAST_OBJECT_TO_STRING, context);
+				else if(expressionType != NoPL_type_String)
+					nopl_error(expression, NoPL_ErrStr_ExpressionMustBeString);
+				
+				//append the expression
+				traverseAST(expression, options, context);
+			}
+			else if(assignToType == NoPL_type_Boolean)
+			{
+				//use the boolean assign
+				addOperator(NoPL_BYTE_BOOLEAN_ASSIGN, context);
+				
+				//cast if necessary
+				if(expressionType == NoPL_type_FunctionResult)
+					addOperator(NoPL_BYTE_CAST_OBJECT_TO_BOOLEAN, context);
+				else if(expressionType != NoPL_type_Boolean)
+					nopl_error(expression, NoPL_ErrStr_ExpressionMustBeBoolean);
+				
+				//append the expression
+				traverseAST(expression, options, context);
+			}
+			else if(assignToType == NoPL_type_Object)
+			{
+				//use the object assign
+				addOperator(NoPL_BYTE_OBJECT_ASSIGN, context);
+				
+				//check to make sure this is an object
+				if(expressionType != NoPL_type_Object && expressionType != NoPL_type_FunctionResult)
+					nopl_error(expression, NoPL_ErrStr_ExpressionMustBeObject);
+				
+				//append the expression
+				traverseAST(expression, options, context);
+			}
+		}
+			break;
+		case BREAK:
+			//TODO: how to do this?
+			break;
+		case CONDITIONAL:
+		{
+			//get the boolean for the conditional, and the first child to check if there is a corresponding 'else' statement
+			pANTLR3_BASE_TREE condition = treeIndex(tree,0);
+			pANTLR3_BASE_TREE firstStatement = treeIndex(tree,1);
+			
+			//cast the conditional if necessary
+			NoPL_DataType conditionalType = dataTypeForTree(condition, context);
+			if(conditionalType == NoPL_type_FunctionResult)
+				addOperator(NoPL_BYTE_CAST_OBJECT_TO_BOOLEAN, context);
+			else if(conditionalType != NoPL_type_String)
+				nopl_error(condition, NoPL_ErrStr_ExpressionMustBeBoolean);
+			
 			//TODO:pick back up here
+			
 		}
 			break;
 	}
