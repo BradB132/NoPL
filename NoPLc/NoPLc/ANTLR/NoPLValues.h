@@ -12,6 +12,7 @@
 //typedefs for NoPL-specific types
 typedef unsigned short NoPL_Index;
 typedef unsigned char NoPL_Instruction;
+typedef int NoPL_BufferMove;
 
 //SYMBOL TABLES
 
@@ -33,12 +34,12 @@ typedef unsigned char NoPL_Instruction;
 #define NoPL_BYTE_LITERAL_STRING 9
 #define NoPL_BYTE_LITERAL_NULL 10
 
-//DECLARATIONS
+//DECLARATIONS - after further thought, don't need this
 
-#define NoPL_BYTE_DECLARE_NUMBER 11
-#define NoPL_BYTE_DECLARE_BOOLEAN 12
-#define NoPL_BYTE_DECLARE_STRING 13
-#define NoPL_BYTE_DECLARE_OBJECT 14
+//#define NoPL_BYTE_DECLARE_NUMBER 11
+//#define NoPL_BYTE_DECLARE_BOOLEAN 12
+//#define NoPL_BYTE_DECLARE_STRING 13
+//#define NoPL_BYTE_DECLARE_OBJECT 14
 
 //NUMERIC OPERATORS
 

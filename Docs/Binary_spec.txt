@@ -1,0 +1,130 @@
+This document describes the makeup of a NoPL compiled binary file. A compiled binary file
+consists of zero or more statements, each will have at least one operator, as detailed
+below.  Each operator is detailed in byte size and order below
+
+///////////////////////////////////////
+//BASIC TYPES AND BYTE SIZES
+
+NoPL_Index - unsigned, 2 bytes,
+used wherever there is a subscript or list of items
+
+NoPL_Instruction - unsigned, 1 byte,
+used for distinguishing different operators
+
+NoPL_BufferMove - signed, 4 bytes,
+used for jumping immediately to a different part of the program, like a goto statement
+
+///////////////////////////////////////
+//OPERATORS
+
+operators are listed by name, byte value, then format / order of following bytes
+
+//SYMBOL TABLES
+
+//symbol table total sizes
+NoPL_BYTE_BOOLEAN_TABLE_SIZE 1 - TODO
+NoPL_BYTE_NUMERIC_TABLE_SIZE 2 - TODO
+NoPL_BYTE_STRING_TABLE_SIZE 3 - TODO
+
+//listing of constant values
+NoPL_BYTE_NUMERIC_CONSTANTS 4 - TODO
+NoPL_BYTE_STRING_CONSTANTS 5 - TODO
+
+//LITERALS
+
+//literal primitives
+NoPL_BYTE_LITERAL_NUMBER 6 - TODO
+NoPL_BYTE_LITERAL_BOOLEAN_TRUE 7 - TODO
+NoPL_BYTE_LITERAL_BOOLEAN_FALSE 8 - TODO
+NoPL_BYTE_LITERAL_STRING 9 - TODO
+NoPL_BYTE_LITERAL_NULL 10 - TODO
+
+//NUMERIC OPERATORS
+
+//binary numeric operators
+NoPL_BYTE_NUMERIC_ADD 15 - (Numeric expression, Numeric expression)
+NoPL_BYTE_NUMERIC_SUBTRACT 16 - (Numeric expression, Numeric expression)
+NoPL_BYTE_NUMERIC_DIVIDE 17 - (Numeric expression, Numeric expression)
+NoPL_BYTE_NUMERIC_MULTIPLY 18 - (Numeric expression, Numeric expression)
+NoPL_BYTE_NUMERIC_EXPONENT 19 - (Numeric expression, Numeric expression)
+NoPL_BYTE_NUMERIC_MODULO 20 - (Numeric expression, Numeric expression)
+
+//unary numeric operators
+NoPL_BYTE_NUMERIC_INCREMENT 21 - (Numeric variable NoPL_Index)
+NoPL_BYTE_NUMERIC_DECREMENT 22 - (Numeric variable NoPL_Index)
+
+//numeric assignment operators
+NoPL_BYTE_NUMERIC_ASSIGN 23
+NoPL_BYTE_NUMERIC_ADD_ASSIGN 24
+NoPL_BYTE_NUMERIC_SUBTRACT_ASSIGN 25
+NoPL_BYTE_NUMERIC_DIVIDE_ASSIGN 26
+NoPL_BYTE_NUMERIC_MULTIPLY_ASSIGN 27
+NoPL_BYTE_NUMERIC_EXPONENT_ASSIGN 28
+NoPL_BYTE_NUMERIC_MODULO_ASSIGN 29
+
+//BOOLEAN OPERATORS
+
+//binary boolean operators
+NoPL_BYTE_BOOLEAN_EQUALITY 30
+NoPL_BYTE_BOOLEAN_INEQUALITY 31
+NoPL_BYTE_BOOLEAN_AND 32
+NoPL_BYTE_BOOLEAN_OR 33
+NoPL_BYTE_BOOLEAN_LESS_THAN 34
+NoPL_BYTE_BOOLEAN_LESS_THAN_EQUAL 35
+NoPL_BYTE_BOOLEAN_GREATER_THAN 36
+NoPL_BYTE_BOOLEAN_GREATER_THAN_EQUAL 37
+
+//unary boolean operators
+NoPL_BYTE_BOOLEAN_NEGATION 38
+
+//boolean assignment operators
+NoPL_BYTE_BOOLEAN_ASSIGN 39
+
+//STRING OPERATORS
+
+//binary string operators
+NoPL_BYTE_STRING_CONCAT 40
+
+//string assignment operators
+NoPL_BYTE_STRING_ASSIGN 41
+NoPL_BYTE_STRING_CONCAT_ASSIGN 42
+
+//OBJECT OPERATORS
+
+NoPL_BYTE_OBJECT_TO_MEMBER 43
+NoPL_BYTE_FUNCTION_ARG_COUNT 44
+NoPL_BYTE_SUBSCRIPT 45
+NoPL_BYTE_OBJECT_ASSIGN 46
+
+//CONTROL FLOW
+
+NoPL_BYTE_CONDITIONAL 47
+NoPL_BYTE_BUFFER_MOVE 48
+NoPL_BYTE_PROGRAM_EXIT 49
+
+//CASTING
+
+NoPL_BYTE_CAST_OBJECT_TO_NUMBER 50
+NoPL_BYTE_CAST_OBJECT_TO_BOOLEAN 51
+NoPL_BYTE_CAST_OBJECT_TO_STRING 52
+
+NoPL_BYTE_CAST_NUMBER_TO_BOOLEAN 53
+NoPL_BYTE_CAST_NUMBER_TO_STRING 54
+
+NoPL_BYTE_CAST_BOOLEAN_TO_NUMBER 55
+NoPL_BYTE_CAST_BOOLEAN_TO_STRING 56
+
+NoPL_BYTE_CAST_STRING_TO_NUMBER 57
+NoPL_BYTE_CAST_STRING_TO_BOOLEAN 58
+
+//ARGUMENT LISTS
+
+NoPL_BYTE_ARG_NUMBER 59
+NoPL_BYTE_ARG_STRING 60
+NoPL_BYTE_ARG_BOOLEAN 61
+NoPL_BYTE_ARG_OBJECT 62
+
+//DEBUGGING
+NoPL_BYTE_DEBUG_LINE 63
+
+#endif

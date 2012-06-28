@@ -103,8 +103,8 @@ public String nextString(Object obj)
 
 @parser::includes
 {
-pANTLR3_VECTOR errorStrings = NULL;
-pANTLR3_VECTOR errorTokens = NULL;
+//pANTLR3_VECTOR errorStrings = NULL;
+//pANTLR3_VECTOR errorTokens = NULL;
 }
 
 @members
@@ -159,7 +159,7 @@ void parsingDidFinish()
 	popScope();
 }
 
-int variableExistsInStack(pANTLR3_STRING varName)
+int variableExists(pANTLR3_STRING varName)
 {
 	//search the stack for the given variable name
 	for(int i = 0; i < variableStack->size(variableStack); i++)

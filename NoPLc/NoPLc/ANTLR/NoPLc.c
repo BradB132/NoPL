@@ -43,9 +43,11 @@ NoPL_DataType dataTypeForTree(const pANTLR3_BASE_TREE tree, NoPL_CompileContext*
 void nopl_pushScope(NoPL_CompileContext* context);
 void nopl_popScope(NoPL_CompileContext* context);
 void nopl_error(const pANTLR3_BASE_TREE tree, const char* desc);
-int variableExistsInStack(const pANTLR3_STRING varName, const pANTLR3_STACK whichStack);
-int declareVariableInStack(const pANTLR3_STRING varName, const pANTLR3_STACK whichStack);
+int nopl_variableExistsInStack(const pANTLR3_STRING varName, const pANTLR3_STACK whichStack);
+int nopl_declareVariableInStack(const pANTLR3_STRING varName, const pANTLR3_STACK whichStack);
 NoPL_Index indexOfVariableInStack(const pANTLR3_STRING varName, const pANTLR3_STACK whichStack, const pANTLR3_BASE_TREE tree);
+NoPL_CompileContext newInnerCompileContext(NoPL_CompileContext* parentContext);
+void freeInnerCompileContext(NoPL_CompileContext* context);
 
 #pragma mark -
 #pragma mark Compilation
@@ -109,7 +111,7 @@ void nopl_popScope(NoPL_CompileContext* context)
 	context->objectStack->pop(context->objectStack);
 }
 
-int variableExistsInStack(const pANTLR3_STRING varName, const  pANTLR3_STACK whichStack)
+int nopl_variableExistsInStack(const pANTLR3_STRING varName, const  pANTLR3_STACK whichStack)
 {
 	//search the stack for the given variable name
 	for(int i = 0; i < whichStack->size(whichStack); i++)
@@ -125,10 +127,10 @@ int variableExistsInStack(const pANTLR3_STRING varName, const  pANTLR3_STACK whi
 	return 0;
 }
 
-int declareVariableInStack(const pANTLR3_STRING varName, const pANTLR3_STACK whichStack)
+int nopl_declareVariableInStack(const pANTLR3_STRING varName, const pANTLR3_STACK whichStack)
 {
 	//fail if this variable is already declared in the stack
-	if(variableExistsInStack(varName, whichStack))
+	if(nopl_variableExistsInStack(varName, whichStack))
 		return 0;
 	
 	pANTLR3_VECTOR topVector = whichStack->peek(whichStack);
@@ -156,6 +158,31 @@ NoPL_Index indexOfVariableInStack(const pANTLR3_STRING varName, const pANTLR3_ST
 	//we didn't find the variable
 	nopl_error(tree, "attempted to use a variable that was not declared");
 	return (NoPL_Index)0;
+}
+
+NoPL_CompileContext newInnerCompileContext(NoPL_CompileContext* parentContext)
+{
+	NoPL_CompileContext context;
+	context.compiledData = NULL;
+	context.dataLength = 0;
+	context.arrayLength = 0;
+	context.objectStack = parentContext->objectStack;
+	context.numberStack = parentContext->numberStack;
+	context.booleanStack = parentContext->booleanStack;
+	context.stringStack = parentContext->stringStack;
+	return context;
+}
+
+void freeInnerCompileContext(NoPL_CompileContext* context)
+{
+	//null these pointers so that they aren't freed
+	context->objectStack = NULL;
+	context->numberStack = NULL;
+	context->booleanStack = NULL;
+	context->stringStack = NULL;
+	
+	//free the byte buffer
+	freeNoPL_CompileContext(context);
 }
 
 NoPL_DataType dataTypeForTree(const pANTLR3_BASE_TREE tree, NoPL_CompileContext* context)
@@ -208,13 +235,13 @@ NoPL_DataType dataTypeForTree(const pANTLR3_BASE_TREE tree, NoPL_CompileContext*
 		{
 			//check the type of this symbol in the variable stacks
 			pANTLR3_STRING varName = tree->getText(tree);
-			if(variableExistsInStack(varName, context->objectStack))
+			if(nopl_variableExistsInStack(varName, context->objectStack))
 			   return NoPL_type_Object;
-			else if(variableExistsInStack(varName, context->numberStack))
+			else if(nopl_variableExistsInStack(varName, context->numberStack))
 				return NoPL_type_Number;
-			else if(variableExistsInStack(varName, context->booleanStack))
+			else if(nopl_variableExistsInStack(varName, context->booleanStack))
 				return NoPL_type_Boolean;
-			else if(variableExistsInStack(varName, context->stringStack))
+			else if(nopl_variableExistsInStack(varName, context->stringStack))
 				return NoPL_type_String;
 			else
 				return NoPL_type_FunctionResult;
@@ -457,6 +484,9 @@ void traverseAST(pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* options, NoP
 			pANTLR3_BASE_TREE condition = treeIndex(tree,0);
 			pANTLR3_BASE_TREE firstStatement = treeIndex(tree,1);
 			
+			//add the operator
+			addOperator(NoPL_BYTE_CONDITIONAL, context);
+			
 			//cast the conditional if necessary
 			NoPL_DataType conditionalType = dataTypeForTree(condition, context);
 			if(conditionalType == NoPL_type_FunctionResult)
@@ -464,8 +494,79 @@ void traverseAST(pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* options, NoP
 			else if(conditionalType != NoPL_type_String)
 				nopl_error(condition, NoPL_ErrStr_ExpressionMustBeBoolean);
 			
-			//TODO:pick back up here
+			//append the conditional
+			traverseAST(condition, options, context);
 			
+			//check if the first statement node is an else statement
+			int hasElse = firstStatement->getType(firstStatement) == CONDITIONAL_ELSE;
+			
+			//get another byte buffer for everything inside this conditional
+			NoPL_CompileContext innerConditional = newInnerCompileContext(context);
+			nopl_pushScope(&innerConditional);
+			
+			//add all of the statements inside the conditional
+			NoPL_Index childCount = 0;
+			if(tree->children)
+				childCount = (NoPL_Index)tree->children->size(tree->children);
+			ANTLR3_UINT32 startIndex = hasElse ? 2 : 1;
+			ANTLR3_UINT32 i;
+			pANTLR3_BASE_TREE childArg;
+			for(i = startIndex; i < childCount; i++)
+			{
+				childArg = (pANTLR3_BASE_TREE)(tree->children->get(tree->children, i));
+				traverseAST(childArg, options, &innerConditional);
+			}
+			
+			//how many bytes to skip if the conditional is false?
+			NoPL_BufferMove move = (NoPL_BufferMove)innerConditional.dataLength;
+			addBytesToContext(&move, sizeof(NoPL_BufferMove), context);
+			
+			//add the inner conditional
+			addBytesToContext(innerConditional.compiledData, innerConditional.dataLength, context);
+			
+			//clean up the inner conditional
+			nopl_popScope(&innerConditional);
+			freeInnerCompileContext(&innerConditional);
+			
+			//add the else statement, if we have one
+			if(hasElse)
+			{
+				//get another byte buffer for everything inside this else statement
+				NoPL_CompileContext innerElse = newInnerCompileContext(context);
+				nopl_pushScope(&innerElse);
+				
+				//add all of the statements inside the else statement
+				childCount = 0;
+				if(firstStatement->children)
+					childCount = (NoPL_Index)firstStatement->children->size(firstStatement->children);
+				ANTLR3_UINT32 i;
+				for(i = 0; i < childCount; i++)
+				{
+					childArg = (pANTLR3_BASE_TREE)(firstStatement->children->get(firstStatement->children, i));
+					traverseAST(childArg, options, &innerElse);
+				}
+				
+				//skip over all this else stuff if we're coming from the block of code for true
+				addOperator(NoPL_BYTE_BUFFER_MOVE, context);
+				move = (NoPL_BufferMove)innerConditional.dataLength;
+				addBytesToContext(&move, sizeof(NoPL_BufferMove), context);
+				
+				//add the else statement
+				addBytesToContext(innerElse.compiledData, innerElse.dataLength, context);
+				
+				//clean up the else statement
+				nopl_popScope(&innerElse);
+				freeInnerCompileContext(&innerElse);
+			}
+			
+		}
+			break;
+		case CONTINUE:
+			//TODO: how to do this?
+			break;
+		case DECL_BOOL:
+		{
+			//TODO:pick back up here
 		}
 			break;
 	}
