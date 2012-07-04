@@ -21,9 +21,10 @@ typedef int NoPL_BufferMove;
 #define NoPL_BYTE_NUMERIC_TABLE_SIZE 2
 #define NoPL_BYTE_STRING_TABLE_SIZE 3
 
-//listing of constant values
-#define NoPL_BYTE_NUMERIC_CONSTANTS 4
-#define NoPL_BYTE_STRING_CONSTANTS 5
+//TODO: do this later
+////listing of constant values
+//#define NoPL_BYTE_NUMERIC_CONSTANTS 4
+//#define NoPL_BYTE_STRING_CONSTANTS 5
 
 //LITERALS
 
@@ -43,19 +44,14 @@ typedef int NoPL_BufferMove;
 
 //NUMERIC OPERATORS
 
-//binary numeric operators
 #define NoPL_BYTE_NUMERIC_ADD 15
 #define NoPL_BYTE_NUMERIC_SUBTRACT 16
 #define NoPL_BYTE_NUMERIC_DIVIDE 17
 #define NoPL_BYTE_NUMERIC_MULTIPLY 18
 #define NoPL_BYTE_NUMERIC_EXPONENT 19
 #define NoPL_BYTE_NUMERIC_MODULO 20
-
-//unary numeric operators
 #define NoPL_BYTE_NUMERIC_INCREMENT 21
 #define NoPL_BYTE_NUMERIC_DECREMENT 22
-
-//numeric assignment operators
 #define NoPL_BYTE_NUMERIC_ASSIGN 23
 #define NoPL_BYTE_NUMERIC_ADD_ASSIGN 24
 #define NoPL_BYTE_NUMERIC_SUBTRACT_ASSIGN 25
@@ -63,10 +59,11 @@ typedef int NoPL_BufferMove;
 #define NoPL_BYTE_NUMERIC_MULTIPLY_ASSIGN 27
 #define NoPL_BYTE_NUMERIC_EXPONENT_ASSIGN 28
 #define NoPL_BYTE_NUMERIC_MODULO_ASSIGN 29
+#define NoPL_BYTE_NUMERIC_ABS_VALUE 100
+#define NoPL_BYTE_NUMERIC_NEGATION 101
 
 //BOOLEAN OPERATORS
 
-//binary boolean operators
 #define NoPL_BYTE_BOOLEAN_EQUALITY 30
 #define NoPL_BYTE_BOOLEAN_INEQUALITY 31
 #define NoPL_BYTE_BOOLEAN_AND 32
@@ -75,21 +72,15 @@ typedef int NoPL_BufferMove;
 #define NoPL_BYTE_BOOLEAN_LESS_THAN_EQUAL 35
 #define NoPL_BYTE_BOOLEAN_GREATER_THAN 36
 #define NoPL_BYTE_BOOLEAN_GREATER_THAN_EQUAL 37
-
-//unary boolean operators
 #define NoPL_BYTE_BOOLEAN_NEGATION 38
-
-//boolean assignment operators
 #define NoPL_BYTE_BOOLEAN_ASSIGN 39
 
 //STRING OPERATORS
 
-//binary string operators
 #define NoPL_BYTE_STRING_CONCAT 40
-
-//string assignment operators
 #define NoPL_BYTE_STRING_ASSIGN 41
 #define NoPL_BYTE_STRING_CONCAT_ASSIGN 42
+#define NoPL_BYTE_STRING_PRINT 102
 
 //OBJECT OPERATORS
 
@@ -97,6 +88,13 @@ typedef int NoPL_BufferMove;
 #define NoPL_BYTE_FUNCTION_ARG_COUNT 44
 #define NoPL_BYTE_SUBSCRIPT 45
 #define NoPL_BYTE_OBJECT_ASSIGN 46
+
+//FUNCTION CALLS
+
+#define NoPL_BYTE_ARG_NUMBER 59
+#define NoPL_BYTE_ARG_STRING 60
+#define NoPL_BYTE_ARG_BOOLEAN 61
+#define NoPL_BYTE_ARG_OBJECT 62
 
 //CONTROL FLOW
 
@@ -118,13 +116,6 @@ typedef int NoPL_BufferMove;
 
 #define NoPL_BYTE_CAST_STRING_TO_NUMBER 57
 #define NoPL_BYTE_CAST_STRING_TO_BOOLEAN 58
-
-//ARGUMENT LISTS
-
-#define NoPL_BYTE_ARG_NUMBER 59
-#define NoPL_BYTE_ARG_STRING 60
-#define NoPL_BYTE_ARG_BOOLEAN 61
-#define NoPL_BYTE_ARG_OBJECT 62
 
 //DEBUGGING
 #define NoPL_BYTE_DEBUG_LINE 63

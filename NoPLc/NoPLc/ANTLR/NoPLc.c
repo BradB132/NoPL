@@ -22,6 +22,7 @@ const char* NoPL_ErrStr_ExpressionMustBeBoolean = "This expression must evaluate
 const char* NoPL_ErrStr_ExpressionMustBeObject = "This expression must evaluate to a object value";
 const char* NoPL_ErrStr_VariableAlreadyDeclared = "A variable with this name was already declared";
 const char* NoPL_ErrStr_CannotIncrement = "Cannot use this increment operator on a variable of this type";
+const char* NoPL_ErrStr_CouldNotDetermineType = "Could not determine the type of this expression";
 
 //enum for checking AST node types
 typedef enum
@@ -168,7 +169,7 @@ NoPL_Index indexOfVariableInStack(const pANTLR3_STRING varName, const pANTLR3_ST
 	}
 	
 	//we didn't find the variable
-	nopl_error(tree, "attempted to use a variable that was not declared");
+	nopl_error(tree, "Attempted to use a variable that was not declared");
 	return (NoPL_Index)0;
 }
 
@@ -211,6 +212,7 @@ NoPL_DataType dataTypeForTree(const pANTLR3_BASE_TREE tree, const NoPL_CompileCo
 			else
 				return NoPL_type_Number;
 		}
+		case ABS_VALUE:
 		case DIVIDE:
 		case EXPONENT:
 		case MOD:
@@ -218,7 +220,6 @@ NoPL_DataType dataTypeForTree(const pANTLR3_BASE_TREE tree, const NoPL_CompileCo
 		case NUMBER:
 		case NUMERIC_NEGATION:
 		case SUBTRACT:
-		case DECL_NUMBER:
 			return NoPL_type_Number;
 		case GREATER_THAN:
 		case GREATER_THAN_EQUAL:
@@ -231,16 +232,26 @@ NoPL_DataType dataTypeForTree(const pANTLR3_BASE_TREE tree, const NoPL_CompileCo
 		case LOGICAL_INEQUALITY:
 		case LOGICAL_NEGATION:
 		case LOGICAL_OR:
-		case DECL_BOOL:
 			return NoPL_type_Boolean;
 		case LITERAL_NULL:
-		case DECL_OBJ:
 			return NoPL_type_Object;
 		case STRING:
-		case DECL_STRING:
 			return NoPL_type_String;
 		case TYPE_CAST:
-			return dataTypeForTree(treeIndex(tree,0), context);
+		{
+			pANTLR3_BASE_TREE castChild = treeIndex(tree,0);
+			ANTLR3_UINT32 castType = castChild->getType(castChild);
+			if(castType == DECL_NUMBER)
+				return NoPL_type_Number;
+			else if(castType == DECL_BOOL)
+				return NoPL_type_Boolean;
+			else if(castType == DECL_OBJ)
+				return NoPL_type_Object;
+			else if(castType == DECL_STRING)
+				return NoPL_type_String;
+			else
+				return NoPL_type_Error;
+		}
 		case ID:
 		{
 			//check the type of this symbol in the variable stacks
@@ -320,6 +331,18 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 {
 	switch(tree->getType(tree))
 	{
+		case ABS_VALUE:
+		{
+			//this operator should have one numeric child
+			pANTLR3_BASE_TREE child1 = treeIndex(tree,0);
+			
+			//append the operator
+			addOperator(NoPL_BYTE_NUMERIC_ABS_VALUE, context);
+			
+			//append the expression
+			appendNodeWithRequiredType(child1, NoPL_type_Number, context, options);
+		}
+			break;
 		case ADD:
 		{
 			//this is a binary operator
@@ -1125,8 +1148,215 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 			break;
 		case NUMBER:
 		{
-			//this is a literal number
-			//TODO:pick back up here
+			//this is a literal number, get the float value from string
+			float floatVal = atof(((const char*)tree->getText(tree)->chars));
+			
+			//add the operator
+			addOperator(NoPL_BYTE_LITERAL_NUMBER, context);
+			
+			//add the float
+			addBytesToContext(&floatVal, sizeof(float), context);
+		}
+			break;
+		case NUMERIC_NEGATION:
+		{
+			//this operator should have one numeric child
+			pANTLR3_BASE_TREE child1 = treeIndex(tree,0);
+			
+			//append the operator
+			addOperator(NoPL_BYTE_NUMERIC_NEGATION, context);
+			
+			//append the expression
+			appendNodeWithRequiredType(child1, NoPL_type_Number, context, options);
+		}
+			break;
+		case OBJECT_TO_MEMBER:
+		{
+			//TODO:
+		}
+			break;
+		case PRINT_VALUE:
+		{
+			//this operator should only have one child
+			pANTLR3_BASE_TREE child1 = treeIndex(tree,0);
+			
+			//add the operator
+			addOperator(NoPL_BYTE_STRING_PRINT, context);
+			
+			//guarantee that the child is a string by casting if necessary
+			switch (dataTypeForTree(child1, context))
+			{
+				case NoPL_type_Boolean:
+					addOperator(NoPL_BYTE_CAST_BOOLEAN_TO_STRING, context);
+					break;
+				case NoPL_type_FunctionResult:
+				case NoPL_type_Object:
+					addOperator(NoPL_BYTE_CAST_OBJECT_TO_STRING, context);
+					break;
+				case NoPL_type_Number:
+					addOperator(NoPL_BYTE_CAST_NUMBER_TO_STRING, context);
+					break;
+				case NoPL_type_String:
+					break;
+				default:
+					nopl_error(child1, NoPL_ErrStr_CouldNotDetermineType);
+					break;
+			}
+			
+			//append the expression
+			traverseAST(child1, options, context);
+		}
+			break;
+		case SCOPE_OPEN:
+		{
+			//push a scope
+			nopl_pushScope(context);
+			
+			//loop to append all children
+			NoPL_Index childCount = 0;
+			if(tree->children)
+				childCount = (NoPL_Index)tree->children->size(tree->children);
+			ANTLR3_UINT32 i;
+			pANTLR3_BASE_TREE child;
+			for(i = 0; i < childCount; i++)
+			{
+				//get each child and append
+				child = (pANTLR3_BASE_TREE)(tree->children->get(tree->children, i));
+				traverseAST(child, options, context);
+			}
+			
+			//pop the scope
+			nopl_popScope(context);
+		}
+			break;
+		case STRING:
+		{
+			//get the string and length
+			char* string = (char*)tree->getText(tree)->chars;
+			int length = strlen(string);
+			
+			//TODO: strip the quotes
+			
+			//add the operator
+			addOperator(NoPL_BYTE_LITERAL_STRING, context);
+			
+			//add the string
+			addBytesToContext(string, sizeof(char)*(length+1), context);
+		}
+			break;
+		case SUBSCRIPT_OPEN:
+		{
+			//get the index and object
+			pANTLR3_BASE_TREE object = treeIndex(tree,0);
+			pANTLR3_BASE_TREE index = treeIndex(tree,1);
+			
+			//TODO:
+		}
+			break;
+		case SUBTRACT:
+		{
+			//this is a binary operator
+			pANTLR3_BASE_TREE child1 = treeIndex(tree,0);
+			pANTLR3_BASE_TREE child2 = treeIndex(tree,1);
+			
+			//add the operator
+			addOperator(NoPL_BYTE_NUMERIC_SUBTRACT, context);
+			
+			//append the expressions
+			appendNodeWithRequiredType(child1, NoPL_type_Number, context, options);
+			appendNodeWithRequiredType(child2, NoPL_type_Number, context, options);
+		}
+			break;
+		case SUBTRACT_ASSIGN:
+		{
+			//this is an assignment operator
+			pANTLR3_BASE_TREE assignTo = treeIndex(tree,0);
+			pANTLR3_BASE_TREE incrementVal = treeIndex(tree,1);
+			
+			//check the object on the left-hand side to make sure that it is the correct type
+			NoPL_DataType assignToType = dataTypeForTree(assignTo, context);
+			if(assignToType == NoPL_type_Number)
+			{
+				//append the operator
+				addOperator(NoPL_BYTE_NUMERIC_SUBTRACT_ASSIGN, context);
+				
+				//add the index for the variable
+				NoPL_Index index = indexOfVariableInStack(assignTo->getText(assignTo), context->numberStack, assignTo);
+				addBytesToContext(&index, sizeof(NoPL_Index), context);
+				
+				//append the expression
+				appendNodeWithRequiredType(incrementVal, NoPL_type_Number, context, options);
+			}
+			else
+			{
+				nopl_error(assignTo, NoPL_ErrStr_CannotIncrement);
+			}
+		}
+			break;
+		case SWITCH:
+		{
+			//TODO:
+		}
+			break;
+		case TYPE_CAST:
+		{
+			//get the expression which will be cast
+			pANTLR3_BASE_TREE expression = treeIndex(tree,1);
+			
+			NoPL_DataType castType = dataTypeForTree(tree, context);
+			NoPL_DataType expressionType = dataTypeForTree(tree, context);
+			
+			//only add this cast if the types are actually different
+			if(castType != expressionType)
+			{
+				switch (castType)
+				{
+					case NoPL_type_Boolean:
+						
+						//cast to boolean
+						if(expressionType == NoPL_type_FunctionResult || expressionType == NoPL_type_Object)
+							addOperator(NoPL_BYTE_CAST_OBJECT_TO_BOOLEAN, context);
+						else if(expressionType == NoPL_type_Number)
+							addOperator(NoPL_BYTE_CAST_NUMBER_TO_BOOLEAN, context);
+						else if(expressionType == NoPL_type_String)
+							addOperator(NoPL_BYTE_CAST_STRING_TO_BOOLEAN, context);
+						else
+							nopl_error(expression, NoPL_ErrStr_CouldNotDetermineType);
+						
+						break;
+					case NoPL_type_Number:
+						
+						//cast to number
+						if(expressionType == NoPL_type_FunctionResult || expressionType == NoPL_type_Object)
+							addOperator(NoPL_BYTE_CAST_OBJECT_TO_NUMBER, context);
+						else if(expressionType == NoPL_type_Boolean)
+							addOperator(NoPL_BYTE_CAST_BOOLEAN_TO_NUMBER, context);
+						else if(expressionType == NoPL_type_String)
+							addOperator(NoPL_BYTE_CAST_STRING_TO_NUMBER, context);
+						else
+							nopl_error(expression, NoPL_ErrStr_CouldNotDetermineType);
+						
+						break;
+					case NoPL_type_String:
+						
+						//cast to number
+						if(expressionType == NoPL_type_FunctionResult || expressionType == NoPL_type_Object)
+							addOperator(NoPL_BYTE_CAST_OBJECT_TO_STRING, context);
+						else if(expressionType == NoPL_type_Boolean)
+							addOperator(NoPL_BYTE_CAST_BOOLEAN_TO_STRING, context);
+						else if(expressionType == NoPL_type_Number)
+							addOperator(NoPL_BYTE_CAST_NUMBER_TO_STRING, context);
+						else
+							nopl_error(expression, NoPL_ErrStr_CouldNotDetermineType);
+						
+						break;
+					default:
+						break;
+				}
+			}
+			
+			//append the expression
+			traverseAST(expression, options, context);
 		}
 			break;
 	}

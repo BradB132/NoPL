@@ -5,7 +5,7 @@ options
 	backtrack=true;
 	memoize=true;
 	output=AST;
-/*
+//*
 	language = C;
 	ASTLabelType=pANTLR3_BASE_TREE;
 //*/
@@ -29,7 +29,7 @@ tokens
 //////////////////////////////////
 //JAVA
 //////////////////////////////////
-//*
+/*
 @members
 {
 
@@ -99,7 +99,7 @@ public String nextString(Object obj)
 //////////////////////////////////
 //C
 //////////////////////////////////
-/*
+//*
 
 @parser::includes
 {
@@ -252,7 +252,6 @@ expressionCast
 	:	PAREN_OPEN DECL_BOOL PAREN_CLOSE expression -> ^(TYPE_CAST DECL_BOOL expression)
 	|	PAREN_OPEN DECL_STRING PAREN_CLOSE expression -> ^(TYPE_CAST DECL_STRING expression)
 	|	PAREN_OPEN DECL_NUMBER PAREN_CLOSE expression -> ^(TYPE_CAST DECL_NUMBER expression)
-	|	PAREN_OPEN DECL_OBJ PAREN_CLOSE expression -> ^(TYPE_CAST DECL_OBJ expression)
 	;
 
 atom
@@ -265,6 +264,7 @@ atom
 	|	SUBTRACT atom -> ^(NUMERIC_NEGATION atom)
 	|	LOGICAL_NEGATION^ booleanExpression
 	|	PAREN_OPEN! expression PAREN_CLOSE!
+	|	ABS_VALUE^ expression ABS_VALUE!
 	|	objectExpression
 	;
 
@@ -367,6 +367,19 @@ switchStatement
 	:	SWITCH^ PAREN_OPEN! expression PAREN_CLOSE! SCOPE_OPEN! innerSwitchStatement+ SCOPE_CLOSE!
 	;
 
+//BOOLEAN OERATORS
+LOGICAL_EQUALITY:	'==';
+LOGICAL_INEQUALITY:	'!=';
+LOGICAL_AND:		('&&'|'and');
+LOGICAL_OR:		('||'|'or');
+LOGICAL_NEGATION:	'!';
+LESS_THAN:		'<';
+LESS_THAN_EQUAL:	'<=';
+GREATER_THAN:		'>';
+GREATER_THAN_EQUAL:	'>=';
+LITERAL_TRUE:		('true'|'YES');
+LITERAL_FALSE:		('false'|'NO');
+
 //MATHEMATIC OPERATORS
 ADD:			'+';
 ADD_ASSIGN:		'+=';
@@ -382,19 +395,7 @@ MOD:			'%';
 MOD_ASSIGN:		'%=';
 INCREMENT:		'++';
 DECREMENT:		'--';
-
-//BOOLEAN OERATORS
-LOGICAL_EQUALITY:	'==';
-LOGICAL_INEQUALITY:	'!=';
-LOGICAL_AND:		('&&'|'and');
-LOGICAL_OR:		('||'|'or');
-LOGICAL_NEGATION:	'!';
-LESS_THAN:		'<';
-LESS_THAN_EQUAL:	'<=';
-GREATER_THAN:		'>';
-GREATER_THAN_EQUAL:	'>=';
-LITERAL_TRUE:		('true'|'YES');
-LITERAL_FALSE:		('false'|'NO');
+ABS_VALUE:		'|';
 
 //TYPES
 DECL_NUMBER:		(('n'|'N')'umber'|'int'|'float');
