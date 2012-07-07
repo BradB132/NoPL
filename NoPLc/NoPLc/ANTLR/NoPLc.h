@@ -10,6 +10,8 @@
 #define NoPLc_NoPLc_h
 
 #include "NoPLValues.h"
+#include "NoPLLexer.h"//TODO: move this back to .c file
+#include "NoPLParser.h"
 
 typedef struct
 {

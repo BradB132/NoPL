@@ -7,6 +7,7 @@
 //
 
 #include <stdio.h>
+#include "NoPLc.h"
 
 int main(int argc, const char * argv[])
 {
@@ -17,13 +18,25 @@ int main(int argc, const char * argv[])
 		return -1;
 	}
 	
-//	pANTLR3_INPUT_STREAM inputStream = antlr3AsciiFileStreamNew((pANTLR3_UINT8)argv[1]);
-//	if(!inputStream)
-//	{
-//		printf("NoPLc was not able to read input file at path: '%s'", argv[1]);
-//		return -1;
-//	}
-	//antlr3readAscii(pANTLR3_INPUT_STREAM input, pANTLR3_UINT8 fileName);
+	//create a compile context
+	NoPL_CompileContext compileCtx = newNoPL_CompileContext();
 	
+	//set up the compile options
+	NoPL_CompileOptions compileOpt;
+	compileOpt.optimizeForRuntime = 1;
+	compileOpt.debugSymbols = 0;
+	
+	//compile the context
+	compileContextWithFilePath(argv[1], &compileOpt, &compileCtx);
+	
+	//save the output to file
+	FILE* file = fopen(argv[2], "wb");
+	fwrite(compileCtx.compiledData, 1, compileCtx.dataLength, file);
+	fclose(file);
+	
+	//free the context
+	freeNoPL_CompileContext(&compileCtx);
+	
+	return 0;
 }
 
