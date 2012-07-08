@@ -24,6 +24,8 @@ const char* NoPL_ErrStr_CannotIncrement = "Cannot use this increment operator on
 const char* NoPL_ErrStr_CouldNotDetermineType = "Could not determine the type of this expression";
 const char* NoPL_ErrStr_CannotImplicitCastObject = "Cannot implicitly cast an object to another type of primitive";
 const char* NoPL_ErrStr_CannotCastObjectToPrimitive = "Cannot cast an object to another type of primitive";
+const char* NoPL_ErrStr_EqualityExpressionsAbiguous = "The type of both expressions being compared is ambiguous, at least one expression must be explicitly cast";
+const char* NoPL_ErrStr_EqualityDifferentType = "Both expressions compared by this equality operator must evaluate to the same type";
 
 //enum for checking AST node types
 typedef enum
@@ -644,7 +646,7 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 				
 				//skip over all this else stuff if we're coming from the block of code for true
 				addOperator(NoPL_BYTE_BUFFER_MOVE, context);
-				move = (NoPL_BufferMove)innerConditional.dataLength;
+				move = (NoPL_BufferMove)innerElse.dataLength;
 				addBytesToContext(&move, sizeof(NoPL_BufferMove), context);
 				
 				//add the else statement
@@ -1066,12 +1068,48 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 			pANTLR3_BASE_TREE child1 = treeIndex(tree,0);
 			pANTLR3_BASE_TREE child2 = treeIndex(tree,1);
 			
-			//append the operator
-			addOperator(NoPL_BYTE_BOOLEAN_EQUALITY, context);
+			//get the types of expressions being compared
+			NoPL_DataType child1Type = dataTypeForTree(child1, context);
+			NoPL_DataType child2Type = dataTypeForTree(child2, context);
 			
-			//append the expressions
-			appendNodeWithRequiredType(child1, NoPL_type_Number, context, options);
-			appendNodeWithRequiredType(child2, NoPL_type_Number, context, options);
+			//make sure we're looking at comparable expressions
+			if(child1Type == NoPL_type_FunctionResult && child2Type == NoPL_type_FunctionResult)
+			{
+				nopl_error(tree, NoPL_ErrStr_EqualityExpressionsAbiguous);
+			}
+			else if(child1Type == child2Type || child1Type == NoPL_type_FunctionResult || child2Type == NoPL_type_FunctionResult)
+			{
+				//we have type agreement, find the type
+				NoPL_DataType exprType = child1Type;
+				if(exprType == NoPL_type_FunctionResult)
+					exprType = child2Type;
+				
+				//append the operator appropriate for that type
+				switch(exprType)
+				{
+					case NoPL_type_Number:
+						addOperator(NoPL_BYTE_NUMERIC_LOGICAL_EQUALITY, context);
+						break;
+					case NoPL_type_Boolean:
+						addOperator(NoPL_BYTE_BOOLEAN_LOGICAL_EQUALITY, context);
+						break;
+					case NoPL_type_Object:
+						addOperator(NoPL_BYTE_OBJECT_LOGICAL_EQUALITY, context);
+						break;
+					case NoPL_type_String:
+						addOperator(NoPL_BYTE_STRING_LOGICAL_EQUALITY, context);
+						break;
+					default:
+						nopl_error(tree, NoPL_ErrStr_CouldNotDetermineType);
+						break;
+				}
+				
+				//append the expressions
+				appendNodeWithRequiredType(child1, exprType, context, options);
+				appendNodeWithRequiredType(child2, exprType, context, options);
+			}
+			else
+				nopl_error(tree, NoPL_ErrStr_EqualityDifferentType);
 		}
 			break;
 		case LOGICAL_INEQUALITY:
@@ -1080,12 +1118,48 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 			pANTLR3_BASE_TREE child1 = treeIndex(tree,0);
 			pANTLR3_BASE_TREE child2 = treeIndex(tree,1);
 			
-			//append the operator
-			addOperator(NoPL_BYTE_BOOLEAN_INEQUALITY, context);
+			//get the types of expressions being compared
+			NoPL_DataType child1Type = dataTypeForTree(child1, context);
+			NoPL_DataType child2Type = dataTypeForTree(child2, context);
 			
-			//append the expressions
-			appendNodeWithRequiredType(child1, NoPL_type_Number, context, options);
-			appendNodeWithRequiredType(child2, NoPL_type_Number, context, options);
+			//make sure we're looking at comparable expressions
+			if(child1Type == NoPL_type_FunctionResult && child2Type == NoPL_type_FunctionResult)
+			{
+				nopl_error(tree, NoPL_ErrStr_EqualityExpressionsAbiguous);
+			}
+			else if(child1Type == child2Type || child1Type == NoPL_type_FunctionResult || child2Type == NoPL_type_FunctionResult)
+			{
+				//we have type agreement, find the type
+				NoPL_DataType exprType = child1Type;
+				if(exprType == NoPL_type_FunctionResult)
+					exprType = child2Type;
+				
+				//append the operator appropriate for that type
+				switch (exprType)
+				{
+					case NoPL_type_Number:
+						addOperator(NoPL_BYTE_NUMERIC_LOGICAL_INEQUALITY, context);
+						break;
+					case NoPL_type_Boolean:
+						addOperator(NoPL_BYTE_BOOLEAN_LOGICAL_INEQUALITY, context);
+						break;
+					case NoPL_type_Object:
+						addOperator(NoPL_BYTE_OBJECT_LOGICAL_INEQUALITY, context);
+						break;
+					case NoPL_type_String:
+						addOperator(NoPL_BYTE_STRING_LOGICAL_INEQUALITY, context);
+						break;
+					default:
+						nopl_error(tree, NoPL_ErrStr_CouldNotDetermineType);
+						break;
+				}
+				
+				//append the expressions
+				appendNodeWithRequiredType(child1, exprType, context, options);
+				appendNodeWithRequiredType(child2, exprType, context, options);
+			}
+			else
+				nopl_error(tree, NoPL_ErrStr_EqualityDifferentType);
 		}
 			break;
 		case LOGICAL_NEGATION:
@@ -1276,7 +1350,7 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 			addOperator(NoPL_BYTE_STRING_PRINT, context);
 			
 			//guarantee that the child is a string by casting if necessary
-			switch (dataTypeForTree(child1, context))
+			switch(dataTypeForTree(child1, context))
 			{
 				case NoPL_type_Boolean:
 					addOperator(NoPL_BYTE_CAST_BOOLEAN_TO_STRING, context);
@@ -1512,6 +1586,10 @@ void compileWithInputStream(pANTLR3_INPUT_STREAM stream, const NoPL_CompileOptio
 	//check for errors
 	pANTLR3_BASE_RECOGNIZER recognizer = parser->pParser->rec;
 	int errCount = recognizer->getNumberOfSyntaxErrors(recognizer);
+	if(errCount > 0)
+	{
+		//TODO: walk the AST for errors
+	}
 	
 	//recurse to assemble the byte code
 	if(errCount == 0)
