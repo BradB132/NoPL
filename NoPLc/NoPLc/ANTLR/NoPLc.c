@@ -674,6 +674,8 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 			//declare the variable
 			nopl_declareVariableInStack(declaredString, context->booleanStack);
 			
+			//TODO: this is prone to error, possible to use a variable in it's own declaration, must traverse the expression first
+			
 			//assign to the index of the newly created variable
 			addOperator(NoPL_BYTE_BOOLEAN_ASSIGN, context);
 			NoPL_Index index = indexOfVariableInStack(declaredString, context->booleanStack, declaredVar);
@@ -1190,17 +1192,162 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 			break;
 		case LOOP_DO:
 		{
-			//TODO:
+			//get nodes for statements in the top of the loop (or in this case, the bottom)
+			pANTLR3_BASE_TREE conditional = treeIndex(tree,0);
+			
+			//get another byte buffer for everything inside this loop
+			NoPL_CompileContext loopCtx = newInnerCompileContext(context);
+			
+			//push a scope for the loop
+			nopl_pushScope(&loopCtx);
+			
+			//add all of the statements inside the loop
+			NoPL_Index childCount = 0;
+			if(tree->children)
+				childCount = (NoPL_Index)tree->children->size(tree->children);
+			ANTLR3_UINT32 i;
+			pANTLR3_BASE_TREE childArg;
+			for(i = 1; i < childCount; i++)
+			{
+				childArg = (pANTLR3_BASE_TREE)(tree->children->get(tree->children, i));
+				traverseAST(childArg, options, &loopCtx);
+			}
+			
+			//pop a scope for the loop
+			nopl_popScope(&loopCtx);
+			
+			//a loop gets compiled as a repeating conditional
+			addOperator(NoPL_BYTE_CONDITIONAL, &loopCtx);
+			
+			//append the boolean expression for the conditional
+			appendNodeWithRequiredType(conditional, NoPL_type_Boolean, &loopCtx, options);
+			
+			//add the number of bytes to skip when the conditional fails
+			NoPL_BufferMove condMove = sizeof(NoPL_Instruction)+sizeof(NoPL_BufferMove);
+			addBytesToContext(&condMove, sizeof(NoPL_BufferMove), &loopCtx);
+			
+			//the only content of the conditional is a buffer move that restarts the loop
+			NoPL_BufferMove loopMove = -((NoPL_BufferMove)(loopCtx.dataLength));
+			addBytesToContext(&loopMove, sizeof(NoPL_BufferMove), &loopCtx);
+			
+			//append the loop
+			addBytesToContext(loopCtx.compiledData, loopCtx.dataLength, context);
 		}
 			break;
 		case LOOP_FOR:
 		{
-			//TODO:
+			//push a scope for the statements in the top of the loop
+			nopl_pushScope(context);
+			
+			//get nodes for statements in the top of the loop
+			pANTLR3_BASE_TREE declaration = treeIndex(tree,0);
+			pANTLR3_BASE_TREE conditional = treeIndex(tree,1);
+			pANTLR3_BASE_TREE increment = treeIndex(tree,2);
+			
+			//append the declaration
+			traverseAST(declaration, options, context);
+			
+			//get another byte buffer for everything inside this loop
+			NoPL_CompileContext outerLoopCtx = newInnerCompileContext(context);
+			
+			//a loop gets compiled as a repeating conditional
+			addOperator(NoPL_BYTE_CONDITIONAL, &outerLoopCtx);
+			
+			//append the boolean expression for the conditional
+			appendNodeWithRequiredType(conditional, NoPL_type_Boolean, &outerLoopCtx, options);
+			
+			//get another byte buffer for everything inside this conditional
+			NoPL_CompileContext innerLoopCtx = newInnerCompileContext(&outerLoopCtx);
+			
+			//push a scope for the loop
+			nopl_pushScope(&innerLoopCtx);
+			
+			//add all of the statements inside the loop
+			NoPL_Index childCount = 0;
+			if(tree->children)
+				childCount = (NoPL_Index)tree->children->size(tree->children);
+			ANTLR3_UINT32 i;
+			pANTLR3_BASE_TREE childArg;
+			for(i = 3; i < childCount; i++)
+			{
+				childArg = (pANTLR3_BASE_TREE)(tree->children->get(tree->children, i));
+				traverseAST(childArg, options, &innerLoopCtx);
+			}
+			
+			//append the increment at the end of the loop
+			traverseAST(increment, options, &innerLoopCtx);
+			
+			//pop a scope for the loop
+			nopl_popScope(&innerLoopCtx);
+			
+			//go back to the beginning of the loop
+			addOperator(NoPL_BYTE_BUFFER_MOVE, &innerLoopCtx);
+			NoPL_BufferMove repeatMove = -((NoPL_BufferMove)(outerLoopCtx.dataLength+innerLoopCtx.dataLength+(2*sizeof(NoPL_BufferMove))));
+			addBytesToContext(&repeatMove, sizeof(NoPL_BufferMove), &innerLoopCtx);
+			
+			//add the number of bytes to skip when the conditional fails
+			NoPL_BufferMove condMove = (NoPL_BufferMove)innerLoopCtx.dataLength;
+			addBytesToContext(&condMove, sizeof(NoPL_BufferMove), &outerLoopCtx);
+			
+			//append the logic for the loop
+			addBytesToContext(outerLoopCtx.compiledData, outerLoopCtx.dataLength, context);
+			
+			//append the loop contents
+			addBytesToContext(innerLoopCtx.compiledData, innerLoopCtx.dataLength, context);
+			
+			//pop the scope for the statements in the top of the loop
+			nopl_popScope(context);
 		}
 			break;
 		case LOOP_WHILE:
 		{
-			//TODO:
+			//get nodes for statements in the top of the loop
+			pANTLR3_BASE_TREE conditional = treeIndex(tree,0);
+			
+			//get another byte buffer for everything inside this loop
+			NoPL_CompileContext outerLoopCtx = newInnerCompileContext(context);
+			
+			//a loop gets compiled as a repeating conditional
+			addOperator(NoPL_BYTE_CONDITIONAL, &outerLoopCtx);
+			
+			//append the boolean expression for the conditional
+			appendNodeWithRequiredType(conditional, NoPL_type_Boolean, &outerLoopCtx, options);
+			
+			//get another byte buffer for everything inside this conditional
+			NoPL_CompileContext innerLoopCtx = newInnerCompileContext(&outerLoopCtx);
+			
+			//push a scope for the loop
+			nopl_pushScope(&innerLoopCtx);
+			
+			//add all of the statements inside the loop
+			NoPL_Index childCount = 0;
+			if(tree->children)
+				childCount = (NoPL_Index)tree->children->size(tree->children);
+			ANTLR3_UINT32 i;
+			pANTLR3_BASE_TREE childArg;
+			for(i = 1; i < childCount; i++)
+			{
+				childArg = (pANTLR3_BASE_TREE)(tree->children->get(tree->children, i));
+				traverseAST(childArg, options, &innerLoopCtx);
+			}
+			
+			//pop a scope for the loop
+			nopl_popScope(&innerLoopCtx);
+			
+			//go back to the beginning of the loop
+			addOperator(NoPL_BYTE_BUFFER_MOVE, &innerLoopCtx);
+			NoPL_BufferMove repeatMove = -((NoPL_BufferMove)(outerLoopCtx.dataLength+innerLoopCtx.dataLength+(2*sizeof(NoPL_BufferMove))));
+			addBytesToContext(&repeatMove, sizeof(NoPL_BufferMove), &innerLoopCtx);
+			
+			//add the number of bytes to skip when the conditional fails
+			NoPL_BufferMove condMove = (NoPL_BufferMove)innerLoopCtx.dataLength;
+			addBytesToContext(&condMove, sizeof(NoPL_BufferMove), &outerLoopCtx);
+			
+			//append the logic for the loop
+			addBytesToContext(outerLoopCtx.compiledData, outerLoopCtx.dataLength, context);
+			
+			//append the loop contents
+			addBytesToContext(innerLoopCtx.compiledData, innerLoopCtx.dataLength, context);
 		}
 			break;
 		case MOD:
@@ -1582,6 +1729,8 @@ void compileWithInputStream(pANTLR3_INPUT_STREAM stream, const NoPL_CompileOptio
 	
 	//attempt to parse the NoPL program
 	NoPLParser_program_return syntaxTree = parser->program(parser);
+	
+	//TODO: pre-process the AST for optimization here?
 	
 	//check for errors
 	pANTLR3_BASE_RECOGNIZER recognizer = parser->pParser->rec;
