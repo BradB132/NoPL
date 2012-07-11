@@ -73,7 +73,7 @@ void addBytesToContext(const void* bytes, int byteCount, NoPL_CompileContext* co
 	//check if the buffer size needs to be increased
 	if(!context->arrayLength)
 	{
-		context->arrayLength = 512;
+		context->arrayLength = 128;
 		context->compiledData = malloc(sizeof(NoPL_Instruction)*context->arrayLength);
 	}
 	else if(byteCount+context->dataLength > context->arrayLength)
@@ -665,130 +665,156 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 		{
 			//get the name of the declared variable
 			pANTLR3_BASE_TREE declaredVar = treeIndex(tree,0);
-			pANTLR3_STRING declaredString = declaredVar->getText(declaredVar);
+			pANTLR3_STRING declaredName = declaredVar->getText(declaredVar);
 			
-			//check if the variable was already declared elsewhere
-			if(nopl_variableExistsInContext(declaredString, context))
-				nopl_error(declaredVar, NoPL_ErrStr_VariableAlreadyDeclared);
-			
-			//declare the variable
-			nopl_declareVariableInStack(declaredString, context->booleanStack);
-			
-			//TODO: this is prone to error, possible to use a variable in it's own declaration, must traverse the expression first
-			
-			//assign to the index of the newly created variable
-			addOperator(NoPL_BYTE_BOOLEAN_ASSIGN, context);
-			NoPL_Index index = indexOfVariableInStack(declaredString, context->booleanStack, declaredVar);
-			addBytesToContext(&index, sizeof(NoPL_Index), context);
+			//we need to evaluate the initial expression before declaring the variable
+			NoPL_CompileContext initCtx = newInnerCompileContext(context);
 			
 			//get the initial value if there is one
 			if(tree->getChildCount(tree) > 1)
 			{
 				//append the expression
-				appendNodeWithRequiredType(treeIndex(tree,1), NoPL_type_Boolean, context, options);
+				appendNodeWithRequiredType(treeIndex(tree,1), NoPL_type_Boolean, &initCtx, options);
 			}
 			else
 			{
 				//set this variable to a default value
-				addOperator(NoPL_BYTE_LITERAL_BOOLEAN_FALSE, context);
+				addOperator(NoPL_BYTE_LITERAL_BOOLEAN_FALSE, &initCtx);
 			}
+			
+			//check if the variable was already declared elsewhere
+			if(nopl_variableExistsInContext(declaredName, context))
+				nopl_error(declaredVar, NoPL_ErrStr_VariableAlreadyDeclared);
+			
+			//declare the variable
+			nopl_declareVariableInStack(declaredName, context->booleanStack);
+			
+			//assign to the index of the newly created variable
+			addOperator(NoPL_BYTE_BOOLEAN_ASSIGN, context);
+			NoPL_Index index = indexOfVariableInStack(declaredName, context->booleanStack, declaredVar);
+			addBytesToContext(&index, sizeof(NoPL_Index), context);
+			
+			//append the initialization
+			addBytesToContext(initCtx.compiledData, initCtx.dataLength, context);
+			freeInnerCompileContext(&initCtx);
 		}
 			break;
 		case DECL_NUMBER:
 		{
 			//get the name of the declared variable
 			pANTLR3_BASE_TREE declaredVar = treeIndex(tree,0);
-			pANTLR3_STRING declaredString = declaredVar->getText(declaredVar);
+			pANTLR3_STRING declaredName = declaredVar->getText(declaredVar);
 			
-			//check if the variable was already declared elsewhere
-			if(nopl_variableExistsInContext(declaredString, context))
-				nopl_error(declaredVar, NoPL_ErrStr_VariableAlreadyDeclared);
-			
-			//declare the variable
-			nopl_declareVariableInStack(declaredString, context->numberStack);
-			
-			//assign to the index of the newly created variable
-			addOperator(NoPL_BYTE_NUMERIC_ASSIGN, context);
-			NoPL_Index index = indexOfVariableInStack(declaredString, context->numberStack, declaredVar);
-			addBytesToContext(&index, sizeof(NoPL_Index), context);
+			//we need to evaluate the initial expression before declaring the variable
+			NoPL_CompileContext initCtx = newInnerCompileContext(context);
 			
 			//get the initial value if there is one
 			if(tree->getChildCount(tree) > 1)
 			{
 				//append the expression
-				appendNodeWithRequiredType(treeIndex(tree,1), NoPL_type_Number, context, options);
+				appendNodeWithRequiredType(treeIndex(tree,1), NoPL_type_Number, &initCtx, options);
 			}
 			else
 			{
 				//set this variable to a default value
-				addOperator(NoPL_BYTE_LITERAL_NUMBER, context);
+				addOperator(NoPL_BYTE_LITERAL_NUMBER, &initCtx);
 				float defaultFloat = 0.0f;
-				addBytesToContext(&defaultFloat, sizeof(float), context);
+				addBytesToContext(&defaultFloat, sizeof(float), &initCtx);
 			}
+			
+			//check if the variable was already declared elsewhere
+			if(nopl_variableExistsInContext(declaredName, context))
+				nopl_error(declaredVar, NoPL_ErrStr_VariableAlreadyDeclared);
+			
+			//declare the variable
+			nopl_declareVariableInStack(declaredName, context->numberStack);
+			
+			//assign to the index of the newly created variable
+			addOperator(NoPL_BYTE_NUMERIC_ASSIGN, context);
+			NoPL_Index index = indexOfVariableInStack(declaredName, context->numberStack, declaredVar);
+			addBytesToContext(&index, sizeof(NoPL_Index), context);
+			
+			//append the initialization
+			addBytesToContext(initCtx.compiledData, initCtx.dataLength, context);
+			freeInnerCompileContext(&initCtx);
 		}
 			break;
 		case DECL_OBJ:
 		{
 			//get the name of the declared variable
 			pANTLR3_BASE_TREE declaredVar = treeIndex(tree,0);
-			pANTLR3_STRING declaredString = declaredVar->getText(declaredVar);
+			pANTLR3_STRING declaredName = declaredVar->getText(declaredVar);
 			
-			//check if the variable was already declared elsewhere
-			if(nopl_variableExistsInContext(declaredString, context))
-				nopl_error(declaredVar, NoPL_ErrStr_VariableAlreadyDeclared);
-			
-			//declare the variable
-			nopl_declareVariableInStack(declaredString, context->objectStack);
-			
-			//assign to the index of the newly created variable
-			addOperator(NoPL_BYTE_OBJECT_ASSIGN, context);
-			NoPL_Index index = indexOfVariableInStack(declaredString, context->objectStack, declaredVar);
-			addBytesToContext(&index, sizeof(NoPL_Index), context);
+			//we need to evaluate the initial expression before declaring the variable
+			NoPL_CompileContext initCtx = newInnerCompileContext(context);
 			
 			//get the initial value if there is one
 			if(tree->getChildCount(tree) > 1)
 			{
 				//append the expression
-				appendNodeWithRequiredType(treeIndex(tree,1), NoPL_type_Object, context, options);
+				appendNodeWithRequiredType(treeIndex(tree,1), NoPL_type_Object, &initCtx, options);
 			}
 			else
 			{
 				//set this variable to a default value
-				addOperator(NoPL_BYTE_LITERAL_NULL, context);
+				addOperator(NoPL_BYTE_LITERAL_NULL, &initCtx);
 			}
+			
+			//check if the variable was already declared elsewhere
+			if(nopl_variableExistsInContext(declaredName, context))
+				nopl_error(declaredVar, NoPL_ErrStr_VariableAlreadyDeclared);
+			
+			//declare the variable
+			nopl_declareVariableInStack(declaredName, context->objectStack);
+			
+			//assign to the index of the newly created variable
+			addOperator(NoPL_BYTE_OBJECT_ASSIGN, context);
+			NoPL_Index index = indexOfVariableInStack(declaredName, context->objectStack, declaredVar);
+			addBytesToContext(&index, sizeof(NoPL_Index), context);
+			
+			//append the initialization
+			addBytesToContext(initCtx.compiledData, initCtx.dataLength, context);
+			freeInnerCompileContext(&initCtx);
 		}
 			break;
 		case DECL_STRING:
 		{
 			//get the name of the declared variable
 			pANTLR3_BASE_TREE declaredVar = treeIndex(tree,0);
-			pANTLR3_STRING declaredString = declaredVar->getText(declaredVar);
+			pANTLR3_STRING declaredName = declaredVar->getText(declaredVar);
 			
-			//check if the variable was already declared elsewhere
-			if(nopl_variableExistsInContext(declaredString, context))
-				nopl_error(declaredVar, NoPL_ErrStr_VariableAlreadyDeclared);
-			
-			//declare the variable
-			nopl_declareVariableInStack(declaredString, context->stringStack);
-			
-			//assign to the index of the newly created variable
-			addOperator(NoPL_BYTE_STRING_ASSIGN, context);
-			NoPL_Index index = indexOfVariableInStack(declaredString, context->stringStack, declaredVar);
-			addBytesToContext(&index, sizeof(NoPL_Index), context);
+			//we need to evaluate the initial expression before declaring the variable
+			NoPL_CompileContext initCtx = newInnerCompileContext(context);
 			
 			//get the initial value if there is one
 			if(tree->getChildCount(tree) > 1)
 			{
 				//append the expression
-				appendNodeWithRequiredType(treeIndex(tree,1), NoPL_type_String, context, options);
+				appendNodeWithRequiredType(treeIndex(tree,1), NoPL_type_String, &initCtx, options);
 			}
 			else
 			{
 				//set this variable to a default value
-				addOperator(NoPL_BYTE_LITERAL_STRING, context);
+				addOperator(NoPL_BYTE_LITERAL_STRING, &initCtx);
 				char* defaultString = "";
-				addBytesToContext(&defaultString[0], sizeof(defaultString[0]), context);
+				addBytesToContext(&defaultString[0], sizeof(defaultString[0]), &initCtx);
 			}
+			
+			//check if the variable was already declared elsewhere
+			if(nopl_variableExistsInContext(declaredName, context))
+				nopl_error(declaredVar, NoPL_ErrStr_VariableAlreadyDeclared);
+			
+			//declare the variable
+			nopl_declareVariableInStack(declaredName, context->stringStack);
+			
+			//assign to the index of the newly created variable
+			addOperator(NoPL_BYTE_STRING_ASSIGN, context);
+			NoPL_Index index = indexOfVariableInStack(declaredName, context->stringStack, declaredVar);
+			addBytesToContext(&index, sizeof(NoPL_Index), context);
+			
+			//append the initialization
+			addBytesToContext(initCtx.compiledData, initCtx.dataLength, context);
+			freeInnerCompileContext(&initCtx);
 		}
 			break;
 		case DECREMENT:
@@ -1232,6 +1258,8 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 			
 			//append the loop
 			addBytesToContext(loopCtx.compiledData, loopCtx.dataLength, context);
+			
+			freeInnerCompileContext(&loopCtx);
 		}
 			break;
 		case LOOP_FOR:
@@ -1297,6 +1325,10 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 			
 			//pop the scope for the statements in the top of the loop
 			nopl_popScope(context);
+			
+			//free contexts
+			freeInnerCompileContext(&innerLoopCtx);
+			freeInnerCompileContext(&outerLoopCtx);
 		}
 			break;
 		case LOOP_WHILE:
@@ -1348,6 +1380,10 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 			
 			//append the loop contents
 			addBytesToContext(innerLoopCtx.compiledData, innerLoopCtx.dataLength, context);
+			
+			//free contexts
+			freeInnerCompileContext(&innerLoopCtx);
+			freeInnerCompileContext(&outerLoopCtx);
 		}
 			break;
 		case MOD:
