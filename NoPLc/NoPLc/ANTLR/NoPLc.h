@@ -18,10 +18,13 @@ typedef struct
 	NoPL_Instruction* compiledData;
 	NoPL_Index dataLength;
 	NoPL_Index arrayLength;
+	pANTLR3_COMMON_TOKEN_STREAM tokenStream;
 	pANTLR3_STACK objectStack;
 	pANTLR3_STACK numberStack;
 	pANTLR3_STACK booleanStack;
 	pANTLR3_STACK stringStack;
+	pANTLR3_VECTOR breakStatements;
+	pANTLR3_VECTOR continueStatements;
 } NoPL_CompileContext;
 
 typedef struct
