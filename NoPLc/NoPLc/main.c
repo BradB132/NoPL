@@ -29,6 +29,13 @@ int main(int argc, const char * argv[])
 	//compile the context
 	compileContextWithFilePath(argv[1], &compileOpt, &compileCtx);
 	
+	//check for errors
+	if(compileCtx.errDescriptions)
+	{
+		//display errors if there are any
+		printf("Errors:\n%s", compileCtx.errDescriptions->chars);
+	}
+	
 	//save the output to file
 	FILE* file = fopen(argv[2], "wb");
 	fwrite(compileCtx.compiledData, 1, compileCtx.dataLength, file);

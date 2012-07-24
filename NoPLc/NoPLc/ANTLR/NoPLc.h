@@ -25,6 +25,7 @@ typedef struct
 	pANTLR3_STACK stringStack;
 	pANTLR3_VECTOR breakStatements;
 	pANTLR3_VECTOR continueStatements;
+	pANTLR3_STRING errDescriptions;
 } NoPL_CompileContext;
 
 typedef struct

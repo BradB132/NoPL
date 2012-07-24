@@ -14,6 +14,7 @@
 #define NoPL_VectorSizeHint 8
 
 //error codes
+const char* NoPL_ErrStr_Generic = "Syntax error";
 const char* NoPL_ErrStr_ExpressionMustBeNumeric = "This expression must evaluate to a numeric value";
 const char* NoPL_ErrStr_ExpressionMustBeString = "This expression must evaluate to a string value";
 const char* NoPL_ErrStr_ExpressionMustBeBoolean = "This expression must evaluate to a boolean value";
@@ -48,6 +49,7 @@ void addOperator(const NoPL_Instruction operator, NoPL_CompileContext* context);
 void appendNodeWithRequiredType(const pANTLR3_BASE_TREE tree, const NoPL_DataType type, NoPL_CompileContext* context, const NoPL_CompileOptions* options);
 void appendFunctionCall(const pANTLR3_BASE_TREE objExpression, const pANTLR3_BASE_TREE funcName, const pANTLR3_BASE_TREE args, const NoPL_CompileOptions* options, NoPL_CompileContext* context);
 void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* options, NoPL_CompileContext* context);
+void traverseForErrors(const pANTLR3_BASE_TREE tree, NoPL_CompileContext* context);
 NoPL_DataType dataTypeForTree(const pANTLR3_BASE_TREE tree, const NoPL_CompileContext* context);
 void nopl_pushScope(NoPL_CompileContext* context);
 void nopl_popScope(NoPL_CompileContext* context);
@@ -64,11 +66,38 @@ void freeInnerCompileContext(NoPL_CompileContext* context);
 
 void nopl_error(const pANTLR3_BASE_TREE tree, const char* desc, NoPL_CompileContext* context)
 {
-	//TODO: better algorithm for finding node start / end
-	//TODO: append error string to context
-	int charPos = tree->getCharPositionInLine(tree);
-	int charLength = strlen((char*)tree->getText(tree)->chars);
-	printf("NoPL Error: '%s' - %d:%d-%d\n", desc, tree->getLine(tree), charPos, charPos+charLength);
+	//TODO: get the actual beginning and end nodes
+	//find the first and last nodes
+	pANTLR3_BASE_TREE firstNode = NULL;
+	pANTLR3_BASE_TREE lastNode = NULL;
+	pANTLR3_BASE_TREE loopNode = tree;
+	while(loopNode->children && loopNode->children->size(loopNode->children))
+		loopNode = loopNode->children->get(loopNode->children, 0);
+	firstNode = loopNode;
+	loopNode = tree;
+	while(loopNode->children && loopNode->children->size(loopNode->children))
+		loopNode = loopNode->children->get(loopNode->children, loopNode->children->size(loopNode->children)-1);
+	lastNode = loopNode;
+	
+	//get the start and end line number and char position
+	int startLine = firstNode->getLine(firstNode);
+	int startChar = firstNode->getCharPositionInLine(firstNode);
+	int endLine = lastNode->getLine(lastNode);
+	int endChar = lastNode->getCharPositionInLine(lastNode)+strlen((char*)lastNode->getText(lastNode)->chars);
+	
+	//format the error
+	char appendStr[512];
+	sprintf(appendStr, "%s - %d:%d-%d:%d\n", desc, startLine, startChar, endLine, endChar);
+	
+	//lazy create the error string
+	if(!context->errDescriptions)
+	{
+		pANTLR3_STRING_FACTORY fctry = context->tokenStream->tstream->tokenSource->strFactory;
+		context->errDescriptions = fctry->newStr8(fctry, (pANTLR3_UINT8)"");
+	}
+	
+	//append error string to context
+	context->errDescriptions->append(context->errDescriptions, appendStr);
 }
 
 void addBytesToContext(const void* bytes, int byteCount, NoPL_CompileContext* context)
@@ -196,6 +225,7 @@ NoPL_CompileContext newInnerCompileContext(NoPL_CompileContext* parentContext, i
 	context.numberStack = parentContext->numberStack;
 	context.booleanStack = parentContext->booleanStack;
 	context.stringStack = parentContext->stringStack;
+	context.errDescriptions = parentContext->errDescriptions;
 	
 	if(allowBreak)
 		context.breakStatements = antlr3VectorNew(NoPL_VectorSizeHint);
@@ -218,6 +248,7 @@ void freeInnerCompileContext(NoPL_CompileContext* context)
 	context->booleanStack = NULL;
 	context->stringStack = NULL;
 	context->tokenStream = NULL;
+	context->errDescriptions = NULL;
 	
 	if(context->breakStatements)
 	{
@@ -1821,6 +1852,26 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 	}
 }
 
+void traverseForErrors(const pANTLR3_BASE_TREE tree, NoPL_CompileContext* context)
+{
+	//check if this node is an error
+	if(tree->isNilNode && !strcmp("Tree Error Node", (char*)tree->getText(tree)->chars))
+		nopl_error(tree, NoPL_ErrStr_Generic, context);
+	
+	//recursively check all nodes in this AST
+	NoPL_Index childCount = 0;
+	if(tree->children)
+		childCount = (NoPL_Index)tree->children->size(tree->children);
+	ANTLR3_UINT32 i;
+	pANTLR3_BASE_TREE child;
+	for(i = 0; i < childCount; i++)
+	{
+		//get each child and append
+		child = (pANTLR3_BASE_TREE)(tree->children->get(tree->children, i));
+		traverseForErrors(child, context);
+	}
+}
+
 void compileWithInputStream(pANTLR3_INPUT_STREAM stream, const NoPL_CompileOptions* options, NoPL_CompileContext* context)
 {
 	//attempt to parse the NoPL program
@@ -1836,13 +1887,17 @@ void compileWithInputStream(pANTLR3_INPUT_STREAM stream, const NoPL_CompileOptio
 	int errCount = recognizer->getNumberOfSyntaxErrors(recognizer);
 	if(errCount > 0)
 	{
-		//TODO: walk the AST for errors
+		//this tree has errors, add them to the context
+		traverseForErrors(syntaxTree.tree, context);
 	}
 	else
+	{
 		//recurse to assemble the byte code
 		traverseAST(syntaxTree.tree, options, context);
+	}
 	
 	//TODO: figure out symbol table
+	
 	
 	//clean up
 	parser->free(parser);
@@ -1879,6 +1934,7 @@ NoPL_CompileContext newNoPL_CompileContext()
 	context.numberStack = antlr3StackNew(NoPL_StackSizeHint);
 	context.booleanStack = antlr3StackNew(NoPL_StackSizeHint);
 	context.stringStack = antlr3StackNew(NoPL_StackSizeHint);
+	context.errDescriptions = NULL;
 	context.breakStatements = NULL;
 	context.continueStatements = NULL;
 	nopl_pushScope(&context);
