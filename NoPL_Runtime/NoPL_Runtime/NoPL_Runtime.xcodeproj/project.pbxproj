@@ -1,0 +1,231 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A261C29315C0E846008AE0C4 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = A261C29215C0E846008AE0C4 /* main.c */; };
+		A261C29515C0E846008AE0C4 /* NoPL_Runtime.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = A261C29415C0E846008AE0C4 /* NoPL_Runtime.1 */; };
+		A261C29D15C0E878008AE0C4 /* NoPLRuntime.c in Sources */ = {isa = PBXBuildFile; fileRef = A261C29C15C0E878008AE0C4 /* NoPLRuntime.c */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		A261C28C15C0E845008AE0C4 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+				A261C29515C0E846008AE0C4 /* NoPL_Runtime.1 in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		A261C28E15C0E845008AE0C4 /* NoPL_Runtime */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = NoPL_Runtime; sourceTree = BUILT_PRODUCTS_DIR; };
+		A261C29215C0E846008AE0C4 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
+		A261C29415C0E846008AE0C4 /* NoPL_Runtime.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = NoPL_Runtime.1; sourceTree = "<group>"; };
+		A261C29C15C0E878008AE0C4 /* NoPLRuntime.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = NoPLRuntime.c; sourceTree = "<group>"; };
+		A261C29E15C0E892008AE0C4 /* NoPLRuntime.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NoPLRuntime.h; sourceTree = "<group>"; };
+		A261C2A315C0E8D6008AE0C4 /* NoPLValues.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = NoPLValues.h; path = ../../../NoPLc/NoPLc/ANTLR/NoPLValues.h; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		A261C28B15C0E845008AE0C4 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		A261C28315C0E845008AE0C4 = {
+			isa = PBXGroup;
+			children = (
+				A261C29115C0E845008AE0C4 /* NoPL_Runtime */,
+				A261C28F15C0E845008AE0C4 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		A261C28F15C0E845008AE0C4 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A261C28E15C0E845008AE0C4 /* NoPL_Runtime */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		A261C29115C0E845008AE0C4 /* NoPL_Runtime */ = {
+			isa = PBXGroup;
+			children = (
+				A261C29B15C0E857008AE0C4 /* Runtime classes */,
+				A261C29215C0E846008AE0C4 /* main.c */,
+				A261C29415C0E846008AE0C4 /* NoPL_Runtime.1 */,
+			);
+			path = NoPL_Runtime;
+			sourceTree = "<group>";
+		};
+		A261C29B15C0E857008AE0C4 /* Runtime classes */ = {
+			isa = PBXGroup;
+			children = (
+				A261C2A315C0E8D6008AE0C4 /* NoPLValues.h */,
+				A261C29E15C0E892008AE0C4 /* NoPLRuntime.h */,
+				A261C29C15C0E878008AE0C4 /* NoPLRuntime.c */,
+			);
+			name = "Runtime classes";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		A261C28D15C0E845008AE0C4 /* NoPL_Runtime */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A261C29815C0E846008AE0C4 /* Build configuration list for PBXNativeTarget "NoPL_Runtime" */;
+			buildPhases = (
+				A261C28A15C0E845008AE0C4 /* Sources */,
+				A261C28B15C0E845008AE0C4 /* Frameworks */,
+				A261C28C15C0E845008AE0C4 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = NoPL_Runtime;
+			productName = NoPL_Runtime;
+			productReference = A261C28E15C0E845008AE0C4 /* NoPL_Runtime */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A261C28515C0E845008AE0C4 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0440;
+				ORGANIZATIONNAME = "Brad Bambara";
+			};
+			buildConfigurationList = A261C28815C0E845008AE0C4 /* Build configuration list for PBXProject "NoPL_Runtime" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = A261C28315C0E845008AE0C4;
+			productRefGroup = A261C28F15C0E845008AE0C4 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				A261C28D15C0E845008AE0C4 /* NoPL_Runtime */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A261C28A15C0E845008AE0C4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A261C29315C0E846008AE0C4 /* main.c in Sources */,
+				A261C29D15C0E878008AE0C4 /* NoPLRuntime.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		A261C29615C0E846008AE0C4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		A261C29715C0E846008AE0C4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		A261C29915C0E846008AE0C4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				HEADER_SEARCH_PATHS = "$(SRCROOT)/NoPLc/NoPLc/ANTLR/";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		A261C29A15C0E846008AE0C4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				HEADER_SEARCH_PATHS = "$(SRCROOT)/NoPLc/NoPLc/ANTLR/";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A261C28815C0E845008AE0C4 /* Build configuration list for PBXProject "NoPL_Runtime" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A261C29615C0E846008AE0C4 /* Debug */,
+				A261C29715C0E846008AE0C4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A261C29815C0E846008AE0C4 /* Build configuration list for PBXNativeTarget "NoPL_Runtime" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A261C29915C0E846008AE0C4 /* Debug */,
+				A261C29A15C0E846008AE0C4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = A261C28515C0E845008AE0C4 /* Project object */;
+}
