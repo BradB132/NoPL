@@ -7,6 +7,9 @@
 //
 
 #include <stdio.h>
+#include <math.h>
+#include <stdlib.h>
+#include <string.h>
 #include "NoPLRuntime.h"
 
 typedef struct
@@ -79,40 +82,62 @@ void evaluateStatement(NoPL_Evaluation* eval)
 
 float evaluateNumber(NoPL_Evaluation* eval)
 {
-	switch(eval->scriptBuffer[eval->evaluationPosition])
+	//get the instruction type
+	NoPL_Instruction instr = eval->scriptBuffer[eval->evaluationPosition];
+	
+	//skip over the instruction byte to the number's actual value
+	eval->evaluationPosition++;
+	
+	//do whatever operation we need to get this number
+	switch(instr)
 	{
 		case NoPL_BYTE_LITERAL_NUMBER:
-			break;
+		{
+			float* literalPtr = (float*)(eval->scriptBuffer+eval->evaluationPosition);
+			eval->evaluationPosition += sizeof(float);
+			return *literalPtr;
+		}
 		case NoPL_BYTE_VARIABLE_NUMBER:
-			break;
+			//TODO: symbol table
 		case NoPL_BYTE_NUMERIC_ADD:
-			break;
+			return evaluateNumber(eval) + evaluateNumber(eval);
 		case NoPL_BYTE_NUMERIC_SUBTRACT:
-			break;
+			return evaluateNumber(eval) - evaluateNumber(eval);
 		case NoPL_BYTE_NUMERIC_DIVIDE:
-			break;
+			return evaluateNumber(eval) / evaluateNumber(eval);
 		case NoPL_BYTE_NUMERIC_MULTIPLY:
-			break;
+			return evaluateNumber(eval) * evaluateNumber(eval);
 		case NoPL_BYTE_NUMERIC_EXPONENT:
-			break;
+			return powf(evaluateNumber(eval), evaluateNumber(eval));
 		case NoPL_BYTE_NUMERIC_MODULO:
-			break;
+			return fmodf(evaluateNumber(eval), evaluateNumber(eval));
 		case NoPL_BYTE_NUMERIC_ABS_VALUE:
-			break;
+			return fabsf(evaluateNumber(eval));
 		case NoPL_BYTE_NUMERIC_NEGATION:
-			break;
+			return -evaluateNumber(eval);
 		case NoPL_BYTE_RESOLVE_RESULT_TO_NUMBER:
-			break;
+		{
+			//attempt to resolve this function result to a numeric value
+			NoPL_FunctionValue val = evaluateFunction(eval);
+			if(val.type == NoPL_DataType_Number)
+				return val.numberValue;
+			else if(val.type == NoPL_DataType_Boolean)
+				return (float)val.booleanValue;
+			else if(val.type == NoPL_DataType_String)
+				return atoi(val.stringValue);
+			else
+				return 0.0f;
+		}
 		case NoPL_BYTE_CAST_BOOLEAN_TO_NUMBER:
-			break;
+			return (float)evaluateBoolean(eval);
 		case NoPL_BYTE_CAST_STRING_TO_NUMBER:
-			break;
+			return atoi(evaluateString(eval));
 		default:
 			printf("Number Error: instruction #%d doesn't make sense here", (int)eval->scriptBuffer[eval->evaluationPosition]);
 			break;
 	}
 	
-	return 0;
+	return 0.0f;
 }
 
 char* evaluateString(NoPL_Evaluation* eval)
@@ -141,50 +166,73 @@ char* evaluateString(NoPL_Evaluation* eval)
 
 int evaluateBoolean(NoPL_Evaluation* eval)
 {
-	switch(eval->scriptBuffer[eval->evaluationPosition])
+	//get the instruction type
+	NoPL_Instruction instr = eval->scriptBuffer[eval->evaluationPosition];
+	
+	//skip over the instruction byte to the number's actual value
+	eval->evaluationPosition++;
+	
+	//do whatever operation we need to get this number
+	switch(instr)
 	{
 		case NoPL_BYTE_LITERAL_BOOLEAN_TRUE:
+			eval->evaluationPosition++;
 			return 1;
 		case NoPL_BYTE_LITERAL_BOOLEAN_FALSE:
+			eval->evaluationPosition++;
 			return 0;
 		case NoPL_BYTE_VARIABLE_BOOLEAN:
-			break;
+			//TODO: symbol tables
 		case NoPL_BYTE_NUMERIC_LOGICAL_EQUALITY:
-			break;
+			return (evaluateNumber(eval) == evaluateNumber(eval));
 		case NoPL_BYTE_NUMERIC_LOGICAL_INEQUALITY:
-			break;
+			return (evaluateNumber(eval) != evaluateNumber(eval));
 		case NoPL_BYTE_BOOLEAN_LOGICAL_EQUALITY:
-			break;
+			return (evaluateBoolean(eval) == evaluateBoolean(eval));
 		case NoPL_BYTE_BOOLEAN_LOGICAL_INEQUALITY:
-			break;
+			return (evaluateBoolean(eval) != evaluateBoolean(eval));
 		case NoPL_BYTE_BOOLEAN_AND:
-			break;
+			return (evaluateBoolean(eval) && evaluateBoolean(eval));
 		case NoPL_BYTE_BOOLEAN_OR:
-			break;
+			return (evaluateBoolean(eval) || evaluateBoolean(eval));
 		case NoPL_BYTE_BOOLEAN_LESS_THAN:
-			break;
+			return (evaluateNumber(eval) < evaluateNumber(eval));
 		case NoPL_BYTE_BOOLEAN_LESS_THAN_EQUAL:
-			break;
+			return (evaluateNumber(eval) <= evaluateNumber(eval));
 		case NoPL_BYTE_BOOLEAN_GREATER_THAN:
-			break;
+			return (evaluateNumber(eval) > evaluateNumber(eval));
 		case NoPL_BYTE_BOOLEAN_GREATER_THAN_EQUAL:
-			break;
+			return (evaluateNumber(eval) >= evaluateNumber(eval));
 		case NoPL_BYTE_BOOLEAN_NEGATION:
-			break;
+			return !evaluateBoolean(eval);
 		case NoPL_BYTE_STRING_LOGICAL_EQUALITY:
-			break;
+			return !strcmp(evaluateString(eval), evaluateString(eval));
 		case NoPL_BYTE_STRING_LOGICAL_INEQUALITY:
-			break;
+			return strcmp(evaluateString(eval), evaluateString(eval));
 		case NoPL_BYTE_OBJECT_LOGICAL_EQUALITY:
-			break;
+			return (evaluatePointer(eval) == evaluatePointer(eval));
 		case NoPL_BYTE_OBJECT_LOGICAL_INEQUALITY:
-			break;
+			return (evaluatePointer(eval) != evaluatePointer(eval));
 		case NoPL_BYTE_RESOLVE_RESULT_TO_BOOLEAN:
-			break;
+		{
+			//attempt to resolve this function result to a boolean value
+			NoPL_FunctionValue val = evaluateFunction(eval);
+			if(val.type == NoPL_DataType_Boolean)
+				return val.booleanValue;
+			else if(val.type == NoPL_DataType_Number)
+				return (val.numberValue != 0.0f);
+			else if(value.type == NoPL_DataType_String)
+				return (val.stringValue && strcmp(val.stringValue, ""));
+			else
+				return 0;
+		}
 		case NoPL_BYTE_CAST_NUMBER_TO_BOOLEAN:
-			break;
+			return (evaluateNumber(eval) != 0.0f);
 		case NoPL_BYTE_CAST_STRING_TO_BOOLEAN:
-			break;
+		{
+			char* str = evaluateString(eval);
+			return (str && strcmp(str, ""));
+		}
 		default:
 			printf("Boolean Error: instruction #%d doesn't make sense here", (int)eval->scriptBuffer[eval->evaluationPosition]);
 			break;
@@ -195,14 +243,29 @@ int evaluateBoolean(NoPL_Evaluation* eval)
 
 void* evaluatePointer(NoPL_Evaluation* eval)
 {
-	switch(eval->scriptBuffer[eval->evaluationPosition])
+	//get the instruction type
+	NoPL_Instruction instr = eval->scriptBuffer[eval->evaluationPosition];
+	
+	//skip over the instruction byte to the number's actual value
+	eval->evaluationPosition++;
+	
+	//do whatever operation we need to get this number
+	switch(instr)
 	{
 		case NoPL_BYTE_LITERAL_NULL:
+			eval->evaluationPosition++;
 			return NULL;
 		case NoPL_BYTE_VARIABLE_OBJECT:
-			break;
+			//TODO: symbol table
 		case NoPL_BYTE_RESOLVE_RESULT_TO_OBJECT:
-			break;
+		{
+			//attempt to resolve this function result to an object value
+			NoPL_FunctionValue val = evaluateFunction(eval);
+			if(val.type == NoPL_DataType_Pointer)
+				return val.pointerValue;
+			else
+				return NULL;
+		}
 		default:
 			printf("Pointer Error: instruction #%d doesn't make sense here", (int)eval->scriptBuffer[eval->evaluationPosition]);
 			break;
