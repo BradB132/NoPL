@@ -57,6 +57,7 @@ void nopl_error(const pANTLR3_BASE_TREE tree, const char* desc, NoPL_CompileCont
 int nopl_variableExistsInStack(const pANTLR3_STRING varName, const pANTLR3_STACK whichStack);
 int nopl_variableExistsInContext(const pANTLR3_STRING varName, const NoPL_CompileContext* context);
 int nopl_declareVariableInStack(const pANTLR3_STRING varName, const pANTLR3_STACK whichStack);
+NoPL_Index nopl_countVariablesInStack(const pANTLR3_STACK whichStack);
 NoPL_Index indexOfVariableInStack(const pANTLR3_STRING varName, const pANTLR3_STACK whichStack, const pANTLR3_BASE_TREE tree, NoPL_CompileContext* context);
 NoPL_CompileContext newInnerCompileContext(NoPL_CompileContext* parentContext, int allowBreak, int allowContinue);
 void freeInnerCompileContext(NoPL_CompileContext* context);
@@ -193,6 +194,17 @@ int nopl_declareVariableInStack(const pANTLR3_STRING varName, const pANTLR3_STAC
 	return 1;
 }
 
+NoPL_Index nopl_countVariablesInStack(const pANTLR3_STACK whichStack)
+{
+	NoPL_Index totalSize = 0;
+	for(int i = 0; i < whichStack->size(whichStack); i++)
+	{
+		pANTLR3_VECTOR vect = (pANTLR3_VECTOR)(whichStack->get(whichStack, i));
+		totalSize += vect->size(vect);
+	}
+	return totalSize;
+}
+
 NoPL_Index indexOfVariableInStack(const pANTLR3_STRING varName, const pANTLR3_STACK whichStack, const pANTLR3_BASE_TREE tree, NoPL_CompileContext* context)
 {
 	NoPL_Index currentIndex = 0;
@@ -226,6 +238,10 @@ NoPL_CompileContext newInnerCompileContext(NoPL_CompileContext* parentContext, i
 	context.booleanStack = parentContext->booleanStack;
 	context.stringStack = parentContext->stringStack;
 	context.errDescriptions = parentContext->errDescriptions;
+	context.objectTableSize = parentContext->objectTableSize;
+	context.numberTableSize = parentContext->numberTableSize;
+	context.booleanTableSize = parentContext->booleanTableSize;
+	context.stringTableSize = parentContext->stringTableSize;
 	
 	if(allowBreak)
 		context.breakStatements = antlr3VectorNew(NoPL_VectorSizeHint);
@@ -412,7 +428,7 @@ void appendFunctionCall(const pANTLR3_BASE_TREE objExpression, const pANTLR3_BAS
 	
 	//get function name and name length
 	char* functionName = (char*)funcName->getText(funcName)->chars;
-	int functionNameLength = strlen(functionName);
+	int functionNameLength = (int)strlen(functionName);
 	
 	//add the function name
 	addBytesToContext(functionName, sizeof(char)*functionNameLength+1, context);
@@ -787,6 +803,9 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 				
 				//declare the variable
 				nopl_declareVariableInStack(declaredName, context->booleanStack);
+				NoPL_Index newCount = nopl_countVariablesInStack(context->booleanStack);
+				if(newCount > *(context->booleanTableSize))
+					*(context->booleanTableSize) = newCount;
 				
 				//assign to the index of the newly created variable
 				addOperator(NoPL_BYTE_BOOLEAN_ASSIGN, context);
@@ -827,6 +846,9 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 				
 				//declare the variable
 				nopl_declareVariableInStack(declaredName, context->numberStack);
+				NoPL_Index newCount = nopl_countVariablesInStack(context->numberStack);
+				if(newCount > *(context->numberTableSize))
+					*(context->numberTableSize) = newCount;
 				
 				//assign to the index of the newly created variable
 				addOperator(NoPL_BYTE_NUMERIC_ASSIGN, context);
@@ -865,6 +887,9 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 				
 				//declare the variable
 				nopl_declareVariableInStack(declaredName, context->objectStack);
+				NoPL_Index newCount = nopl_countVariablesInStack(context->objectStack);
+				if(newCount > *(context->objectTableSize))
+					*(context->objectTableSize) = newCount;
 				
 				//assign to the index of the newly created variable
 				addOperator(NoPL_BYTE_OBJECT_ASSIGN, context);
@@ -905,6 +930,9 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 				
 				//declare the variable
 				nopl_declareVariableInStack(declaredName, context->stringStack);
+				NoPL_Index newCount = nopl_countVariablesInStack(context->stringStack);
+				if(newCount > *(context->stringTableSize))
+					*(context->stringTableSize) = newCount;
 				
 				//assign to the index of the newly created variable
 				addOperator(NoPL_BYTE_STRING_ASSIGN, context);
@@ -1892,12 +1920,54 @@ void compileWithInputStream(pANTLR3_INPUT_STREAM stream, const NoPL_CompileOptio
 	}
 	else
 	{
+		//set up counts for symbol table
+		int symbolTableByteSize = 4*(sizeof(NoPL_Instruction)+sizeof(NoPL_Index));
+		NoPL_Instruction symbolTable[symbolTableByteSize];
+		NoPL_Index objectTableSize = 0;
+		NoPL_Index numberTableSize = 0;
+		NoPL_Index booleanTableSize = 0;
+		NoPL_Index stringTableSize = 0;
+		context->objectTableSize = &objectTableSize;
+		context->numberTableSize = &numberTableSize;
+		context->booleanTableSize = &booleanTableSize;
+		context->stringTableSize = &stringTableSize;
+		
+		//make some space for the symbol table at the beginning of the buffer
+		addBytesToContext(symbolTable, symbolTableByteSize, context);
+		
 		//recurse to assemble the byte code
 		traverseAST(syntaxTree.tree, options, context);
+		
+		//add the actual values for the symbol table sizes
+		int bytePos = 0;
+		if(objectTableSize > 0)
+		{
+			context->compiledData[bytePos] = (NoPL_Instruction)NoPL_BYTE_OBJECT_TABLE_SIZE;
+			bytePos += sizeof(NoPL_Instruction);
+			context->compiledData[bytePos] = objectTableSize;
+			bytePos += sizeof(NoPL_Index);
+		}
+		if(numberTableSize > 0)
+		{
+			context->compiledData[bytePos] = (NoPL_Instruction)NoPL_BYTE_NUMERIC_TABLE_SIZE;
+			bytePos += sizeof(NoPL_Instruction);
+			context->compiledData[bytePos] = numberTableSize;
+			bytePos += sizeof(NoPL_Index);
+		}
+		if(booleanTableSize > 0)
+		{
+			context->compiledData[bytePos] = (NoPL_Instruction)NoPL_BYTE_BOOLEAN_TABLE_SIZE;
+			bytePos += sizeof(NoPL_Instruction);
+			context->compiledData[bytePos] = booleanTableSize;
+			bytePos += sizeof(NoPL_Index);
+		}
+		if(stringTableSize > 0)
+		{
+			context->compiledData[bytePos] = (NoPL_Instruction)NoPL_BYTE_STRING_TABLE_SIZE;
+			bytePos += sizeof(NoPL_Instruction);
+			context->compiledData[bytePos] = stringTableSize;
+		}
 	}
-	
-	//TODO: figure out symbol table
-	
 	
 	//clean up
 	parser->free(parser);
@@ -1919,7 +1989,7 @@ void compileContextWithFilePath(const char* path, const NoPL_CompileOptions* opt
 void compileContextWithString(const char* scriptString, const NoPL_CompileOptions* options, NoPL_CompileContext* context)
 {
 	//run the compiler with an input stream created from a C string
-	pANTLR3_INPUT_STREAM inputStream = antlr3NewAsciiStringCopyStream((pANTLR3_UINT8)scriptString, strlen((const char*)scriptString), 0);
+	pANTLR3_INPUT_STREAM inputStream = antlr3NewAsciiStringCopyStream((pANTLR3_UINT8)scriptString, (int)strlen((const char*)scriptString), 0);
 	compileWithInputStream(inputStream, options, context);
 	inputStream->free(inputStream);
 }

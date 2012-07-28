@@ -14,51 +14,286 @@
 
 typedef struct
 {
+	char* stringValue;
+	int isAllocated;
+}NoPL_String;
+
+typedef struct
+{
 	const NoPL_Callbacks* callbacks;
 	const NoPL_Instruction* scriptBuffer;
 	unsigned int bufferLength;
 	unsigned int evaluationPosition;
+	NoPL_Index objectTableSize;
+	NoPL_Index numberTableSize;
+	NoPL_Index booleanTableSize;
+	NoPL_Index stringTableSize;
+	void** objectTable;
+	float* numberTable;
+	int* booleanTable;
+	NoPL_String* stringTable;
 }NoPL_Evaluation;
 
+#define NoPL_String() ((NoPL_String){(char*)0,(int)0})
+
 //internal functions
-void evaluateStatement(NoPL_Evaluation* eval);
+void freeNoPL_String(NoPL_String* string);
+int evaluateStatement(NoPL_Evaluation* eval);
 float evaluateNumber(NoPL_Evaluation* eval);
-char* evaluateString(NoPL_Evaluation* eval);
+void evaluateString(NoPL_Evaluation* eval, NoPL_String* outStr);
 int evaluateBoolean(NoPL_Evaluation* eval);
 void* evaluatePointer(NoPL_Evaluation* eval);
 NoPL_FunctionValue evaluateFunction(NoPL_Evaluation* eval);
+void boolToString(int boolVal, NoPL_String* outStr);
+void numberToString(float number, NoPL_String* outStr);
 
-void evaluateStatement(NoPL_Evaluation* eval)
+#pragma mark -
+#pragma mark String memory management
+
+void freeNoPL_String(NoPL_String* string)
 {
-	switch(eval->scriptBuffer[eval->evaluationPosition])
+	if(string->isAllocated <= 0)
+		return;
+	string->isAllocated = 0;
+	if(string->stringValue)
+	{
+		free(string->stringValue);
+		string->stringValue = NULL;
+	}
+}
+
+#pragma mark -
+#pragma mark String casting
+
+void boolToString(int boolVal, NoPL_String* outStr)
+{
+	if(boolVal)
+	{
+		outStr->stringValue = malloc(5);
+		strcpy(outStr->stringValue, "true");
+	}
+	else
+	{
+		outStr->stringValue = malloc(6);
+		strcpy(outStr->stringValue, "false");
+	}
+	outStr->isAllocated = 1;
+}
+
+void numberToString(float number, NoPL_String* outStr)
+{
+	outStr->stringValue = malloc(16);
+	snprintf(outStr->stringValue, 16, "%f", number);
+	outStr->isAllocated = 1;
+}
+
+#pragma mark -
+#pragma mark Script evaluation
+
+int evaluateStatement(NoPL_Evaluation* eval)
+{
+	//get the instruction type
+	NoPL_Instruction instr = eval->scriptBuffer[eval->evaluationPosition];
+	
+	//skip over the instruction byte to the number's actual value
+	eval->evaluationPosition += sizeof(NoPL_Instruction);
+	
+	//do whatever operation we need for this statement
+	switch(instr)
 	{
 		case NoPL_BYTE_NUMERIC_INCREMENT:
+		{
+			//get the index
+			NoPL_Index* varIndex = (NoPL_Index*)(eval->scriptBuffer+eval->evaluationPosition);
+			eval->evaluationPosition += sizeof(NoPL_Index);
+			
+			//increment the variable at that index
+			eval->numberTable[*varIndex]++;
+		}
 			break;
 		case NoPL_BYTE_NUMERIC_DECREMENT:
+		{
+			//get the index
+			NoPL_Index* varIndex = (NoPL_Index*)(eval->scriptBuffer+eval->evaluationPosition);
+			eval->evaluationPosition += sizeof(NoPL_Index);
+			
+			//increment the variable at that index
+			eval->numberTable[*varIndex]--;
+		}
 			break;
 		case NoPL_BYTE_NUMERIC_ASSIGN:
+		{
+			//get the index
+			NoPL_Index* varIndex = (NoPL_Index*)(eval->scriptBuffer+eval->evaluationPosition);
+			eval->evaluationPosition += sizeof(NoPL_Index);
+			
+			//get the numeric value
+			float numVal = evaluateNumber(eval);
+			
+			//assign the variable at that index
+			eval->numberTable[*varIndex] = numVal;
+		}
 			break;
 		case NoPL_BYTE_NUMERIC_ADD_ASSIGN:
+		{
+			//get the index
+			NoPL_Index* varIndex = (NoPL_Index*)(eval->scriptBuffer+eval->evaluationPosition);
+			eval->evaluationPosition += sizeof(NoPL_Index);
+			
+			//get the numeric value
+			float numVal = evaluateNumber(eval);
+			
+			//assign the variable at that index
+			eval->numberTable[*varIndex] += numVal;
+		}
 			break;
 		case NoPL_BYTE_NUMERIC_SUBTRACT_ASSIGN:
+		{
+			//get the index
+			NoPL_Index* varIndex = (NoPL_Index*)(eval->scriptBuffer+eval->evaluationPosition);
+			eval->evaluationPosition += sizeof(NoPL_Index);
+			
+			//get the numeric value
+			float numVal = evaluateNumber(eval);
+			
+			//assign the variable at that index
+			eval->numberTable[*varIndex] -= numVal;
+		}
 			break;
 		case NoPL_BYTE_NUMERIC_DIVIDE_ASSIGN:
+		{
+			//get the index
+			NoPL_Index* varIndex = (NoPL_Index*)(eval->scriptBuffer+eval->evaluationPosition);
+			eval->evaluationPosition += sizeof(NoPL_Index);
+			
+			//get the numeric value
+			float numVal = evaluateNumber(eval);
+			
+			//assign the variable at that index
+			eval->numberTable[*varIndex] /= numVal;
+		}
 			break;
 		case NoPL_BYTE_NUMERIC_MULTIPLY_ASSIGN:
+		{
+			//get the index
+			NoPL_Index* varIndex = (NoPL_Index*)(eval->scriptBuffer+eval->evaluationPosition);
+			eval->evaluationPosition += sizeof(NoPL_Index);
+			
+			//get the numeric value
+			float numVal = evaluateNumber(eval);
+			
+			//assign the variable at that index
+			eval->numberTable[*varIndex] *= numVal;
+		}
 			break;
 		case NoPL_BYTE_NUMERIC_EXPONENT_ASSIGN:
+		{
+			//get the index
+			NoPL_Index* varIndex = (NoPL_Index*)(eval->scriptBuffer+eval->evaluationPosition);
+			eval->evaluationPosition += sizeof(NoPL_Index);
+			
+			//get the numeric value
+			float numVal = evaluateNumber(eval);
+			
+			//assign the variable at that index
+			eval->numberTable[*varIndex] = powf(eval->numberTable[*varIndex], numVal);
+		}
 			break;
 		case NoPL_BYTE_NUMERIC_MODULO_ASSIGN:
+		{
+			//get the index
+			NoPL_Index* varIndex = (NoPL_Index*)(eval->scriptBuffer+eval->evaluationPosition);
+			eval->evaluationPosition += sizeof(NoPL_Index);
+			
+			//get the numeric value
+			float numVal = evaluateNumber(eval);
+			
+			//assign the variable at that index
+			eval->numberTable[*varIndex] = fmodf(eval->numberTable[*varIndex], numVal);
+		}
 			break;
 		case NoPL_BYTE_BOOLEAN_ASSIGN:
+		{
+			//get the index
+			NoPL_Index* varIndex = (NoPL_Index*)(eval->scriptBuffer+eval->evaluationPosition);
+			eval->evaluationPosition += sizeof(NoPL_Index);
+			
+			//get the boolean value
+			int boolVal = evaluateBoolean(eval);
+			
+			//assign the variable at that index
+			eval->booleanTable[*varIndex] = boolVal;
+		}
 			break;
 		case NoPL_BYTE_STRING_ASSIGN:
+		{
+			//get the index
+			NoPL_Index* varIndex = (NoPL_Index*)(eval->scriptBuffer+eval->evaluationPosition);
+			eval->evaluationPosition += sizeof(NoPL_Index);
+			
+			//get the string value
+			NoPL_String strVal = NoPL_String();
+			evaluateString(eval, &strVal);
+			
+			//free the string that was occupying this index in the table
+			freeNoPL_String(&eval->stringTable[*varIndex]);
+			
+			//assign the new string to the index
+			eval->stringTable[*varIndex] = strVal;
+		}
 			break;
 		case NoPL_BYTE_STRING_CONCAT_ASSIGN:
+		{
+			//get the index
+			NoPL_Index* varIndex = (NoPL_Index*)(eval->scriptBuffer+eval->evaluationPosition);
+			eval->evaluationPosition += sizeof(NoPL_Index);
+			
+			//get the new string value
+			NoPL_String newStr = NoPL_String();
+			evaluateString(eval, &newStr);
+			
+			//get the old string value
+			NoPL_String oldStr = eval->stringTable[*varIndex];
+			
+			//create the new value by concatenating the strings
+			NoPL_String concatStr = NoPL_String();
+			concatStr.stringValue = malloc(strlen(oldStr.stringValue)+strlen(newStr.stringValue)+1);
+			strcpy(concatStr.stringValue, oldStr.stringValue);
+			strcat(concatStr.stringValue, newStr.stringValue);
+			
+			//free the string that was occupying this index in the table
+			freeNoPL_String(&oldStr);
+			//free the copy of the string that we added on
+			freeNoPL_String(&newStr);
+			
+			//assign the new string to the index
+			eval->stringTable[*varIndex] = concatStr;
+		}
 			break;
 		case NoPL_BYTE_STRING_PRINT:
+		{
+			//get the string value
+			NoPL_String strObj = NoPL_String();
+			evaluateString(eval, &strObj);
+			
+			//print to callback function
+			eval->callbacks->stringFeedback(strObj.stringValue, NoPL_StringFeedbackType_PrintStatement);
+			
+			freeNoPL_String(&strObj);
+		}
 			break;
 		case NoPL_BYTE_OBJECT_ASSIGN:
+		{
+			//get the index
+			NoPL_Index* varIndex = (NoPL_Index*)(eval->scriptBuffer+eval->evaluationPosition);
+			eval->evaluationPosition += sizeof(NoPL_Index);
+			
+			//get the pointer value
+			void* ptrVal = evaluatePointer(eval);
+			
+			//assign the variable at that index
+			eval->objectTable[*varIndex] = ptrVal;
+		}
 			break;
 		case NoPL_BYTE_FUNCTION_CALL:
 			//global function call
@@ -67,17 +302,50 @@ void evaluateStatement(NoPL_Evaluation* eval)
 			//TODO: this doesn't really make sense, but can happen
 			break;
 		case NoPL_BYTE_CONDITIONAL:
+		{
+			//evaluate the conditional
+			int condition = evaluateBoolean(eval);
+			
+			//get the buffer move if the conditional is not true
+			NoPL_BufferMove* buffMove = (NoPL_BufferMove*)(eval->scriptBuffer+eval->evaluationPosition);
+			eval->evaluationPosition += sizeof(NoPL_BufferMove);
+			
+			if(!condition)
+				eval->evaluationPosition += *buffMove;
+		}
 			break;
 		case NoPL_BYTE_BUFFER_MOVE:
+		{
+			//get the buffer move amount
+			NoPL_BufferMove* buffMove = (NoPL_BufferMove*)(eval->scriptBuffer+eval->evaluationPosition);
+			eval->evaluationPosition += sizeof(NoPL_BufferMove);
+			
+			//adjust position by move amount
+			eval->evaluationPosition += *buffMove;
+		}
 			break;
 		case NoPL_BYTE_PROGRAM_EXIT:
-			break;
+			return 0;
 		case NoPL_BYTE_DEBUG_LINE:
+		{
+			//get the line number
+			NoPL_Index* lineNum = (NoPL_Index*)(eval->scriptBuffer+eval->evaluationPosition);
+			eval->evaluationPosition += sizeof(NoPL_Index);
+			
+			//format a string to send to the callback function
+			char str[32];
+			sprintf(str, "Line: %d", (int)(*lineNum));
+			
+			//call the callback function
+			eval->callbacks->stringFeedback(str, NoPL_StringFeedbackType_DebugInfo);
+		}
 			break;
 		default:
 			printf("Statement Error: instruction #%d doesn't make sense here", (int)eval->scriptBuffer[eval->evaluationPosition]);
 			break;
 	}
+	
+	return 1;
 }
 
 float evaluateNumber(NoPL_Evaluation* eval)
@@ -86,7 +354,7 @@ float evaluateNumber(NoPL_Evaluation* eval)
 	NoPL_Instruction instr = eval->scriptBuffer[eval->evaluationPosition];
 	
 	//skip over the instruction byte to the number's actual value
-	eval->evaluationPosition++;
+	eval->evaluationPosition += sizeof(NoPL_Instruction);
 	
 	//do whatever operation we need to get this number
 	switch(instr)
@@ -98,7 +366,14 @@ float evaluateNumber(NoPL_Evaluation* eval)
 			return *literalPtr;
 		}
 		case NoPL_BYTE_VARIABLE_NUMBER:
-			//TODO: symbol table
+		{
+			//get the index
+			NoPL_Index* varIndex = (NoPL_Index*)(eval->scriptBuffer+eval->evaluationPosition);
+			eval->evaluationPosition += sizeof(NoPL_Index);
+			
+			//return that index from the variable table
+			return eval->booleanTable[*varIndex];
+		}
 		case NoPL_BYTE_NUMERIC_ADD:
 			return evaluateNumber(eval) + evaluateNumber(eval);
 		case NoPL_BYTE_NUMERIC_SUBTRACT:
@@ -131,7 +406,13 @@ float evaluateNumber(NoPL_Evaluation* eval)
 		case NoPL_BYTE_CAST_BOOLEAN_TO_NUMBER:
 			return (float)evaluateBoolean(eval);
 		case NoPL_BYTE_CAST_STRING_TO_NUMBER:
-			return atoi(evaluateString(eval));
+		{
+			NoPL_String strObj = NoPL_String();
+			evaluateString(eval, &strObj);
+			float returnVal = atoi(strObj.stringValue);
+			freeNoPL_String(&strObj);
+			return returnVal;
+		}
 		default:
 			printf("Number Error: instruction #%d doesn't make sense here", (int)eval->scriptBuffer[eval->evaluationPosition]);
 			break;
@@ -140,28 +421,88 @@ float evaluateNumber(NoPL_Evaluation* eval)
 	return 0.0f;
 }
 
-char* evaluateString(NoPL_Evaluation* eval)
+void evaluateString(NoPL_Evaluation* eval, NoPL_String* outStr)
 {
-	switch(eval->scriptBuffer[eval->evaluationPosition])
+	//get the instruction type
+	NoPL_Instruction instr = eval->scriptBuffer[eval->evaluationPosition];
+	
+	//skip over the instruction byte to the number's actual value
+	eval->evaluationPosition += sizeof(NoPL_Instruction);
+	
+	//do whatever operation we need to get this string
+	switch(instr)
 	{
 		case NoPL_BYTE_LITERAL_STRING:
-			break;
+		{
+			//create a string struct from the string contained in the script's buffer
+			outStr->stringValue = (char*)(eval->scriptBuffer+eval->evaluationPosition);
+			outStr->isAllocated = -1;
+			return;
+		}
 		case NoPL_BYTE_VARIABLE_STRING:
-			break;
+		{
+			//get the index
+			NoPL_Index* varIndex = (NoPL_Index*)(eval->scriptBuffer+eval->evaluationPosition);
+			eval->evaluationPosition += sizeof(NoPL_Index);
+			
+			//return that index from the variable table
+			*outStr = eval->stringTable[*varIndex];
+			return;
+		}
 		case NoPL_BYTE_STRING_CONCAT:
-			break;
+		{
+			//get the two strings
+			NoPL_String strObj1 = NoPL_String();
+			evaluateString(eval, &strObj1);
+			NoPL_String strObj2 = NoPL_String();
+			evaluateString(eval, &strObj2);
+			
+			//create a new string by combining the other two
+			outStr->stringValue = malloc(strlen(strObj1.stringValue)+strlen(strObj2.stringValue)+1);
+			outStr->isAllocated = 1;
+			strcpy(outStr->stringValue, strObj1.stringValue);
+			strcat(outStr->stringValue, strObj2.stringValue);
+			
+			//free the original strings
+			freeNoPL_String(&strObj1);
+			freeNoPL_String(&strObj2);
+			
+			return;
+		}
 		case NoPL_BYTE_RESOLVE_RESULT_TO_STRING:
-			break;
+		{
+			//attempt to resolve this function result to a string value
+			NoPL_FunctionValue val = evaluateFunction(eval);
+			if(val.type == NoPL_DataType_String)
+			{
+				outStr->stringValue = val.stringValue;
+				outStr->isAllocated = 1;
+			}
+			else if(val.type == NoPL_DataType_Number)
+			{
+				numberToString(val.numberValue, outStr);
+			}
+			else if(val.type == NoPL_DataType_Boolean)
+			{
+				boolToString(val.booleanValue, outStr);
+			}
+			else
+			{
+				outStr->stringValue = NULL;
+				outStr->isAllocated = 0;
+			}
+			return;
+		}
 		case NoPL_BYTE_CAST_NUMBER_TO_STRING:
-			break;
+			numberToString(evaluateNumber(eval), outStr);
+			return;
 		case NoPL_BYTE_CAST_BOOLEAN_TO_STRING:
-			break;
+			boolToString(evaluateBoolean(eval), outStr);
+			return;
 		default:
 			printf("String Error: instruction #%d doesn't make sense here", (int)eval->scriptBuffer[eval->evaluationPosition]);
 			break;
 	}
-	
-	return NULL;
 }
 
 int evaluateBoolean(NoPL_Evaluation* eval)
@@ -170,19 +511,26 @@ int evaluateBoolean(NoPL_Evaluation* eval)
 	NoPL_Instruction instr = eval->scriptBuffer[eval->evaluationPosition];
 	
 	//skip over the instruction byte to the number's actual value
-	eval->evaluationPosition++;
+	eval->evaluationPosition += sizeof(NoPL_Instruction);
 	
-	//do whatever operation we need to get this number
+	//do whatever operation we need to get this boolean
 	switch(instr)
 	{
 		case NoPL_BYTE_LITERAL_BOOLEAN_TRUE:
-			eval->evaluationPosition++;
+			eval->evaluationPosition += sizeof(NoPL_Instruction);
 			return 1;
 		case NoPL_BYTE_LITERAL_BOOLEAN_FALSE:
-			eval->evaluationPosition++;
+			eval->evaluationPosition += sizeof(NoPL_Instruction);
 			return 0;
 		case NoPL_BYTE_VARIABLE_BOOLEAN:
-			//TODO: symbol tables
+		{
+			//get the index
+			NoPL_Index* varIndex = (NoPL_Index*)(eval->scriptBuffer+eval->evaluationPosition);
+			eval->evaluationPosition += sizeof(NoPL_Index);
+			
+			//return that index from the variable table
+			return eval->booleanTable[*varIndex];
+		}
 		case NoPL_BYTE_NUMERIC_LOGICAL_EQUALITY:
 			return (evaluateNumber(eval) == evaluateNumber(eval));
 		case NoPL_BYTE_NUMERIC_LOGICAL_INEQUALITY:
@@ -206,9 +554,39 @@ int evaluateBoolean(NoPL_Evaluation* eval)
 		case NoPL_BYTE_BOOLEAN_NEGATION:
 			return !evaluateBoolean(eval);
 		case NoPL_BYTE_STRING_LOGICAL_EQUALITY:
-			return !strcmp(evaluateString(eval), evaluateString(eval));
+		{
+			//get the two strings
+			NoPL_String strObj1 = NoPL_String();
+			evaluateString(eval, &strObj1);
+			NoPL_String strObj2 = NoPL_String();
+			evaluateString(eval, &strObj2);
+			
+			//compare the strings
+			int boolResult = !strcmp(strObj1.stringValue, strObj2.stringValue);
+			
+			//free the strings
+			freeNoPL_String(&strObj1);
+			freeNoPL_String(&strObj2);
+			
+			return boolResult;
+		}
 		case NoPL_BYTE_STRING_LOGICAL_INEQUALITY:
-			return strcmp(evaluateString(eval), evaluateString(eval));
+		{
+			//get the two strings
+			NoPL_String strObj1 = NoPL_String();
+			evaluateString(eval, &strObj1);
+			NoPL_String strObj2 = NoPL_String();
+			evaluateString(eval, &strObj2);
+			
+			//compare the strings
+			int boolResult = strcmp(strObj1.stringValue, strObj2.stringValue);
+			
+			//free the strings
+			freeNoPL_String(&strObj1);
+			freeNoPL_String(&strObj2);
+			
+			return boolResult;
+		}
 		case NoPL_BYTE_OBJECT_LOGICAL_EQUALITY:
 			return (evaluatePointer(eval) == evaluatePointer(eval));
 		case NoPL_BYTE_OBJECT_LOGICAL_INEQUALITY:
@@ -221,7 +599,7 @@ int evaluateBoolean(NoPL_Evaluation* eval)
 				return val.booleanValue;
 			else if(val.type == NoPL_DataType_Number)
 				return (val.numberValue != 0.0f);
-			else if(value.type == NoPL_DataType_String)
+			else if(val.type == NoPL_DataType_String)
 				return (val.stringValue && strcmp(val.stringValue, ""));
 			else
 				return 0;
@@ -230,8 +608,17 @@ int evaluateBoolean(NoPL_Evaluation* eval)
 			return (evaluateNumber(eval) != 0.0f);
 		case NoPL_BYTE_CAST_STRING_TO_BOOLEAN:
 		{
-			char* str = evaluateString(eval);
-			return (str && strcmp(str, ""));
+			//get the string from script buffer
+			NoPL_String strObj = NoPL_String();
+			evaluateString(eval, &strObj);
+			
+			//check if this is a string with a value
+			int boolResult = (strObj.stringValue && strcmp(strObj.stringValue, ""));
+			
+			//we're done with the string
+			freeNoPL_String(&strObj);
+			
+			return boolResult;
 		}
 		default:
 			printf("Boolean Error: instruction #%d doesn't make sense here", (int)eval->scriptBuffer[eval->evaluationPosition]);
@@ -247,16 +634,23 @@ void* evaluatePointer(NoPL_Evaluation* eval)
 	NoPL_Instruction instr = eval->scriptBuffer[eval->evaluationPosition];
 	
 	//skip over the instruction byte to the number's actual value
-	eval->evaluationPosition++;
+	eval->evaluationPosition += sizeof(NoPL_Instruction);
 	
-	//do whatever operation we need to get this number
+	//do whatever operation we need to get this pointer
 	switch(instr)
 	{
 		case NoPL_BYTE_LITERAL_NULL:
-			eval->evaluationPosition++;
+			eval->evaluationPosition += sizeof(NoPL_Instruction);
 			return NULL;
 		case NoPL_BYTE_VARIABLE_OBJECT:
-			//TODO: symbol table
+		{
+			//get the index
+			NoPL_Index* varIndex = (NoPL_Index*)(eval->scriptBuffer+eval->evaluationPosition);
+			eval->evaluationPosition += sizeof(NoPL_Index);
+			
+			//return that index from the variable table
+			return eval->objectTable[*varIndex];
+		}
 		case NoPL_BYTE_RESOLVE_RESULT_TO_OBJECT:
 		{
 			//attempt to resolve this function result to an object value
@@ -277,6 +671,8 @@ void* evaluatePointer(NoPL_Evaluation* eval)
 NoPL_FunctionValue evaluateFunction(NoPL_Evaluation* eval)
 {
 	//TODO: fancy function call
+	NoPL_FunctionValue val;
+	return val;
 }
 
 void runScript(const NoPL_Instruction* scriptBuffer, unsigned int bufferLength, const NoPL_Callbacks* callbacks)
@@ -284,8 +680,67 @@ void runScript(const NoPL_Instruction* scriptBuffer, unsigned int bufferLength, 
 	//set up an evaluation struct
 	NoPL_Evaluation eval;
 	eval.callbacks = callbacks;
+	eval.scriptBuffer = scriptBuffer;
+	eval.bufferLength = bufferLength;
+	eval.evaluationPosition = 0;
 	
-	//TODO: variable tables
+	//get the sizes of the variable tables
+	eval.objectTableSize = 0;
+	eval.numberTableSize = 0;
+	eval.booleanTableSize = 0;
+	eval.stringTableSize = 0;
+	for(int i = 0; i < 4; i++)
+	{
+		NoPL_Instruction instr = eval.scriptBuffer[eval.evaluationPosition];
+		if(instr == NoPL_BYTE_BOOLEAN_TABLE_SIZE)
+		{
+			eval.evaluationPosition += sizeof(NoPL_Instruction);
+			NoPL_Index* sizePtr = (NoPL_Index*)(eval.scriptBuffer+eval.evaluationPosition);
+			eval.booleanTableSize = *sizePtr;
+		}
+		else if(instr == NoPL_BYTE_NUMERIC_TABLE_SIZE)
+		{
+			eval.evaluationPosition += sizeof(NoPL_Instruction);
+			NoPL_Index* sizePtr = (NoPL_Index*)(eval.scriptBuffer+eval.evaluationPosition);
+			eval.numberTableSize = *sizePtr;
+		}
+		else if(instr == NoPL_BYTE_OBJECT_TABLE_SIZE)
+		{
+			eval.evaluationPosition += sizeof(NoPL_Instruction);
+			NoPL_Index* sizePtr = (NoPL_Index*)(eval.scriptBuffer+eval.evaluationPosition);
+			eval.objectTableSize = *sizePtr;
+		}
+		else if(instr == NoPL_BYTE_STRING_TABLE_SIZE)
+		{
+			eval.evaluationPosition += sizeof(NoPL_Instruction);
+			NoPL_Index* sizePtr = (NoPL_Index*)(eval.scriptBuffer+eval.evaluationPosition);
+			eval.stringTableSize = *sizePtr;
+		}
+		else
+			break;
+		
+		//advance to the next position in the buffer
+		eval.evaluationPosition += sizeof(NoPL_Index);
+	}
 	
-	evaluateStatement(&eval);
+	//create tables for variables
+	int booleanTable[eval.booleanTableSize];
+	float numberTable[eval.numberTableSize];
+	void* objectTable[eval.objectTableSize];
+	NoPL_String stringTable[eval.stringTableSize];
+	eval.booleanTable = booleanTable;
+	eval.numberTable = numberTable;
+	eval.objectTable = objectTable;
+	eval.stringTable = stringTable;
+	memset(stringTable, 0, sizeof(NoPL_String)*eval.stringTableSize);
+	
+	//evaluate all statements in the script
+	int evaluateOK = 1;
+	while(evaluateOK && eval.evaluationPosition < eval.bufferLength)
+		evaluateOK = evaluateStatement(&eval);
+	
+	//free any strings that were allocated
+	for(int i = 0; i < eval.stringTableSize; i++)
+		if(stringTable[i].stringValue)
+			free(stringTable[i].stringValue);
 }
