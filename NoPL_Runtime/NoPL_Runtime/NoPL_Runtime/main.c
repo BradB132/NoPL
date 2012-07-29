@@ -57,6 +57,17 @@ NoPL_FunctionValue testingEvalFunc(void* calledOnObject, char* functionName, NoP
 		returnValue.type = NoPL_DataType_Number;
 		returnValue.numberValue = 5.7f;
 	}
+	else if(!strcmp(functionName, "sum"))
+	{
+		//sum all numeric args
+		returnValue.type = NoPL_DataType_Number;
+		returnValue.numberValue = 0.0f;
+		for(int i = 0; i < argc; i++)
+		{
+			if(argv[i].type == NoPL_DataType_Number)
+				returnValue.numberValue += argv[i].numberValue;
+		}
+	}
 	
 	return returnValue;
 }

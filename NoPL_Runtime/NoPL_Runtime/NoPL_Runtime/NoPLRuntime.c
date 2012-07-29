@@ -740,7 +740,7 @@ void evaluateFunction(NoPL_Evaluation* eval, NoPL_FunctionValue* returnVal)
 			}
 			
 			//call the function
-			*returnVal = eval->callbacks->evaluateFunction(ptr, funcName, argv, (unsigned int)argCount);
+			*returnVal = eval->callbacks->evaluateFunction(ptr, funcName, argv, (unsigned int)(*argCount));
 		}
 			break;
 		case NoPL_BYTE_FUNCTION_INDEX:
