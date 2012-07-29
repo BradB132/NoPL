@@ -1738,14 +1738,20 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 				appendNodeWithRequiredType(object, NoPL_type_Object, context, options);
 				
 				//we can only index numbers or strings
-				NoPL_DataType indexType = dataTypeForTree(index, context);
-				if(indexType == NoPL_type_FunctionResult)
+				switch(dataTypeForTree(index, context))
 				{
-					nopl_error(index, "This expression must be cast to either a numeric or string value", context);
-				}
-				if(indexType != NoPL_type_Number && indexType != NoPL_type_String)
-				{
-					nopl_error(index, "Cannot use an expression of this type as an index", context);
+					case NoPL_type_FunctionResult:
+						nopl_error(index, "This expression must be cast to either a numeric or string value", context);
+						break;
+					case NoPL_type_Number:
+						addOperator(NoPL_BYTE_ARG_NUMBER, context);
+						break;
+					case NoPL_type_String:
+						addOperator(NoPL_BYTE_ARG_STRING, context);
+						break;
+					default:
+						nopl_error(index, "Cannot use an expression of this type as an index", context);
+						break;
 				}
 				
 				//append the index expression

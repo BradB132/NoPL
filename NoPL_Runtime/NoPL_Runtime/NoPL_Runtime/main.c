@@ -8,6 +8,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "NoPLRuntime.h"
 
 char* mallocBufferFromFilePath(const char* filePath, unsigned long* outLength)
@@ -48,12 +49,34 @@ char* mallocBufferFromFilePath(const char* filePath, unsigned long* outLength)
 
 NoPL_FunctionValue testingEvalFunc(void* calledOnObject, char* functionName, NoPL_FunctionValue* argv, unsigned int argc)
 {
-	return NoPL_FunctionValue();
+	NoPL_FunctionValue returnValue = NoPL_FunctionValue();
+	
+	//do some stuff that just shows that this callback is happening
+	if(!strcmp(functionName, "getMyNumber"))
+	{
+		returnValue.type = NoPL_DataType_Number;
+		returnValue.numberValue = 5.7f;
+	}
+	
+	return returnValue;
 }
 
 NoPL_FunctionValue testingSubscript(void* calledOnObject, NoPL_FunctionValue index)
 {
-	return NoPL_FunctionValue();
+	NoPL_FunctionValue returnValue = NoPL_FunctionValue();
+	returnValue.type = NoPL_DataType_Number;
+	
+	//do some stuff that just shows that this callback is happening
+	if(index.type == NoPL_DataType_Number)
+	{
+		returnValue.numberValue = index.numberValue*2;
+	}
+	else if(index.type == NoPL_DataType_String)
+	{
+		returnValue.numberValue = (float)index.stringValue[0];
+	}
+	
+	return returnValue;
 }
 
 void testStrings(char* string, NoPL_StringFeedbackType type)

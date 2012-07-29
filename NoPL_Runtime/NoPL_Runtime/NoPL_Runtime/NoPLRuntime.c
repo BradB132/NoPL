@@ -43,7 +43,7 @@ float evaluateNumber(NoPL_Evaluation* eval);
 void evaluateString(NoPL_Evaluation* eval, NoPL_String* outStr);
 int evaluateBoolean(NoPL_Evaluation* eval);
 void* evaluatePointer(NoPL_Evaluation* eval);
-NoPL_FunctionValue evaluateFunction(NoPL_Evaluation* eval);
+void evaluateFunction(NoPL_Evaluation* eval, NoPL_FunctionValue* returnVal);
 void boolToString(int boolVal, NoPL_String* outStr);
 void numberToString(float number, NoPL_String* outStr);
 
@@ -95,7 +95,7 @@ int evaluateStatement(NoPL_Evaluation* eval)
 	//get the instruction type
 	NoPL_Instruction instr = eval->scriptBuffer[eval->evaluationPosition];
 	
-	//skip over the instruction byte to the number's actual value
+	//skip over the instruction byte to the expression's actual value
 	eval->evaluationPosition += sizeof(NoPL_Instruction);
 	
 	//do whatever operation we need for this statement
@@ -296,10 +296,15 @@ int evaluateStatement(NoPL_Evaluation* eval)
 		}
 			break;
 		case NoPL_BYTE_FUNCTION_CALL:
-			//global function call
-			break;
 		case NoPL_BYTE_FUNCTION_INDEX:
-			//TODO: this doesn't really make sense, but can happen
+			
+			//back up to read the operator again
+			eval->evaluationPosition -= sizeof(NoPL_Instruction);
+			
+			//evaluate the function
+			NoPL_FunctionValue val = NoPL_FunctionValue();
+			evaluateFunction(eval, &val);
+			
 			break;
 		case NoPL_BYTE_CONDITIONAL:
 		{
@@ -353,7 +358,7 @@ float evaluateNumber(NoPL_Evaluation* eval)
 	//get the instruction type
 	NoPL_Instruction instr = eval->scriptBuffer[eval->evaluationPosition];
 	
-	//skip over the instruction byte to the number's actual value
+	//skip over the instruction byte to the expression's actual value
 	eval->evaluationPosition += sizeof(NoPL_Instruction);
 	
 	//do whatever operation we need to get this number
@@ -393,7 +398,8 @@ float evaluateNumber(NoPL_Evaluation* eval)
 		case NoPL_BYTE_RESOLVE_RESULT_TO_NUMBER:
 		{
 			//attempt to resolve this function result to a numeric value
-			NoPL_FunctionValue val = evaluateFunction(eval);
+			NoPL_FunctionValue val = NoPL_FunctionValue();
+			evaluateFunction(eval, &val);
 			if(val.type == NoPL_DataType_Number)
 				return val.numberValue;
 			else if(val.type == NoPL_DataType_Boolean)
@@ -426,7 +432,7 @@ void evaluateString(NoPL_Evaluation* eval, NoPL_String* outStr)
 	//get the instruction type
 	NoPL_Instruction instr = eval->scriptBuffer[eval->evaluationPosition];
 	
-	//skip over the instruction byte to the number's actual value
+	//skip over the instruction byte to the expression's actual value
 	eval->evaluationPosition += sizeof(NoPL_Instruction);
 	
 	//do whatever operation we need to get this string
@@ -447,7 +453,8 @@ void evaluateString(NoPL_Evaluation* eval, NoPL_String* outStr)
 			eval->evaluationPosition += sizeof(NoPL_Index);
 			
 			//return that index from the variable table
-			*outStr = eval->stringTable[*varIndex];
+			outStr->stringValue = eval->stringTable[*varIndex].stringValue;
+			outStr->isAllocated = 0;
 			return;
 		}
 		case NoPL_BYTE_STRING_CONCAT:
@@ -473,7 +480,8 @@ void evaluateString(NoPL_Evaluation* eval, NoPL_String* outStr)
 		case NoPL_BYTE_RESOLVE_RESULT_TO_STRING:
 		{
 			//attempt to resolve this function result to a string value
-			NoPL_FunctionValue val = evaluateFunction(eval);
+			NoPL_FunctionValue val = NoPL_FunctionValue();
+			evaluateFunction(eval, &val);
 			if(val.type == NoPL_DataType_String)
 			{
 				outStr->stringValue = val.stringValue;
@@ -511,7 +519,7 @@ int evaluateBoolean(NoPL_Evaluation* eval)
 	//get the instruction type
 	NoPL_Instruction instr = eval->scriptBuffer[eval->evaluationPosition];
 	
-	//skip over the instruction byte to the number's actual value
+	//skip over the instruction byte to the expression's actual value
 	eval->evaluationPosition += sizeof(NoPL_Instruction);
 	
 	//do whatever operation we need to get this boolean
@@ -595,7 +603,8 @@ int evaluateBoolean(NoPL_Evaluation* eval)
 		case NoPL_BYTE_RESOLVE_RESULT_TO_BOOLEAN:
 		{
 			//attempt to resolve this function result to a boolean value
-			NoPL_FunctionValue val = evaluateFunction(eval);
+			NoPL_FunctionValue val = NoPL_FunctionValue();
+			evaluateFunction(eval, &val);
 			if(val.type == NoPL_DataType_Boolean)
 				return val.booleanValue;
 			else if(val.type == NoPL_DataType_Number)
@@ -634,14 +643,13 @@ void* evaluatePointer(NoPL_Evaluation* eval)
 	//get the instruction type
 	NoPL_Instruction instr = eval->scriptBuffer[eval->evaluationPosition];
 	
-	//skip over the instruction byte to the number's actual value
+	//skip over the instruction byte to the expression's actual value
 	eval->evaluationPosition += sizeof(NoPL_Instruction);
 	
 	//do whatever operation we need to get this pointer
 	switch(instr)
 	{
 		case NoPL_BYTE_LITERAL_NULL:
-			eval->evaluationPosition += sizeof(NoPL_Instruction);
 			return NULL;
 		case NoPL_BYTE_VARIABLE_OBJECT:
 		{
@@ -655,7 +663,8 @@ void* evaluatePointer(NoPL_Evaluation* eval)
 		case NoPL_BYTE_RESOLVE_RESULT_TO_OBJECT:
 		{
 			//attempt to resolve this function result to an object value
-			NoPL_FunctionValue val = evaluateFunction(eval);
+			NoPL_FunctionValue val = NoPL_FunctionValue();
+			evaluateFunction(eval, &val);
 			if(val.type == NoPL_DataType_Pointer)
 				return val.pointerValue;
 			else
@@ -669,11 +678,108 @@ void* evaluatePointer(NoPL_Evaluation* eval)
 	return NULL;
 }
 
-NoPL_FunctionValue evaluateFunction(NoPL_Evaluation* eval)
+void evaluateFunction(NoPL_Evaluation* eval, NoPL_FunctionValue* returnVal)
 {
-	//TODO: fancy function call
-	NoPL_FunctionValue val;
-	return val;
+	//get the instruction type
+	NoPL_Instruction instr = eval->scriptBuffer[eval->evaluationPosition];
+	
+	//skip over the instruction byte to the expression's actual value
+	eval->evaluationPosition += sizeof(NoPL_Instruction);
+	
+	//get the object that the function is being called on
+	void* ptr = evaluatePointer(eval);
+	
+	//do whatever operation we need to get this function result
+	switch(instr)
+	{
+		case NoPL_BYTE_FUNCTION_CALL:
+		{
+			//read a string from the buffer
+			char* funcName = (char*)(eval->scriptBuffer+eval->evaluationPosition);
+			eval->evaluationPosition += strlen(funcName)+1;
+			
+			//how many arguments are there?
+			NoPL_Index* argCount = (NoPL_Index*)(eval->scriptBuffer+eval->evaluationPosition);
+			eval->evaluationPosition += sizeof(NoPL_Index);
+			
+			//set up an array for the args
+			NoPL_FunctionValue argv[*argCount];
+			memset(argv, 0, sizeof(NoPL_FunctionValue)*(*argCount));
+			
+			//populate the args with their values from the script
+			for(int i = 0; i < *argCount; i++)
+			{
+				//get the arg type
+				NoPL_Instruction argType = eval->scriptBuffer[eval->evaluationPosition];
+				
+				//skip over the instruction byte to the expression's actual value
+				eval->evaluationPosition += sizeof(NoPL_Instruction);
+				
+				switch (argType)
+				{
+					case NoPL_BYTE_ARG_BOOLEAN:
+						argv[i].type = NoPL_DataType_Boolean;
+						argv[i].booleanValue = evaluateBoolean(eval);
+						break;
+					case NoPL_BYTE_ARG_NUMBER:
+						argv[i].type = NoPL_DataType_Number;
+						argv[i].numberValue = evaluateNumber(eval);
+						break;
+					case NoPL_BYTE_ARG_OBJECT:
+						argv[i].type = NoPL_DataType_Pointer;
+						argv[i].pointerValue = evaluatePointer(eval);
+						break;
+					case NoPL_BYTE_ARG_STRING:
+						argv[i].type = NoPL_DataType_String;
+						argv[i].stringValue = NULL;//TODO: fix this
+						break;
+					default:
+						printf("Function Error: instruction #%d doesn't make sense here\n", (int)argType);
+						break;
+				}
+			}
+			
+			//call the function
+			*returnVal = eval->callbacks->evaluateFunction(ptr, funcName, argv, (unsigned int)argCount);
+		}
+			break;
+		case NoPL_BYTE_FUNCTION_INDEX:
+		{
+			//get the type of the subscript
+			NoPL_FunctionValue index = NoPL_FunctionValue();
+			NoPL_Instruction argType = eval->scriptBuffer[eval->evaluationPosition];
+			eval->evaluationPosition += sizeof(NoPL_Instruction);
+			if(argType == NoPL_BYTE_ARG_NUMBER)
+			{
+				//set a numeric value for the index
+				index.type = NoPL_DataType_Number;
+				index.numberValue = evaluateNumber(eval);
+				
+				//call the function
+				*returnVal = eval->callbacks->subscript(ptr, index);
+			}
+			else if (argType == NoPL_BYTE_ARG_STRING)
+			{
+				//set a string value for the index
+				index.type = NoPL_DataType_String;
+				NoPL_String strObj = NoPL_String();
+				evaluateString(eval, &strObj);
+				index.stringValue = strObj.stringValue;
+				
+				//call the function
+				*returnVal = eval->callbacks->subscript(ptr, index);
+				
+				//clean up the string
+				freeNoPL_String(&strObj);
+			}
+			else
+				printf("Function Error: instruction #%d doesn't make sense here\n", (int)argType);
+		}
+			break;
+		default:
+			printf("Function Error: instruction #%d doesn't make sense here\n", (int)instr);
+			break;
+	}
 }
 
 void runScript(const NoPL_Instruction* scriptBuffer, unsigned int bufferLength, const NoPL_Callbacks* callbacks)

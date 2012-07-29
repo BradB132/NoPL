@@ -16,11 +16,11 @@
 
 typedef enum
 {
+	NoPL_DataType_Void,
 	NoPL_DataType_Number,
 	NoPL_DataType_String,
 	NoPL_DataType_Boolean,
 	NoPL_DataType_Pointer,
-	NoPL_DataType_Void,
 } NoPL_DataType;
 
 typedef struct
