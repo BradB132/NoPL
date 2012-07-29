@@ -34,7 +34,7 @@ typedef struct
 	NoPL_String* stringTable;
 }NoPL_Evaluation;
 
-#define NoPL_String() ((NoPL_String){(char*)0,(int)0})
+#define NoPL_String() ((NoPL_String){0,0})
 
 //internal functions
 void freeNoPL_String(NoPL_String* string);
@@ -83,7 +83,7 @@ void boolToString(int boolVal, NoPL_String* outStr)
 void numberToString(float number, NoPL_String* outStr)
 {
 	outStr->stringValue = malloc(16);
-	snprintf(outStr->stringValue, 16, "%f", number);
+	snprintf(outStr->stringValue, 16, "%g", number);
 	outStr->isAllocated = 1;
 }
 
@@ -341,7 +341,7 @@ int evaluateStatement(NoPL_Evaluation* eval)
 		}
 			break;
 		default:
-			printf("Statement Error: instruction #%d doesn't make sense here", (int)eval->scriptBuffer[eval->evaluationPosition]);
+			printf("Statement Error: instruction #%d doesn't make sense here\n", (int)instr);
 			break;
 	}
 	
@@ -372,7 +372,7 @@ float evaluateNumber(NoPL_Evaluation* eval)
 			eval->evaluationPosition += sizeof(NoPL_Index);
 			
 			//return that index from the variable table
-			return eval->booleanTable[*varIndex];
+			return eval->numberTable[*varIndex];
 		}
 		case NoPL_BYTE_NUMERIC_ADD:
 			return evaluateNumber(eval) + evaluateNumber(eval);
@@ -414,7 +414,7 @@ float evaluateNumber(NoPL_Evaluation* eval)
 			return returnVal;
 		}
 		default:
-			printf("Number Error: instruction #%d doesn't make sense here", (int)eval->scriptBuffer[eval->evaluationPosition]);
+			printf("Number Error: instruction #%d doesn't make sense here\n", (int)instr);
 			break;
 	}
 	
@@ -436,7 +436,8 @@ void evaluateString(NoPL_Evaluation* eval, NoPL_String* outStr)
 		{
 			//create a string struct from the string contained in the script's buffer
 			outStr->stringValue = (char*)(eval->scriptBuffer+eval->evaluationPosition);
-			outStr->isAllocated = -1;
+			outStr->isAllocated = 0;
+			eval->evaluationPosition += strlen(outStr->stringValue)+1;
 			return;
 		}
 		case NoPL_BYTE_VARIABLE_STRING:
@@ -500,7 +501,7 @@ void evaluateString(NoPL_Evaluation* eval, NoPL_String* outStr)
 			boolToString(evaluateBoolean(eval), outStr);
 			return;
 		default:
-			printf("String Error: instruction #%d doesn't make sense here", (int)eval->scriptBuffer[eval->evaluationPosition]);
+			printf("String Error: instruction #%d doesn't make sense here\n", (int)instr);
 			break;
 	}
 }
@@ -621,7 +622,7 @@ int evaluateBoolean(NoPL_Evaluation* eval)
 			return boolResult;
 		}
 		default:
-			printf("Boolean Error: instruction #%d doesn't make sense here", (int)eval->scriptBuffer[eval->evaluationPosition]);
+			printf("Boolean Error: instruction #%d doesn't make sense here\n", (int)instr);
 			break;
 	}
 	
@@ -661,7 +662,7 @@ void* evaluatePointer(NoPL_Evaluation* eval)
 				return NULL;
 		}
 		default:
-			printf("Pointer Error: instruction #%d doesn't make sense here", (int)eval->scriptBuffer[eval->evaluationPosition]);
+			printf("Pointer Error: instruction #%d doesn't make sense here\n", (int)instr);
 			break;
 	}
 	
@@ -741,6 +742,6 @@ void runScript(const NoPL_Instruction* scriptBuffer, unsigned int bufferLength, 
 	
 	//free any strings that were allocated
 	for(int i = 0; i < eval.stringTableSize; i++)
-		if(stringTable[i].stringValue)
+		if(stringTable[i].isAllocated && stringTable[i].stringValue)
 			free(stringTable[i].stringValue);
 }

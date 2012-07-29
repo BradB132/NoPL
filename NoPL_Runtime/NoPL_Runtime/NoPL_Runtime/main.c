@@ -7,15 +7,85 @@
 //
 
 #include <stdio.h>
+#include <stdlib.h>
 #include "NoPLRuntime.h"
+
+char* mallocBufferFromFilePath(const char* filePath, unsigned long* outLength)
+{
+	FILE* file;
+	char* buffer;
+	unsigned long fileLen;
+	
+	//Open file
+	file = fopen(filePath, "rb");
+	if (!file)
+	{
+		fprintf(stderr, "Unable to open file %s", filePath);
+		return 0;
+	}
+	
+	//Get file length
+	fseek(file, 0, SEEK_END);
+	fileLen = ftell(file);
+	fseek(file, 0, SEEK_SET);
+	
+	//Allocate memory
+	buffer = (char*)malloc(fileLen+1);
+	if(!buffer)
+	{
+		fprintf(stderr, "Memory error!");
+		fclose(file);
+		return 0;
+	}
+	
+	//Read file contents into buffer
+	fread(buffer, 1, fileLen, file);
+	fclose(file);
+	
+	*outLength = fileLen;
+	return buffer;
+}
+
+NoPL_FunctionValue testingEvalFunc(void* calledOnObject, char* functionName, NoPL_FunctionValue* argv, unsigned int argc)
+{
+	return NoPL_FunctionValue();
+}
+
+NoPL_FunctionValue testingSubscript(void* calledOnObject, NoPL_FunctionValue index)
+{
+	return NoPL_FunctionValue();
+}
+
+void testStrings(char* string, NoPL_StringFeedbackType type)
+{
+	if(type == NoPL_StringFeedbackType_PrintStatement)
+		printf("NoPL Print: %s\n", string);
+}
 
 int main(int argc, const char * argv[])
 {
-	//TODO: get the path of the script
+	//check to make sure we have a path specified
+	if(argc < 2)
+	{
+		printf("You must supply a path for the script");
+		return -1;
+	}
 	
-	//TODO: load the script from file
+	//load the script data from file specified from command line
+	unsigned long fileLength;
+	char* scriptBuffer = mallocBufferFromFilePath(argv[1], &fileLength);
 	
-	//TODO: run the script
+	//set up callback function pointers
+	NoPL_Callbacks callbacks = NoPL_Callbacks();
+	callbacks.evaluateFunction = &testingEvalFunc;
+	callbacks.subscript = &testingSubscript;
+	callbacks.stringFeedback = &testStrings;
+	
+	//run the script
+	runScript((NoPL_Instruction*)scriptBuffer, (unsigned int)fileLength, &callbacks);
+	
+	//delete the used script data
+	free(scriptBuffer);
 	
     return 0;
 }

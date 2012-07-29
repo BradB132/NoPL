@@ -1806,7 +1806,7 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 				pANTLR3_BASE_TREE expression = treeIndex(tree,1);
 				
 				NoPL_DataType castType = dataTypeForTree(tree, context);
-				NoPL_DataType expressionType = dataTypeForTree(tree, context);
+				NoPL_DataType expressionType = dataTypeForTree(expression, context);
 				
 				//only add this cast if the types are actually different
 				if(castType != expressionType)
@@ -1940,32 +1940,37 @@ void compileWithInputStream(pANTLR3_INPUT_STREAM stream, const NoPL_CompileOptio
 		
 		//add the actual values for the symbol table sizes
 		int bytePos = 0;
-		if(objectTableSize > 0)
+		//if(objectTableSize > 0) //TODO: fix this issue later
 		{
-			context->compiledData[bytePos] = (NoPL_Instruction)NoPL_BYTE_OBJECT_TABLE_SIZE;
+			NoPL_Instruction instr = (NoPL_Instruction)NoPL_BYTE_OBJECT_TABLE_SIZE;
+			memcpy((context->compiledData+bytePos), &instr, sizeof(NoPL_Instruction));
 			bytePos += sizeof(NoPL_Instruction);
-			context->compiledData[bytePos] = objectTableSize;
+			memcpy((context->compiledData+bytePos), &objectTableSize, sizeof(NoPL_Index));
 			bytePos += sizeof(NoPL_Index);
 		}
-		if(numberTableSize > 0)
+		//if(numberTableSize > 0)
 		{
-			context->compiledData[bytePos] = (NoPL_Instruction)NoPL_BYTE_NUMERIC_TABLE_SIZE;
+			NoPL_Instruction instr = (NoPL_Instruction)NoPL_BYTE_NUMERIC_TABLE_SIZE;
+			memcpy((context->compiledData+bytePos), &instr, sizeof(NoPL_Instruction));
 			bytePos += sizeof(NoPL_Instruction);
-			context->compiledData[bytePos] = numberTableSize;
+			memcpy((context->compiledData+bytePos), &numberTableSize, sizeof(NoPL_Index));
 			bytePos += sizeof(NoPL_Index);
 		}
-		if(booleanTableSize > 0)
+		//if(booleanTableSize > 0)
 		{
-			context->compiledData[bytePos] = (NoPL_Instruction)NoPL_BYTE_BOOLEAN_TABLE_SIZE;
+			NoPL_Instruction instr = (NoPL_Instruction)NoPL_BYTE_BOOLEAN_TABLE_SIZE;
+			memcpy((context->compiledData+bytePos), &instr, sizeof(NoPL_Instruction));
 			bytePos += sizeof(NoPL_Instruction);
-			context->compiledData[bytePos] = booleanTableSize;
+			memcpy((context->compiledData+bytePos), &booleanTableSize, sizeof(NoPL_Index));
 			bytePos += sizeof(NoPL_Index);
 		}
-		if(stringTableSize > 0)
+		//if(stringTableSize > 0)
 		{
-			context->compiledData[bytePos] = (NoPL_Instruction)NoPL_BYTE_STRING_TABLE_SIZE;
+			NoPL_Instruction instr = (NoPL_Instruction)NoPL_BYTE_STRING_TABLE_SIZE;
+			memcpy((context->compiledData+bytePos), &instr, sizeof(NoPL_Instruction));
 			bytePos += sizeof(NoPL_Instruction);
-			context->compiledData[bytePos] = stringTableSize;
+			memcpy((context->compiledData+bytePos), &stringTableSize, sizeof(NoPL_Index));
+			bytePos += sizeof(NoPL_Index);
 		}
 	}
 	
