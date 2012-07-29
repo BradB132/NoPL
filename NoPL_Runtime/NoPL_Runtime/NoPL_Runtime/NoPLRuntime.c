@@ -52,7 +52,7 @@ void numberToString(float number, NoPL_String* outStr);
 
 void freeNoPL_String(NoPL_String* string)
 {
-	if(string->isAllocated <= 0)
+	if(!string->isAllocated)
 		return;
 	string->isAllocated = 0;
 	if(string->stringValue)
@@ -704,7 +704,12 @@ void evaluateFunction(NoPL_Evaluation* eval, NoPL_FunctionValue* returnVal)
 			
 			//set up an array for the args
 			NoPL_FunctionValue argv[*argCount];
-			memset(argv, 0, sizeof(NoPL_FunctionValue)*(*argCount));
+			memset(argv, 0, sizeof(argv));
+			
+			//set up a list of string args (better way to do this?)
+			NoPL_String releaseStrings[*argCount];
+			memset(releaseStrings, 0, sizeof(releaseStrings));
+			int releaseStringCount = 0;
 			
 			//populate the args with their values from the script
 			for(int i = 0; i < *argCount; i++)
@@ -730,8 +735,21 @@ void evaluateFunction(NoPL_Evaluation* eval, NoPL_FunctionValue* returnVal)
 						argv[i].pointerValue = evaluatePointer(eval);
 						break;
 					case NoPL_BYTE_ARG_STRING:
+					{
+						//get the string value
+						NoPL_String strObj = NoPL_String();
+						evaluateString(eval, &strObj);
+						
 						argv[i].type = NoPL_DataType_String;
-						argv[i].stringValue = NULL;//TODO: fix this
+						argv[i].stringValue = strObj.stringValue;
+						
+						//put this in a list for deleting later if it was allocated
+						if(strObj.isAllocated)
+						{
+							releaseStrings[releaseStringCount] = strObj;
+							releaseStringCount++;
+						}
+					}
 						break;
 					default:
 						printf("Function Error: instruction #%d doesn't make sense here\n", (int)argType);
@@ -741,6 +759,10 @@ void evaluateFunction(NoPL_Evaluation* eval, NoPL_FunctionValue* returnVal)
 			
 			//call the function
 			*returnVal = eval->callbacks->evaluateFunction(ptr, funcName, argv, (unsigned int)(*argCount));
+			
+			//release any strings that were allocated
+			for(int i = 0; i < releaseStringCount; i++)
+				freeNoPL_String(&releaseStrings[i]);
 		}
 			break;
 		case NoPL_BYTE_FUNCTION_INDEX:
@@ -839,7 +861,7 @@ void runScript(const NoPL_Instruction* scriptBuffer, unsigned int bufferLength, 
 	eval.numberTable = numberTable;
 	eval.objectTable = objectTable;
 	eval.stringTable = stringTable;
-	memset(stringTable, 0, sizeof(NoPL_String)*eval.stringTableSize);
+	memset(stringTable, 0, sizeof(stringTable));
 	
 	//evaluate all statements in the script
 	int evaluateOK = 1;
