@@ -1927,8 +1927,6 @@ void compileWithInputStream(pANTLR3_INPUT_STREAM stream, const NoPL_CompileOptio
 	else
 	{
 		//set up counts for symbol table
-		int symbolTableByteSize = 4*(sizeof(NoPL_Instruction)+sizeof(NoPL_Index));
-		NoPL_Instruction symbolTable[symbolTableByteSize];
 		NoPL_Index objectTableSize = 0;
 		NoPL_Index numberTableSize = 0;
 		NoPL_Index booleanTableSize = 0;
@@ -1938,46 +1936,50 @@ void compileWithInputStream(pANTLR3_INPUT_STREAM stream, const NoPL_CompileOptio
 		context->booleanTableSize = &booleanTableSize;
 		context->stringTableSize = &stringTableSize;
 		
-		//make some space for the symbol table at the beginning of the buffer
-		addBytesToContext(symbolTable, symbolTableByteSize, context);
-		
 		//recurse to assemble the byte code
 		traverseAST(syntaxTree.tree, options, context);
 		
+		//use a second context to create the symbol table
+		NoPL_CompileContext symbolTableContext = newNoPL_CompileContext();
+		
 		//add the actual values for the symbol table sizes
-		int bytePos = 0;
-		//if(objectTableSize > 0) //TODO: fix this issue later
+		if(objectTableSize > 0)
 		{
-			NoPL_Instruction instr = (NoPL_Instruction)NoPL_BYTE_OBJECT_TABLE_SIZE;
-			memcpy((context->compiledData+bytePos), &instr, sizeof(NoPL_Instruction));
-			bytePos += sizeof(NoPL_Instruction);
-			memcpy((context->compiledData+bytePos), &objectTableSize, sizeof(NoPL_Index));
-			bytePos += sizeof(NoPL_Index);
+			addOperator(NoPL_BYTE_OBJECT_TABLE_SIZE, &symbolTableContext);
+			addBytesToContext(&objectTableSize, sizeof(NoPL_Index), &symbolTableContext);
 		}
-		//if(numberTableSize > 0)
+		if(numberTableSize > 0)
 		{
-			NoPL_Instruction instr = (NoPL_Instruction)NoPL_BYTE_NUMERIC_TABLE_SIZE;
-			memcpy((context->compiledData+bytePos), &instr, sizeof(NoPL_Instruction));
-			bytePos += sizeof(NoPL_Instruction);
-			memcpy((context->compiledData+bytePos), &numberTableSize, sizeof(NoPL_Index));
-			bytePos += sizeof(NoPL_Index);
+			addOperator(NoPL_BYTE_NUMERIC_TABLE_SIZE, &symbolTableContext);
+			addBytesToContext(&numberTableSize, sizeof(NoPL_Index), &symbolTableContext);
 		}
-		//if(booleanTableSize > 0)
+		if(booleanTableSize > 0)
 		{
-			NoPL_Instruction instr = (NoPL_Instruction)NoPL_BYTE_BOOLEAN_TABLE_SIZE;
-			memcpy((context->compiledData+bytePos), &instr, sizeof(NoPL_Instruction));
-			bytePos += sizeof(NoPL_Instruction);
-			memcpy((context->compiledData+bytePos), &booleanTableSize, sizeof(NoPL_Index));
-			bytePos += sizeof(NoPL_Index);
+			addOperator(NoPL_BYTE_BOOLEAN_TABLE_SIZE, &symbolTableContext);
+			addBytesToContext(&booleanTableSize, sizeof(NoPL_Index), &symbolTableContext);
 		}
-		//if(stringTableSize > 0)
+		if(stringTableSize > 0)
 		{
-			NoPL_Instruction instr = (NoPL_Instruction)NoPL_BYTE_STRING_TABLE_SIZE;
-			memcpy((context->compiledData+bytePos), &instr, sizeof(NoPL_Instruction));
-			bytePos += sizeof(NoPL_Instruction);
-			memcpy((context->compiledData+bytePos), &stringTableSize, sizeof(NoPL_Index));
-			bytePos += sizeof(NoPL_Index);
+			addOperator(NoPL_BYTE_STRING_TABLE_SIZE, &symbolTableContext);
+			addBytesToContext(&stringTableSize, sizeof(NoPL_Index), &symbolTableContext);
 		}
+		
+		//prepend the table
+		if(symbolTableContext.dataLength > 0)
+		{
+			//append the script to the table buffer
+			addBytesToContext(context->compiledData, context->dataLength, &symbolTableContext);
+			
+			//replace the old buffer
+			if(context->compiledData)
+				free(context->compiledData);
+			context->compiledData = symbolTableContext.compiledData;
+			context->dataLength = symbolTableContext.dataLength;
+			symbolTableContext.compiledData = NULL;
+		}
+		
+		//free the symbol table context
+		freeNoPL_CompileContext(&symbolTableContext);
 	}
 	
 	//clean up
