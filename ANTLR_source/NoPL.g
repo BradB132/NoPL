@@ -12,7 +12,7 @@ options
 }
 
 //TO DO:
-//	disallow global function calls with no parens
+//	error when doing: boolean b = (5 % 2 == 0);
 //	Pre-compile:
 //		includes
 //		value defines

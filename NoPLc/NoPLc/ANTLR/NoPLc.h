@@ -23,6 +23,8 @@ typedef struct
 	pANTLR3_STACK numberStack;
 	pANTLR3_STACK booleanStack;
 	pANTLR3_STACK stringStack;
+	int allowsBreakStatements;
+	int allowsContinueStatements;
 	pANTLR3_VECTOR breakStatements;
 	pANTLR3_VECTOR continueStatements;
 	pANTLR3_STRING errDescriptions;

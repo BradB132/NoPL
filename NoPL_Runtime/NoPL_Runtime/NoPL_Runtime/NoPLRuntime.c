@@ -526,10 +526,8 @@ int evaluateBoolean(NoPL_Evaluation* eval)
 	switch(instr)
 	{
 		case NoPL_BYTE_LITERAL_BOOLEAN_TRUE:
-			eval->evaluationPosition += sizeof(NoPL_Instruction);
 			return 1;
 		case NoPL_BYTE_LITERAL_BOOLEAN_FALSE:
-			eval->evaluationPosition += sizeof(NoPL_Instruction);
 			return 0;
 		case NoPL_BYTE_VARIABLE_BOOLEAN:
 		{
@@ -704,11 +702,11 @@ void evaluateFunction(NoPL_Evaluation* eval, NoPL_FunctionValue* returnVal)
 			
 			//set up an array for the args
 			NoPL_FunctionValue argv[*argCount];
-			memset(argv, 0, sizeof(argv));
+			memset(argv, 0, sizeof(NoPL_FunctionValue)*(*argCount));
 			
 			//set up a list of string args (better way to do this?)
 			NoPL_String releaseStrings[*argCount];
-			memset(releaseStrings, 0, sizeof(releaseStrings));
+			memset(releaseStrings, 0, sizeof(NoPL_String)*(*argCount));
 			int releaseStringCount = 0;
 			
 			//populate the args with their values from the script
@@ -861,7 +859,7 @@ void runScript(const NoPL_Instruction* scriptBuffer, unsigned int bufferLength, 
 	eval.numberTable = numberTable;
 	eval.objectTable = objectTable;
 	eval.stringTable = stringTable;
-	memset(stringTable, 0, sizeof(stringTable));
+	memset(stringTable, 0, sizeof(NoPL_String)*eval.stringTableSize);
 	
 	//evaluate all statements in the script
 	int evaluateOK = 1;

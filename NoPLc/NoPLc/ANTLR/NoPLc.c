@@ -43,14 +43,14 @@ typedef enum
 #pragma mark -
 #pragma mark Internal functions
 
-void compileWithInputStream(pANTLR3_INPUT_STREAM stream, const NoPL_CompileOptions* options, NoPL_CompileContext* context);
-void addBytesToContext(const void* bytes, int byteCount, NoPL_CompileContext* context);
-void addOperator(const NoPL_Instruction operator, NoPL_CompileContext* context);
-void appendNodeWithRequiredType(const pANTLR3_BASE_TREE tree, const NoPL_DataType type, NoPL_CompileContext* context, const NoPL_CompileOptions* options);
-void appendFunctionCall(const pANTLR3_BASE_TREE objExpression, const pANTLR3_BASE_TREE funcName, const pANTLR3_BASE_TREE args, const NoPL_CompileOptions* options, NoPL_CompileContext* context);
-void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* options, NoPL_CompileContext* context);
-void traverseForErrors(const pANTLR3_BASE_TREE tree, NoPL_CompileContext* context);
-NoPL_DataType dataTypeForTree(const pANTLR3_BASE_TREE tree, const NoPL_CompileContext* context);
+void nopl_compileWithInputStream(pANTLR3_INPUT_STREAM stream, const NoPL_CompileOptions* options, NoPL_CompileContext* context);
+void nopl_addBytesToContext(const void* bytes, int byteCount, NoPL_CompileContext* context);
+void nopl_addOperator(const NoPL_Instruction operator, NoPL_CompileContext* context);
+void nopl_appendNodeWithRequiredType(const pANTLR3_BASE_TREE tree, const NoPL_DataType type, NoPL_CompileContext* context, const NoPL_CompileOptions* options);
+void nopl_appendFunctionCall(const pANTLR3_BASE_TREE objExpression, const pANTLR3_BASE_TREE funcName, const pANTLR3_BASE_TREE args, const NoPL_CompileOptions* options, NoPL_CompileContext* context);
+void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* options, NoPL_CompileContext* context);
+void nopl_traverseForErrors(const pANTLR3_BASE_TREE tree, NoPL_CompileContext* context);
+NoPL_DataType nopl_dataTypeForTree(const pANTLR3_BASE_TREE tree, const NoPL_CompileContext* context);
 void nopl_pushScope(NoPL_CompileContext* context);
 void nopl_popScope(NoPL_CompileContext* context);
 void nopl_error(const pANTLR3_BASE_TREE tree, const char* desc, NoPL_CompileContext* context);
@@ -58,9 +58,11 @@ int nopl_variableExistsInStack(const pANTLR3_STRING varName, const pANTLR3_STACK
 int nopl_variableExistsInContext(const pANTLR3_STRING varName, const NoPL_CompileContext* context);
 int nopl_declareVariableInStack(const pANTLR3_STRING varName, const pANTLR3_STACK whichStack);
 NoPL_Index nopl_countVariablesInStack(const pANTLR3_STACK whichStack);
-NoPL_Index indexOfVariableInStack(const pANTLR3_STRING varName, const pANTLR3_STACK whichStack, const pANTLR3_BASE_TREE tree, NoPL_CompileContext* context);
-NoPL_CompileContext newInnerCompileContext(NoPL_CompileContext* parentContext, int allowBreak, int allowContinue);
-void freeInnerCompileContext(NoPL_CompileContext* context);
+NoPL_Index nopl_indexOfVariableInStack(const pANTLR3_STRING varName, const pANTLR3_STACK whichStack, const pANTLR3_BASE_TREE tree, NoPL_CompileContext* context);
+NoPL_CompileContext nopl_newInnerCompileContext(NoPL_CompileContext* parentContext, int allowBreak, int allowContinue);
+void nopl_freeInnerCompileContext(NoPL_CompileContext* context);
+void nopl_appendContext(const NoPL_CompileContext* fromContext, NoPL_CompileContext* toContext);
+void nopl_finalizeControlFlowMoves(NoPL_CompileContext* context, NoPL_Index breakIndex, NoPL_Index continueIndex);
 
 #pragma mark -
 #pragma mark Compilation
@@ -84,7 +86,7 @@ void nopl_error(const pANTLR3_BASE_TREE tree, const char* desc, NoPL_CompileCont
 	int startLine = firstNode->getLine(firstNode);
 	int startChar = firstNode->getCharPositionInLine(firstNode);
 	int endLine = lastNode->getLine(lastNode);
-	int endChar = lastNode->getCharPositionInLine(lastNode)+strlen((char*)lastNode->getText(lastNode)->chars);
+	int endChar = lastNode->getCharPositionInLine(lastNode)+(int)strlen((char*)lastNode->getText(lastNode)->chars);
 	
 	//format the error
 	char appendStr[512];
@@ -101,7 +103,7 @@ void nopl_error(const pANTLR3_BASE_TREE tree, const char* desc, NoPL_CompileCont
 	context->errDescriptions->append(context->errDescriptions, appendStr);
 }
 
-void addBytesToContext(const void* bytes, int byteCount, NoPL_CompileContext* context)
+void nopl_addBytesToContext(const void* bytes, int byteCount, NoPL_CompileContext* context)
 {
 	//check if the buffer size needs to be increased
 	if(!context->arrayLength)
@@ -129,9 +131,9 @@ void addBytesToContext(const void* bytes, int byteCount, NoPL_CompileContext* co
 	context->dataLength += byteCount;
 }
 
-void addOperator(const NoPL_Instruction operator, NoPL_CompileContext* context)
+void nopl_addOperator(const NoPL_Instruction operator, NoPL_CompileContext* context)
 {
-	addBytesToContext(&operator, sizeof(NoPL_Instruction), context);
+	nopl_addBytesToContext(&operator, sizeof(NoPL_Instruction), context);
 }
 
 void nopl_pushScope(NoPL_CompileContext* context)
@@ -205,7 +207,7 @@ NoPL_Index nopl_countVariablesInStack(const pANTLR3_STACK whichStack)
 	return totalSize;
 }
 
-NoPL_Index indexOfVariableInStack(const pANTLR3_STRING varName, const pANTLR3_STACK whichStack, const pANTLR3_BASE_TREE tree, NoPL_CompileContext* context)
+NoPL_Index nopl_indexOfVariableInStack(const pANTLR3_STRING varName, const pANTLR3_STACK whichStack, const pANTLR3_BASE_TREE tree, NoPL_CompileContext* context)
 {
 	NoPL_Index currentIndex = 0;
 	for(int i = 0; i < whichStack->size(whichStack); i++)
@@ -226,7 +228,7 @@ NoPL_Index indexOfVariableInStack(const pANTLR3_STRING varName, const pANTLR3_ST
 	return (NoPL_Index)0;
 }
 
-NoPL_CompileContext newInnerCompileContext(NoPL_CompileContext* parentContext, int allowBreak, int allowContinue)
+NoPL_CompileContext nopl_newInnerCompileContext(NoPL_CompileContext* parentContext, int allowBreak, int allowContinue)
 {
 	NoPL_CompileContext context;
 	context.compiledData = NULL;
@@ -242,13 +244,15 @@ NoPL_CompileContext newInnerCompileContext(NoPL_CompileContext* parentContext, i
 	context.numberTableSize = parentContext->numberTableSize;
 	context.booleanTableSize = parentContext->booleanTableSize;
 	context.stringTableSize = parentContext->stringTableSize;
+	context.allowsBreakStatements = (allowBreak || parentContext->allowsBreakStatements);
+	context.allowsContinueStatements = (allowContinue || parentContext->allowsContinueStatements);
 	
-	if(allowBreak)
+	if(context.allowsBreakStatements)
 		context.breakStatements = antlr3VectorNew(NoPL_VectorSizeHint);
 	else
 		context.breakStatements = NULL;
 	
-	if(allowBreak)
+	if(context.allowsContinueStatements)
 		context.continueStatements = antlr3VectorNew(NoPL_VectorSizeHint);
 	else
 		context.continueStatements = NULL;
@@ -256,7 +260,7 @@ NoPL_CompileContext newInnerCompileContext(NoPL_CompileContext* parentContext, i
 	return context;
 }
 
-void freeInnerCompileContext(NoPL_CompileContext* context)
+void nopl_freeInnerCompileContext(NoPL_CompileContext* context)
 {
 	//null these pointers so that they aren't freed
 	context->objectStack = NULL;
@@ -281,15 +285,15 @@ void freeInnerCompileContext(NoPL_CompileContext* context)
 	freeNoPL_CompileContext(context);
 }
 
-NoPL_DataType dataTypeForTree(const pANTLR3_BASE_TREE tree, const NoPL_CompileContext* context)
+NoPL_DataType nopl_dataTypeForTree(const pANTLR3_BASE_TREE tree, const NoPL_CompileContext* context)
 {
 	switch(tree->getType(tree))
 	{
 		case ADD:
 		{
 			//the ADD operator can be used on either numbers or strings
-			NoPL_DataType type1 = dataTypeForTree(treeIndex(tree,0), context);
-			NoPL_DataType type2 = dataTypeForTree(treeIndex(tree,1), context);
+			NoPL_DataType type1 = nopl_dataTypeForTree(treeIndex(tree,0), context);
+			NoPL_DataType type2 = nopl_dataTypeForTree(treeIndex(tree,1), context);
 			if(type1 == NoPL_type_String || type2 == NoPL_type_String)
 				return NoPL_type_String;
 			else
@@ -359,10 +363,10 @@ NoPL_DataType dataTypeForTree(const pANTLR3_BASE_TREE tree, const NoPL_CompileCo
 	}
 }
 
-void appendNodeWithRequiredType(const pANTLR3_BASE_TREE tree, const NoPL_DataType type, NoPL_CompileContext* context, const NoPL_CompileOptions* options)
+void nopl_appendNodeWithRequiredType(const pANTLR3_BASE_TREE tree, const NoPL_DataType type, NoPL_CompileContext* context, const NoPL_CompileOptions* options)
 {
 	//get the type of this node
-	NoPL_DataType treeType = dataTypeForTree(tree, context);
+	NoPL_DataType treeType = nopl_dataTypeForTree(tree, context);
 	
 	//check if this node is a function call
 	if(treeType == NoPL_type_FunctionResult)
@@ -371,16 +375,16 @@ void appendNodeWithRequiredType(const pANTLR3_BASE_TREE tree, const NoPL_DataTyp
 		switch(type)
 		{
 			case NoPL_type_Boolean:
-				addOperator(NoPL_BYTE_RESOLVE_RESULT_TO_BOOLEAN, context);
+				nopl_addOperator(NoPL_BYTE_RESOLVE_RESULT_TO_BOOLEAN, context);
 				break;
 			case NoPL_type_Number:
-				addOperator(NoPL_BYTE_RESOLVE_RESULT_TO_NUMBER, context);
+				nopl_addOperator(NoPL_BYTE_RESOLVE_RESULT_TO_NUMBER, context);
 				break;
 			case NoPL_type_String:
-				addOperator(NoPL_BYTE_RESOLVE_RESULT_TO_STRING, context);
+				nopl_addOperator(NoPL_BYTE_RESOLVE_RESULT_TO_STRING, context);
 				break;
 			case NoPL_type_Object:
-				addOperator(NoPL_BYTE_RESOLVE_RESULT_TO_OBJECT, context);
+				nopl_addOperator(NoPL_BYTE_RESOLVE_RESULT_TO_OBJECT, context);
 				break;
 			default:
 				break;
@@ -412,26 +416,26 @@ void appendNodeWithRequiredType(const pANTLR3_BASE_TREE tree, const NoPL_DataTyp
 	}
 	
 	//append the node
-	traverseAST(tree, options, context);
+	nopl_traverseAST(tree, options, context);
 }
 
-void appendFunctionCall(const pANTLR3_BASE_TREE objExpression, const pANTLR3_BASE_TREE funcName, const pANTLR3_BASE_TREE args, const NoPL_CompileOptions* options, NoPL_CompileContext* context)
+void nopl_appendFunctionCall(const pANTLR3_BASE_TREE objExpression, const pANTLR3_BASE_TREE funcName, const pANTLR3_BASE_TREE args, const NoPL_CompileOptions* options, NoPL_CompileContext* context)
 {
 	//add the function operator
-	addOperator(NoPL_BYTE_FUNCTION_CALL, context);
+	nopl_addOperator(NoPL_BYTE_FUNCTION_CALL, context);
 	
 	//append the object
 	if(objExpression)
-		appendNodeWithRequiredType(objExpression, NoPL_type_Object, context, options);
+		nopl_appendNodeWithRequiredType(objExpression, NoPL_type_Object, context, options);
 	else
-		addOperator(NoPL_BYTE_LITERAL_NULL, context);
+		nopl_addOperator(NoPL_BYTE_LITERAL_NULL, context);
 	
 	//get function name and name length
 	char* functionName = (char*)funcName->getText(funcName)->chars;
 	int functionNameLength = (int)strlen(functionName);
 	
 	//add the function name
-	addBytesToContext(functionName, sizeof(char)*functionNameLength+1, context);
+	nopl_addBytesToContext(functionName, sizeof(char)*functionNameLength+1, context);
 	
 	if(args)
 	{
@@ -441,7 +445,7 @@ void appendFunctionCall(const pANTLR3_BASE_TREE objExpression, const pANTLR3_BAS
 			argCount = (NoPL_Index)args->getChildCount(args);
 		
 		//append bytes for count
-		addBytesToContext(&argCount, sizeof(NoPL_Index), context);
+		nopl_addBytesToContext(&argCount, sizeof(NoPL_Index), context);
 		
 		//loop through all children to add args
 		ANTLR3_UINT32 i;
@@ -450,34 +454,109 @@ void appendFunctionCall(const pANTLR3_BASE_TREE objExpression, const pANTLR3_BAS
 		{
 			//get the type for each arg
 			childArg = (pANTLR3_BASE_TREE)(args->children->get(args->children, i));
-			NoPL_DataType argType = dataTypeForTree(childArg, context);
+			NoPL_DataType argType = nopl_dataTypeForTree(childArg, context);
 			
 			if(argType == NoPL_type_Number)
-				addOperator(NoPL_BYTE_ARG_NUMBER, context);
+				nopl_addOperator(NoPL_BYTE_ARG_NUMBER, context);
 			else if(argType == NoPL_type_String)
-				addOperator(NoPL_BYTE_ARG_STRING, context);
+				nopl_addOperator(NoPL_BYTE_ARG_STRING, context);
 			else if(argType == NoPL_type_Boolean)
-				addOperator(NoPL_BYTE_ARG_BOOLEAN, context);
+				nopl_addOperator(NoPL_BYTE_ARG_BOOLEAN, context);
 			else if(argType == NoPL_type_Object)
-				addOperator(NoPL_BYTE_ARG_OBJECT, context);
+				nopl_addOperator(NoPL_BYTE_ARG_OBJECT, context);
 			else if(argType == NoPL_type_FunctionResult)
 				nopl_error(childArg, "The type of this argument is ambiguous and requires an explicit cast", context);
 			else
 				nopl_error(childArg, "Cannot determine the type of this argument", context);
 			
 			//append the arg
-			traverseAST(childArg, options, context);
+			nopl_traverseAST(childArg, options, context);
 		}
 	}
 	else
 	{
 		//this is a function call has specified no arguments
 		NoPL_Index zero = 0;
-		addBytesToContext(&zero, sizeof(NoPL_Index), context);
+		nopl_addBytesToContext(&zero, sizeof(NoPL_Index), context);
 	}
 }
 
-void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* options, NoPL_CompileContext* context)
+void nopl_finalizeControlFlowMoves(NoPL_CompileContext* context, NoPL_Index breakIndex, NoPL_Index continueIndex)
+{
+	//check for breaks
+	if(context->breakStatements)
+	{
+		for(int i = 0; i < context->breakStatements->size(context->breakStatements); i++)
+		{
+			//calculate the move amount
+			NoPL_Index moveFromIndex = (NoPL_Index)(context->breakStatements->get(context->breakStatements,i));
+			NoPL_Index copyToIndex = moveFromIndex-sizeof(NoPL_BufferMove);
+			NoPL_BufferMove moveAmount = breakIndex - moveFromIndex;
+			
+			//set the correct value in the compiled data for this new amount
+			memcpy((context->compiledData+copyToIndex), &moveAmount, sizeof(NoPL_BufferMove));
+		}
+	}
+	
+	//check for continues
+	if(context->continueStatements)
+	{
+		for(int i = 0; i < context->continueStatements->size(context->continueStatements); i++)
+		{
+			//calculate the move amount
+			NoPL_Index moveFromIndex = (NoPL_Index)(context->continueStatements->get(context->continueStatements,i));
+			NoPL_Index copyToIndex = moveFromIndex-sizeof(NoPL_BufferMove);
+			NoPL_BufferMove moveAmount = continueIndex - moveFromIndex;
+			
+			//set the correct value in the compiled data for this new amount
+			memcpy((context->compiledData+copyToIndex), &moveAmount, sizeof(NoPL_BufferMove));
+		}
+	}
+}
+
+void nopl_appendContext(const NoPL_CompileContext* fromContext, NoPL_CompileContext* toContext)
+{
+	//add all bytes from the original context
+	nopl_addBytesToContext(fromContext->compiledData, fromContext->dataLength, toContext);
+	
+	//check for breaks
+	if(fromContext->breakStatements)
+	{
+		int size = fromContext->breakStatements->size(fromContext->breakStatements);
+		if(!toContext->breakStatements)
+			toContext->breakStatements = antlr3VectorNew(size);
+		
+		for(int i = 0; i < size; i++)
+		{
+			//get the index and adjust by the amount of data in the new context
+			NoPL_Index index = (NoPL_Index)(fromContext->breakStatements->get(fromContext->breakStatements,i));
+			index += toContext->dataLength;
+			
+			//add the adjusted number to the new context
+			toContext->breakStatements->add(toContext->breakStatements, (void*)index, NULL);
+		}
+	}
+	
+	//check for continues
+	if(fromContext->continueStatements)
+	{
+		int size = fromContext->continueStatements->size(fromContext->continueStatements);
+		if(!toContext->continueStatements)
+			toContext->continueStatements = antlr3VectorNew(size);
+		
+		for(int i = 0; i < size; i++)
+		{
+			//calculate the move amount
+			NoPL_Index index = (NoPL_Index)(fromContext->continueStatements->get(fromContext->continueStatements,i));
+			index += toContext->dataLength;
+			
+			//add the adjusted number to the new context
+			toContext->continueStatements->add(toContext->continueStatements, (void*)index, NULL);
+		}
+	}
+}
+
+void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* options, NoPL_CompileContext* context)
 {
 	if(tree->isNilNode(tree))
 	{
@@ -491,7 +570,7 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 		{
 			//get each child and append
 			child = (pANTLR3_BASE_TREE)(tree->children->get(tree->children, i));
-			traverseAST(child, options, context);
+			nopl_traverseAST(child, options, context);
 		}
 	}
 	else
@@ -504,10 +583,10 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 				pANTLR3_BASE_TREE child1 = treeIndex(tree,0);
 				
 				//append the operator
-				addOperator(NoPL_BYTE_NUMERIC_ABS_VALUE, context);
+				nopl_addOperator(NoPL_BYTE_NUMERIC_ABS_VALUE, context);
 				
 				//append the expression
-				appendNodeWithRequiredType(child1, NoPL_type_Number, context, options);
+				nopl_appendNodeWithRequiredType(child1, NoPL_type_Number, context, options);
 			}
 				break;
 			case ADD:
@@ -517,50 +596,50 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 				pANTLR3_BASE_TREE child2 = treeIndex(tree,1);
 				
 				//the ADD operator can be used for numbers or concatenating strings
-				NoPL_DataType dataType = dataTypeForTree(tree, context);
+				NoPL_DataType dataType = nopl_dataTypeForTree(tree, context);
 				if(dataType == NoPL_type_Number)
 				{
 					//add the operator
-					addOperator(NoPL_BYTE_NUMERIC_ADD, context);
+					nopl_addOperator(NoPL_BYTE_NUMERIC_ADD, context);
 					
 					//append the expressions
-					appendNodeWithRequiredType(child1, NoPL_type_Number, context, options);
-					appendNodeWithRequiredType(child2, NoPL_type_Number, context, options);
+					nopl_appendNodeWithRequiredType(child1, NoPL_type_Number, context, options);
+					nopl_appendNodeWithRequiredType(child2, NoPL_type_Number, context, options);
 				}
 				else if(dataType == NoPL_type_String)
 				{
 					//add the operator
-					addOperator(NoPL_BYTE_STRING_CONCAT, context);
+					nopl_addOperator(NoPL_BYTE_STRING_CONCAT, context);
 					
 					//get the types for the children
-					NoPL_DataType childType1 = dataTypeForTree(child1, context);
-					NoPL_DataType childType2 = dataTypeForTree(child2, context);
+					NoPL_DataType childType1 = nopl_dataTypeForTree(child1, context);
+					NoPL_DataType childType2 = nopl_dataTypeForTree(child2, context);
 					
 					//cast the first child if we need to
 					if(childType1 == NoPL_type_Number)
-						addOperator(NoPL_BYTE_CAST_NUMBER_TO_STRING, context);
+						nopl_addOperator(NoPL_BYTE_CAST_NUMBER_TO_STRING, context);
 					else if(childType1 == NoPL_type_Boolean)
-						addOperator(NoPL_BYTE_CAST_BOOLEAN_TO_STRING, context);
+						nopl_addOperator(NoPL_BYTE_CAST_BOOLEAN_TO_STRING, context);
 					else if(childType1 == NoPL_type_FunctionResult)
-						addOperator(NoPL_BYTE_RESOLVE_RESULT_TO_STRING, context);
+						nopl_addOperator(NoPL_BYTE_RESOLVE_RESULT_TO_STRING, context);
 					else if(childType1 == NoPL_type_Object)
 						nopl_error(child1, NoPL_ErrStr_CannotImplicitCastObject, context);
 					
 					//add the first child
-					traverseAST(child1, options, context);
+					nopl_traverseAST(child1, options, context);
 					
 					//cast the second child if we need to
 					if(childType2 == NoPL_type_Number)
-						addOperator(NoPL_BYTE_CAST_NUMBER_TO_STRING, context);
+						nopl_addOperator(NoPL_BYTE_CAST_NUMBER_TO_STRING, context);
 					else if(childType2 == NoPL_type_Boolean)
-						addOperator(NoPL_BYTE_CAST_BOOLEAN_TO_STRING, context);
+						nopl_addOperator(NoPL_BYTE_CAST_BOOLEAN_TO_STRING, context);
 					else if(childType2 == NoPL_type_FunctionResult)
-						addOperator(NoPL_BYTE_RESOLVE_RESULT_TO_STRING, context);
+						nopl_addOperator(NoPL_BYTE_RESOLVE_RESULT_TO_STRING, context);
 					else if(childType2 == NoPL_type_Object)
 						nopl_error(child2, NoPL_ErrStr_CannotImplicitCastObject, context);
 					
 					//add the second child
-					traverseAST(child2, options, context);
+					nopl_traverseAST(child2, options, context);
 				}
 				else
 				{
@@ -575,30 +654,30 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 				pANTLR3_BASE_TREE incrementVal = treeIndex(tree,1);
 				
 				//check the object on the left-hand side to make sure that it is the correct type
-				NoPL_DataType assignToType = dataTypeForTree(assignTo, context);
+				NoPL_DataType assignToType = nopl_dataTypeForTree(assignTo, context);
 				if(assignToType == NoPL_type_Number)
 				{
 					//use the numeric increment
-					addOperator(NoPL_BYTE_NUMERIC_ADD_ASSIGN, context);
+					nopl_addOperator(NoPL_BYTE_NUMERIC_ADD_ASSIGN, context);
 					
 					//add the index for the variable which will be incremented
-					NoPL_Index index = indexOfVariableInStack(assignTo->getText(assignTo), context->numberStack, assignTo, context);
-					addBytesToContext(&index, sizeof(NoPL_Index), context);
+					NoPL_Index index = nopl_indexOfVariableInStack(assignTo->getText(assignTo), context->numberStack, assignTo, context);
+					nopl_addBytesToContext(&index, sizeof(NoPL_Index), context);
 					
 					//append the increment
-					appendNodeWithRequiredType(incrementVal, NoPL_type_Number, context, options);
+					nopl_appendNodeWithRequiredType(incrementVal, NoPL_type_Number, context, options);
 				}
 				else if(assignToType == NoPL_type_String)
 				{
 					//use the string concat
-					addOperator(NoPL_BYTE_STRING_CONCAT_ASSIGN, context);
+					nopl_addOperator(NoPL_BYTE_STRING_CONCAT_ASSIGN, context);
 					
 					//add the index for the variable which will be incremented
-					NoPL_Index index = indexOfVariableInStack(assignTo->getText(assignTo), context->stringStack, assignTo, context);
-					addBytesToContext(&index, sizeof(NoPL_Index), context);
+					NoPL_Index index = nopl_indexOfVariableInStack(assignTo->getText(assignTo), context->stringStack, assignTo, context);
+					nopl_addBytesToContext(&index, sizeof(NoPL_Index), context);
 					
 					//append the increment
-					appendNodeWithRequiredType(incrementVal, NoPL_type_String, context, options);
+					nopl_appendNodeWithRequiredType(incrementVal, NoPL_type_String, context, options);
 				}
 				else
 				{
@@ -616,54 +695,54 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 				pANTLR3_BASE_TREE expression = treeIndex(tree,1);
 				
 				//check the object on the left-hand side to what type should be assigned
-				NoPL_DataType assignToType = dataTypeForTree(assignTo, context);
+				NoPL_DataType assignToType = nopl_dataTypeForTree(assignTo, context);
 				if(assignToType == NoPL_type_Number)
 				{
 					//use the numeric assign
-					addOperator(NoPL_BYTE_NUMERIC_ASSIGN, context);
+					nopl_addOperator(NoPL_BYTE_NUMERIC_ASSIGN, context);
 					
 					//add the index for the variable which will be assigned to
-					NoPL_Index index = indexOfVariableInStack(assignTo->getText(assignTo), context->numberStack, assignTo, context);
-					addBytesToContext(&index, sizeof(NoPL_Index), context);
+					NoPL_Index index = nopl_indexOfVariableInStack(assignTo->getText(assignTo), context->numberStack, assignTo, context);
+					nopl_addBytesToContext(&index, sizeof(NoPL_Index), context);
 					
 					//append the expression
-					appendNodeWithRequiredType(expression, NoPL_type_Number, context, options);
+					nopl_appendNodeWithRequiredType(expression, NoPL_type_Number, context, options);
 				}
 				else if(assignToType == NoPL_type_String)
 				{
 					//use the string assign
-					addOperator(NoPL_BYTE_STRING_ASSIGN, context);
+					nopl_addOperator(NoPL_BYTE_STRING_ASSIGN, context);
 					
 					//add the index for the variable which will be assigned to
-					NoPL_Index index = indexOfVariableInStack(assignTo->getText(assignTo), context->stringStack, assignTo, context);
-					addBytesToContext(&index, sizeof(NoPL_Index), context);
+					NoPL_Index index = nopl_indexOfVariableInStack(assignTo->getText(assignTo), context->stringStack, assignTo, context);
+					nopl_addBytesToContext(&index, sizeof(NoPL_Index), context);
 					
 					//append the expression
-					appendNodeWithRequiredType(expression, NoPL_type_String, context, options);
+					nopl_appendNodeWithRequiredType(expression, NoPL_type_String, context, options);
 				}
 				else if(assignToType == NoPL_type_Boolean)
 				{
 					//use the boolean assign
-					addOperator(NoPL_BYTE_BOOLEAN_ASSIGN, context);
+					nopl_addOperator(NoPL_BYTE_BOOLEAN_ASSIGN, context);
 					
 					//add the index for the variable which will be assigned to
-					NoPL_Index index = indexOfVariableInStack(assignTo->getText(assignTo), context->booleanStack, assignTo, context);
-					addBytesToContext(&index, sizeof(NoPL_Index), context);
+					NoPL_Index index = nopl_indexOfVariableInStack(assignTo->getText(assignTo), context->booleanStack, assignTo, context);
+					nopl_addBytesToContext(&index, sizeof(NoPL_Index), context);
 					
 					//append the expression
-					appendNodeWithRequiredType(expression, NoPL_type_Boolean, context, options);
+					nopl_appendNodeWithRequiredType(expression, NoPL_type_Boolean, context, options);
 				}
 				else if(assignToType == NoPL_type_Object)
 				{
 					//use the object assign
-					addOperator(NoPL_BYTE_OBJECT_ASSIGN, context);
+					nopl_addOperator(NoPL_BYTE_OBJECT_ASSIGN, context);
 					
 					//add the index for the variable which will be assigned to
-					NoPL_Index index = indexOfVariableInStack(assignTo->getText(assignTo), context->objectStack, assignTo, context);
-					addBytesToContext(&index, sizeof(NoPL_Index), context);
+					NoPL_Index index = nopl_indexOfVariableInStack(assignTo->getText(assignTo), context->objectStack, assignTo, context);
+					nopl_addBytesToContext(&index, sizeof(NoPL_Index), context);
 					
 					//append the expression
-					appendNodeWithRequiredType(expression, NoPL_type_Object, context, options);
+					nopl_appendNodeWithRequiredType(expression, NoPL_type_Object, context, options);
 				}
 				else
 				{
@@ -673,17 +752,21 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 				break;
 			case BREAK:
 			{
-				if(!context->breakStatements)
-					nopl_error(tree, NoPL_ErrStr_CannotControlFlow, context);
-				
 				//append the operator
-				addOperator(NoPL_BYTE_BUFFER_MOVE, context);
+				nopl_addOperator(NoPL_BYTE_BUFFER_MOVE, context);
 				
 				//append an empty placeholder for the move
 				NoPL_BufferMove move = 0;
-				addBytesToContext(&move, sizeof(NoPL_BufferMove), context);
+				nopl_addBytesToContext(&move, sizeof(NoPL_BufferMove), context);
 				
-				//TODO: how to do this?
+				//check if our current context even supports this
+				if(context->allowsBreakStatements)
+				{
+					//keep a list of the positions of all break statements in the buffer
+					context->breakStatements->add(context->breakStatements, (void*)(context->dataLength), NULL);
+				}
+				else
+					nopl_error(tree, NoPL_ErrStr_CannotControlFlow, context);
 			}
 				break;
 			case CONDITIONAL:
@@ -693,16 +776,16 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 				pANTLR3_BASE_TREE firstStatement = treeIndex(tree,1);
 				
 				//add the operator
-				addOperator(NoPL_BYTE_CONDITIONAL, context);
+				nopl_addOperator(NoPL_BYTE_CONDITIONAL, context);
 				
 				//append the boolean expression for the conditional
-				appendNodeWithRequiredType(condition, NoPL_type_Boolean, context, options);
+				nopl_appendNodeWithRequiredType(condition, NoPL_type_Boolean, context, options);
 				
 				//check if the first statement node is an else statement
 				int hasElse = firstStatement->getType(firstStatement) == CONDITIONAL_ELSE;
 				
 				//get another byte buffer for everything inside this conditional
-				NoPL_CompileContext innerConditional = newInnerCompileContext(context, 0, 0);
+				NoPL_CompileContext innerConditional = nopl_newInnerCompileContext(context, 0, 0);
 				nopl_pushScope(&innerConditional);
 				
 				//add all of the statements inside the conditional
@@ -715,25 +798,30 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 				for(i = startIndex; i < childCount; i++)
 				{
 					childArg = (pANTLR3_BASE_TREE)(tree->children->get(tree->children, i));
-					traverseAST(childArg, options, &innerConditional);
+					nopl_traverseAST(childArg, options, &innerConditional);
 				}
 				
-				//how many bytes to skip if the conditional is false?
+				//calc how many bytes to skip if the conditional is false
 				NoPL_BufferMove move = (NoPL_BufferMove)innerConditional.dataLength;
-				addBytesToContext(&move, sizeof(NoPL_BufferMove), context);
+				if(hasElse)
+				{
+					//else conditionals contain an extra buffer move at the beginning of the else statement
+					move += sizeof(NoPL_Instruction)+sizeof(NoPL_BufferMove);
+				}
+				nopl_addBytesToContext(&move, sizeof(NoPL_BufferMove), context);
 				
 				//add the inner conditional
-				addBytesToContext(innerConditional.compiledData, innerConditional.dataLength, context);
+				nopl_appendContext(&innerConditional, context);
 				
 				//clean up the inner conditional
 				nopl_popScope(&innerConditional);
-				freeInnerCompileContext(&innerConditional);
+				nopl_freeInnerCompileContext(&innerConditional);
 				
 				//add the else statement, if we have one
 				if(hasElse)
 				{
 					//get another byte buffer for everything inside this else statement
-					NoPL_CompileContext innerElse = newInnerCompileContext(context, 0, 0);
+					NoPL_CompileContext innerElse = nopl_newInnerCompileContext(context, 0, 0);
 					nopl_pushScope(&innerElse);
 					
 					//add all of the statements inside the else statement
@@ -744,36 +832,40 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 					for(i = 0; i < childCount; i++)
 					{
 						childArg = (pANTLR3_BASE_TREE)(firstStatement->children->get(firstStatement->children, i));
-						traverseAST(childArg, options, &innerElse);
+						nopl_traverseAST(childArg, options, &innerElse);
 					}
 					
 					//skip over all this else stuff if we're coming from the block of code for true
-					addOperator(NoPL_BYTE_BUFFER_MOVE, context);
+					nopl_addOperator(NoPL_BYTE_BUFFER_MOVE, context);
 					move = (NoPL_BufferMove)innerElse.dataLength;
-					addBytesToContext(&move, sizeof(NoPL_BufferMove), context);
+					nopl_addBytesToContext(&move, sizeof(NoPL_BufferMove), context);
 					
 					//add the else statement
-					addBytesToContext(innerElse.compiledData, innerElse.dataLength, context);
+					nopl_appendContext(&innerElse, context);
 					
 					//clean up the else statement
 					nopl_popScope(&innerElse);
-					freeInnerCompileContext(&innerElse);
+					nopl_freeInnerCompileContext(&innerElse);
 				}
 			}
 				break;
 			case CONTINUE:
 			{
-				if(!context->continueStatements)
-					nopl_error(tree, NoPL_ErrStr_CannotControlFlow, context);
-				
 				//append the operator
-				addOperator(NoPL_BYTE_BUFFER_MOVE, context);
+				nopl_addOperator(NoPL_BYTE_BUFFER_MOVE, context);
 				
 				//append an empty placeholder for the move
 				NoPL_BufferMove move = 0;
-				addBytesToContext(&move, sizeof(NoPL_BufferMove), context);
+				nopl_addBytesToContext(&move, sizeof(NoPL_BufferMove), context);
 				
-				//TODO: how to do this?
+				//check if our current context even supports this
+				if(context->allowsContinueStatements)
+				{
+					//keep a list of the positions of all continue statements in the buffer
+					context->continueStatements->add(context->continueStatements, (void*)(context->dataLength), NULL);
+				}
+				else
+					nopl_error(tree, NoPL_ErrStr_CannotControlFlow, context);
 			}
 				break;
 			case DECL_BOOL:
@@ -783,18 +875,18 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 				pANTLR3_STRING declaredName = declaredVar->getText(declaredVar);
 				
 				//we need to evaluate the initial expression before declaring the variable
-				NoPL_CompileContext initCtx = newInnerCompileContext(context, 0, 0);
+				NoPL_CompileContext initCtx = nopl_newInnerCompileContext(context, 0, 0);
 				
 				//get the initial value if there is one
 				if(tree->getChildCount(tree) > 1)
 				{
 					//append the expression
-					appendNodeWithRequiredType(treeIndex(tree,1), NoPL_type_Boolean, &initCtx, options);
+					nopl_appendNodeWithRequiredType(treeIndex(tree,1), NoPL_type_Boolean, &initCtx, options);
 				}
 				else
 				{
 					//set this variable to a default value
-					addOperator(NoPL_BYTE_LITERAL_BOOLEAN_FALSE, &initCtx);
+					nopl_addOperator(NoPL_BYTE_LITERAL_BOOLEAN_FALSE, &initCtx);
 				}
 				
 				//check if the variable was already declared elsewhere
@@ -808,13 +900,13 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 					*(context->booleanTableSize) = newCount;
 				
 				//assign to the index of the newly created variable
-				addOperator(NoPL_BYTE_BOOLEAN_ASSIGN, context);
-				NoPL_Index index = indexOfVariableInStack(declaredName, context->booleanStack, declaredVar, context);
-				addBytesToContext(&index, sizeof(NoPL_Index), context);
+				nopl_addOperator(NoPL_BYTE_BOOLEAN_ASSIGN, context);
+				NoPL_Index index = nopl_indexOfVariableInStack(declaredName, context->booleanStack, declaredVar, context);
+				nopl_addBytesToContext(&index, sizeof(NoPL_Index), context);
 				
 				//append the initialization
-				addBytesToContext(initCtx.compiledData, initCtx.dataLength, context);
-				freeInnerCompileContext(&initCtx);
+				nopl_appendContext(&initCtx, context);
+				nopl_freeInnerCompileContext(&initCtx);
 			}
 				break;
 			case DECL_NUMBER:
@@ -824,20 +916,20 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 				pANTLR3_STRING declaredName = declaredVar->getText(declaredVar);
 				
 				//we need to evaluate the initial expression before declaring the variable
-				NoPL_CompileContext initCtx = newInnerCompileContext(context, 0, 0);
+				NoPL_CompileContext initCtx = nopl_newInnerCompileContext(context, 0, 0);
 				
 				//get the initial value if there is one
 				if(tree->getChildCount(tree) > 1)
 				{
 					//append the expression
-					appendNodeWithRequiredType(treeIndex(tree,1), NoPL_type_Number, &initCtx, options);
+					nopl_appendNodeWithRequiredType(treeIndex(tree,1), NoPL_type_Number, &initCtx, options);
 				}
 				else
 				{
 					//set this variable to a default value
-					addOperator(NoPL_BYTE_LITERAL_NUMBER, &initCtx);
+					nopl_addOperator(NoPL_BYTE_LITERAL_NUMBER, &initCtx);
 					float defaultFloat = 0.0f;
-					addBytesToContext(&defaultFloat, sizeof(float), &initCtx);
+					nopl_addBytesToContext(&defaultFloat, sizeof(float), &initCtx);
 				}
 				
 				//check if the variable was already declared elsewhere
@@ -851,13 +943,13 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 					*(context->numberTableSize) = newCount;
 				
 				//assign to the index of the newly created variable
-				addOperator(NoPL_BYTE_NUMERIC_ASSIGN, context);
-				NoPL_Index index = indexOfVariableInStack(declaredName, context->numberStack, declaredVar, context);
-				addBytesToContext(&index, sizeof(NoPL_Index), context);
+				nopl_addOperator(NoPL_BYTE_NUMERIC_ASSIGN, context);
+				NoPL_Index index = nopl_indexOfVariableInStack(declaredName, context->numberStack, declaredVar, context);
+				nopl_addBytesToContext(&index, sizeof(NoPL_Index), context);
 				
 				//append the initialization
-				addBytesToContext(initCtx.compiledData, initCtx.dataLength, context);
-				freeInnerCompileContext(&initCtx);
+				nopl_appendContext(&initCtx, context);
+				nopl_freeInnerCompileContext(&initCtx);
 			}
 				break;
 			case DECL_OBJ:
@@ -867,18 +959,18 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 				pANTLR3_STRING declaredName = declaredVar->getText(declaredVar);
 				
 				//we need to evaluate the initial expression before declaring the variable
-				NoPL_CompileContext initCtx = newInnerCompileContext(context, 0, 0);
+				NoPL_CompileContext initCtx = nopl_newInnerCompileContext(context, 0, 0);
 				
 				//get the initial value if there is one
 				if(tree->getChildCount(tree) > 1)
 				{
 					//append the expression
-					appendNodeWithRequiredType(treeIndex(tree,1), NoPL_type_Object, &initCtx, options);
+					nopl_appendNodeWithRequiredType(treeIndex(tree,1), NoPL_type_Object, &initCtx, options);
 				}
 				else
 				{
 					//set this variable to a default value
-					addOperator(NoPL_BYTE_LITERAL_NULL, &initCtx);
+					nopl_addOperator(NoPL_BYTE_LITERAL_NULL, &initCtx);
 				}
 				
 				//check if the variable was already declared elsewhere
@@ -892,13 +984,13 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 					*(context->objectTableSize) = newCount;
 				
 				//assign to the index of the newly created variable
-				addOperator(NoPL_BYTE_OBJECT_ASSIGN, context);
-				NoPL_Index index = indexOfVariableInStack(declaredName, context->objectStack, declaredVar, context);
-				addBytesToContext(&index, sizeof(NoPL_Index), context);
+				nopl_addOperator(NoPL_BYTE_OBJECT_ASSIGN, context);
+				NoPL_Index index = nopl_indexOfVariableInStack(declaredName, context->objectStack, declaredVar, context);
+				nopl_addBytesToContext(&index, sizeof(NoPL_Index), context);
 				
 				//append the initialization
-				addBytesToContext(initCtx.compiledData, initCtx.dataLength, context);
-				freeInnerCompileContext(&initCtx);
+				nopl_appendContext(&initCtx, context);
+				nopl_freeInnerCompileContext(&initCtx);
 			}
 				break;
 			case DECL_STRING:
@@ -908,20 +1000,20 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 				pANTLR3_STRING declaredName = declaredVar->getText(declaredVar);
 				
 				//we need to evaluate the initial expression before declaring the variable
-				NoPL_CompileContext initCtx = newInnerCompileContext(context, 0, 0);
+				NoPL_CompileContext initCtx = nopl_newInnerCompileContext(context, 0, 0);
 				
 				//get the initial value if there is one
 				if(tree->getChildCount(tree) > 1)
 				{
 					//append the expression
-					appendNodeWithRequiredType(treeIndex(tree,1), NoPL_type_String, &initCtx, options);
+					nopl_appendNodeWithRequiredType(treeIndex(tree,1), NoPL_type_String, &initCtx, options);
 				}
 				else
 				{
 					//set this variable to a default value
-					addOperator(NoPL_BYTE_LITERAL_STRING, &initCtx);
+					nopl_addOperator(NoPL_BYTE_LITERAL_STRING, &initCtx);
 					char* defaultString = "";
-					addBytesToContext(&defaultString[0], sizeof(defaultString[0]), &initCtx);
+					nopl_addBytesToContext(&defaultString[0], sizeof(defaultString[0]), &initCtx);
 				}
 				
 				//check if the variable was already declared elsewhere
@@ -935,30 +1027,30 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 					*(context->stringTableSize) = newCount;
 				
 				//assign to the index of the newly created variable
-				addOperator(NoPL_BYTE_STRING_ASSIGN, context);
-				NoPL_Index index = indexOfVariableInStack(declaredName, context->stringStack, declaredVar, context);
-				addBytesToContext(&index, sizeof(NoPL_Index), context);
+				nopl_addOperator(NoPL_BYTE_STRING_ASSIGN, context);
+				NoPL_Index index = nopl_indexOfVariableInStack(declaredName, context->stringStack, declaredVar, context);
+				nopl_addBytesToContext(&index, sizeof(NoPL_Index), context);
 				
 				//append the initialization
-				addBytesToContext(initCtx.compiledData, initCtx.dataLength, context);
-				freeInnerCompileContext(&initCtx);
+				nopl_appendContext(&initCtx, context);
+				nopl_freeInnerCompileContext(&initCtx);
 			}
 				break;
 			case DECREMENT:
 			{
 				//add the operator
-				addOperator(NoPL_BYTE_NUMERIC_DECREMENT, context);
+				nopl_addOperator(NoPL_BYTE_NUMERIC_DECREMENT, context);
 				
 				//get the variable being changed
 				pANTLR3_BASE_TREE var = treeIndex(tree,0);
 				
 				//check the data type of the variable
-				if(dataTypeForTree(var, context) != NoPL_type_Number)
+				if(nopl_dataTypeForTree(var, context) != NoPL_type_Number)
 					nopl_error(var, NoPL_ErrStr_CannotIncrement, context);
 				
 				//append the index for the variable
-				NoPL_Index index = indexOfVariableInStack(var->getText(var), context->numberStack, var, context);
-				addBytesToContext(&index, sizeof(NoPL_Index), context);
+				NoPL_Index index = nopl_indexOfVariableInStack(var->getText(var), context->numberStack, var, context);
+				nopl_addBytesToContext(&index, sizeof(NoPL_Index), context);
 			}
 				break;
 			case DIVIDE:
@@ -968,11 +1060,11 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 				pANTLR3_BASE_TREE child2 = treeIndex(tree,1);
 				
 				//add the operator
-				addOperator(NoPL_BYTE_NUMERIC_DIVIDE, context);
+				nopl_addOperator(NoPL_BYTE_NUMERIC_DIVIDE, context);
 				
 				//append the expressions
-				appendNodeWithRequiredType(child1, NoPL_type_Number, context, options);
-				appendNodeWithRequiredType(child2, NoPL_type_Number, context, options);
+				nopl_appendNodeWithRequiredType(child1, NoPL_type_Number, context, options);
+				nopl_appendNodeWithRequiredType(child2, NoPL_type_Number, context, options);
 			}
 				break;
 			case DIVIDE_ASSIGN:
@@ -982,18 +1074,18 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 				pANTLR3_BASE_TREE incrementVal = treeIndex(tree,1);
 				
 				//check the object on the left-hand side to make sure that it is the correct type
-				NoPL_DataType assignToType = dataTypeForTree(assignTo, context);
+				NoPL_DataType assignToType = nopl_dataTypeForTree(assignTo, context);
 				if(assignToType == NoPL_type_Number)
 				{
 					//append the operator
-					addOperator(NoPL_BYTE_NUMERIC_DIVIDE_ASSIGN, context);
+					nopl_addOperator(NoPL_BYTE_NUMERIC_DIVIDE_ASSIGN, context);
 					
 					//add the index for the variable
-					NoPL_Index index = indexOfVariableInStack(assignTo->getText(assignTo), context->numberStack, assignTo, context);
-					addBytesToContext(&index, sizeof(NoPL_Index), context);
+					NoPL_Index index = nopl_indexOfVariableInStack(assignTo->getText(assignTo), context->numberStack, assignTo, context);
+					nopl_addBytesToContext(&index, sizeof(NoPL_Index), context);
 					
 					//append the expression
-					appendNodeWithRequiredType(incrementVal, NoPL_type_Number, context, options);
+					nopl_appendNodeWithRequiredType(incrementVal, NoPL_type_Number, context, options);
 				}
 				else
 				{
@@ -1005,7 +1097,7 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 			}
 				break;
 			case EXIT:
-				addOperator(NoPL_BYTE_PROGRAM_EXIT, context);
+				nopl_addOperator(NoPL_BYTE_PROGRAM_EXIT, context);
 				break;
 			case EXPONENT:
 			{
@@ -1014,11 +1106,11 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 				pANTLR3_BASE_TREE child2 = treeIndex(tree,1);
 				
 				//add the operator
-				addOperator(NoPL_BYTE_NUMERIC_EXPONENT, context);
+				nopl_addOperator(NoPL_BYTE_NUMERIC_EXPONENT, context);
 				
 				//append the expressions
-				appendNodeWithRequiredType(child1, NoPL_type_Number, context, options);
-				appendNodeWithRequiredType(child2, NoPL_type_Number, context, options);
+				nopl_appendNodeWithRequiredType(child1, NoPL_type_Number, context, options);
+				nopl_appendNodeWithRequiredType(child2, NoPL_type_Number, context, options);
 			}
 				break;
 			case EXPONENT_ASSIGN:
@@ -1028,18 +1120,18 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 				pANTLR3_BASE_TREE incrementVal = treeIndex(tree,1);
 				
 				//check the object on the left-hand side to make sure that it is the correct type
-				NoPL_DataType assignToType = dataTypeForTree(assignTo, context);
+				NoPL_DataType assignToType = nopl_dataTypeForTree(assignTo, context);
 				if(assignToType == NoPL_type_Number)
 				{
 					//append the operator
-					addOperator(NoPL_BYTE_NUMERIC_EXPONENT_ASSIGN, context);
+					nopl_addOperator(NoPL_BYTE_NUMERIC_EXPONENT_ASSIGN, context);
 					
 					//add the index for the variable
-					NoPL_Index index = indexOfVariableInStack(assignTo->getText(assignTo), context->numberStack, assignTo, context);
-					addBytesToContext(&index, sizeof(NoPL_Index), context);
+					NoPL_Index index = nopl_indexOfVariableInStack(assignTo->getText(assignTo), context->numberStack, assignTo, context);
+					nopl_addBytesToContext(&index, sizeof(NoPL_Index), context);
 					
 					//append the increment
-					appendNodeWithRequiredType(incrementVal, NoPL_type_Number, context, options);
+					nopl_appendNodeWithRequiredType(incrementVal, NoPL_type_Number, context, options);
 				}
 				else
 				{
@@ -1058,7 +1150,7 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 					args = treeIndex(tree, 1);
 				
 				//append the function call
-				appendFunctionCall(NULL, treeIndex(tree, 0), args, options, context);
+				nopl_appendFunctionCall(NULL, treeIndex(tree, 0), args, options, context);
 			}
 				break;
 			case GREATER_THAN:
@@ -1068,11 +1160,11 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 				pANTLR3_BASE_TREE child2 = treeIndex(tree,1);
 				
 				//append the operator
-				addOperator(NoPL_BYTE_BOOLEAN_GREATER_THAN, context);
+				nopl_addOperator(NoPL_BYTE_BOOLEAN_GREATER_THAN, context);
 				
 				//append the expressions
-				appendNodeWithRequiredType(child1, NoPL_type_Number, context, options);
-				appendNodeWithRequiredType(child2, NoPL_type_Number, context, options);
+				nopl_appendNodeWithRequiredType(child1, NoPL_type_Number, context, options);
+				nopl_appendNodeWithRequiredType(child2, NoPL_type_Number, context, options);
 			}
 				break;
 			case GREATER_THAN_EQUAL:
@@ -1082,62 +1174,62 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 				pANTLR3_BASE_TREE child2 = treeIndex(tree,1);
 				
 				//append the operator
-				addOperator(NoPL_BYTE_BOOLEAN_GREATER_THAN_EQUAL, context);
+				nopl_addOperator(NoPL_BYTE_BOOLEAN_GREATER_THAN_EQUAL, context);
 				
 				//append the expressions
-				appendNodeWithRequiredType(child1, NoPL_type_Number, context, options);
-				appendNodeWithRequiredType(child2, NoPL_type_Number, context, options);
+				nopl_appendNodeWithRequiredType(child1, NoPL_type_Number, context, options);
+				nopl_appendNodeWithRequiredType(child2, NoPL_type_Number, context, options);
 			}
 				break;
 			case ID:
 			{
 				//check the type of the ID
-				switch(dataTypeForTree(tree, context))
+				switch(nopl_dataTypeForTree(tree, context))
 				{
 					case NoPL_type_Boolean:
 					{
 						//append the operator
-						addOperator(NoPL_BYTE_VARIABLE_BOOLEAN, context);
+						nopl_addOperator(NoPL_BYTE_VARIABLE_BOOLEAN, context);
 						
 						//append the index of the variable
-						NoPL_Index varIndex = indexOfVariableInStack(tree->getText(tree), context->booleanStack, tree, context);
-						addBytesToContext(&varIndex, sizeof(NoPL_Index), context);
+						NoPL_Index varIndex = nopl_indexOfVariableInStack(tree->getText(tree), context->booleanStack, tree, context);
+						nopl_addBytesToContext(&varIndex, sizeof(NoPL_Index), context);
 					}
 						break;
 					case NoPL_type_Number:
 					{
 						//append the operator
-						addOperator(NoPL_BYTE_VARIABLE_NUMBER, context);
+						nopl_addOperator(NoPL_BYTE_VARIABLE_NUMBER, context);
 						
 						//append the index of the variable
-						NoPL_Index varIndex = indexOfVariableInStack(tree->getText(tree), context->numberStack, tree, context);
-						addBytesToContext(&varIndex, sizeof(NoPL_Index), context);
+						NoPL_Index varIndex = nopl_indexOfVariableInStack(tree->getText(tree), context->numberStack, tree, context);
+						nopl_addBytesToContext(&varIndex, sizeof(NoPL_Index), context);
 					}
 						break;
 					case NoPL_type_Object:
 					{
 						//append the operator
-						addOperator(NoPL_BYTE_VARIABLE_OBJECT, context);
+						nopl_addOperator(NoPL_BYTE_VARIABLE_OBJECT, context);
 						
 						//append the index of the variable
-						NoPL_Index varIndex = indexOfVariableInStack(tree->getText(tree), context->objectStack, tree, context);
-						addBytesToContext(&varIndex, sizeof(NoPL_Index), context);
+						NoPL_Index varIndex = nopl_indexOfVariableInStack(tree->getText(tree), context->objectStack, tree, context);
+						nopl_addBytesToContext(&varIndex, sizeof(NoPL_Index), context);
 					}
 						break;
 					case NoPL_type_String:
 					{
 						//append the operator
-						addOperator(NoPL_BYTE_VARIABLE_STRING, context);
+						nopl_addOperator(NoPL_BYTE_VARIABLE_STRING, context);
 						
 						//append the index of the variable
-						NoPL_Index varIndex = indexOfVariableInStack(tree->getText(tree), context->stringStack, tree, context);
-						addBytesToContext(&varIndex, sizeof(NoPL_Index), context);
+						NoPL_Index varIndex = nopl_indexOfVariableInStack(tree->getText(tree), context->stringStack, tree, context);
+						nopl_addBytesToContext(&varIndex, sizeof(NoPL_Index), context);
 					}
 						break;
 					default:
 					{
 						//this is a global function without args
-						appendFunctionCall(NULL, tree, NULL, options, context);
+						nopl_appendFunctionCall(NULL, tree, NULL, options, context);
 					}
 						break;
 				}
@@ -1146,18 +1238,18 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 			case INCREMENT:
 			{
 				//add the operator
-				addOperator(NoPL_BYTE_NUMERIC_INCREMENT, context);
+				nopl_addOperator(NoPL_BYTE_NUMERIC_INCREMENT, context);
 				
 				//get the variable being changed
 				pANTLR3_BASE_TREE var = treeIndex(tree,0);
 				
 				//check the data type of the variable
-				if(dataTypeForTree(var, context) != NoPL_type_Number)
+				if(nopl_dataTypeForTree(var, context) != NoPL_type_Number)
 					nopl_error(var, NoPL_ErrStr_CannotIncrement, context);
 				
 				//append the index for the variable
-				NoPL_Index index = indexOfVariableInStack(var->getText(var), context->numberStack, var, context);
-				addBytesToContext(&index, sizeof(NoPL_Index), context);
+				NoPL_Index index = nopl_indexOfVariableInStack(var->getText(var), context->numberStack, var, context);
+				nopl_addBytesToContext(&index, sizeof(NoPL_Index), context);
 			}
 				break;
 			case LESS_THAN:
@@ -1167,11 +1259,11 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 				pANTLR3_BASE_TREE child2 = treeIndex(tree,1);
 				
 				//append the operator
-				addOperator(NoPL_BYTE_BOOLEAN_LESS_THAN, context);
+				nopl_addOperator(NoPL_BYTE_BOOLEAN_LESS_THAN, context);
 				
 				//append the expressions
-				appendNodeWithRequiredType(child1, NoPL_type_Number, context, options);
-				appendNodeWithRequiredType(child2, NoPL_type_Number, context, options);
+				nopl_appendNodeWithRequiredType(child1, NoPL_type_Number, context, options);
+				nopl_appendNodeWithRequiredType(child2, NoPL_type_Number, context, options);
 			}
 				break;
 			case LESS_THAN_EQUAL:
@@ -1181,26 +1273,26 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 				pANTLR3_BASE_TREE child2 = treeIndex(tree,1);
 				
 				//append the operator
-				addOperator(NoPL_BYTE_BOOLEAN_LESS_THAN_EQUAL, context);
+				nopl_addOperator(NoPL_BYTE_BOOLEAN_LESS_THAN_EQUAL, context);
 				
 				//append the expressions
-				appendNodeWithRequiredType(child1, NoPL_type_Number, context, options);
-				appendNodeWithRequiredType(child2, NoPL_type_Number, context, options);
+				nopl_appendNodeWithRequiredType(child1, NoPL_type_Number, context, options);
+				nopl_appendNodeWithRequiredType(child2, NoPL_type_Number, context, options);
 			}
 				break;
 			case LITERAL_FALSE:
 			{
-				addOperator(NoPL_BYTE_LITERAL_BOOLEAN_FALSE, context);
+				nopl_addOperator(NoPL_BYTE_LITERAL_BOOLEAN_FALSE, context);
 			}
 				break;
 			case LITERAL_NULL:
 			{
-				addOperator(NoPL_BYTE_LITERAL_NULL, context);
+				nopl_addOperator(NoPL_BYTE_LITERAL_NULL, context);
 			}
 				break;
 			case LITERAL_TRUE:
 			{
-				addOperator(NoPL_BYTE_LITERAL_BOOLEAN_TRUE, context);
+				nopl_addOperator(NoPL_BYTE_LITERAL_BOOLEAN_TRUE, context);
 			}
 				break;
 			case LOGICAL_AND:
@@ -1210,11 +1302,11 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 				pANTLR3_BASE_TREE child2 = treeIndex(tree,1);
 				
 				//append the operator
-				addOperator(NoPL_BYTE_BOOLEAN_AND, context);
+				nopl_addOperator(NoPL_BYTE_BOOLEAN_AND, context);
 				
 				//append the expressions
-				appendNodeWithRequiredType(child1, NoPL_type_Number, context, options);
-				appendNodeWithRequiredType(child2, NoPL_type_Number, context, options);
+				nopl_appendNodeWithRequiredType(child1, NoPL_type_Number, context, options);
+				nopl_appendNodeWithRequiredType(child2, NoPL_type_Number, context, options);
 			}
 				break;
 			case LOGICAL_EQUALITY:
@@ -1224,8 +1316,8 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 				pANTLR3_BASE_TREE child2 = treeIndex(tree,1);
 				
 				//get the types of expressions being compared
-				NoPL_DataType child1Type = dataTypeForTree(child1, context);
-				NoPL_DataType child2Type = dataTypeForTree(child2, context);
+				NoPL_DataType child1Type = nopl_dataTypeForTree(child1, context);
+				NoPL_DataType child2Type = nopl_dataTypeForTree(child2, context);
 				
 				//make sure we're looking at comparable expressions
 				if(child1Type == NoPL_type_FunctionResult && child2Type == NoPL_type_FunctionResult)
@@ -1243,16 +1335,16 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 					switch(exprType)
 					{
 						case NoPL_type_Number:
-							addOperator(NoPL_BYTE_NUMERIC_LOGICAL_EQUALITY, context);
+							nopl_addOperator(NoPL_BYTE_NUMERIC_LOGICAL_EQUALITY, context);
 							break;
 						case NoPL_type_Boolean:
-							addOperator(NoPL_BYTE_BOOLEAN_LOGICAL_EQUALITY, context);
+							nopl_addOperator(NoPL_BYTE_BOOLEAN_LOGICAL_EQUALITY, context);
 							break;
 						case NoPL_type_Object:
-							addOperator(NoPL_BYTE_OBJECT_LOGICAL_EQUALITY, context);
+							nopl_addOperator(NoPL_BYTE_OBJECT_LOGICAL_EQUALITY, context);
 							break;
 						case NoPL_type_String:
-							addOperator(NoPL_BYTE_STRING_LOGICAL_EQUALITY, context);
+							nopl_addOperator(NoPL_BYTE_STRING_LOGICAL_EQUALITY, context);
 							break;
 						default:
 							nopl_error(tree, NoPL_ErrStr_CouldNotDetermineType, context);
@@ -1260,8 +1352,8 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 					}
 					
 					//append the expressions
-					appendNodeWithRequiredType(child1, exprType, context, options);
-					appendNodeWithRequiredType(child2, exprType, context, options);
+					nopl_appendNodeWithRequiredType(child1, exprType, context, options);
+					nopl_appendNodeWithRequiredType(child2, exprType, context, options);
 				}
 				else
 					nopl_error(tree, NoPL_ErrStr_EqualityDifferentType, context);
@@ -1274,8 +1366,8 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 				pANTLR3_BASE_TREE child2 = treeIndex(tree,1);
 				
 				//get the types of expressions being compared
-				NoPL_DataType child1Type = dataTypeForTree(child1, context);
-				NoPL_DataType child2Type = dataTypeForTree(child2, context);
+				NoPL_DataType child1Type = nopl_dataTypeForTree(child1, context);
+				NoPL_DataType child2Type = nopl_dataTypeForTree(child2, context);
 				
 				//make sure we're looking at comparable expressions
 				if(child1Type == NoPL_type_FunctionResult && child2Type == NoPL_type_FunctionResult)
@@ -1293,16 +1385,16 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 					switch (exprType)
 					{
 						case NoPL_type_Number:
-							addOperator(NoPL_BYTE_NUMERIC_LOGICAL_INEQUALITY, context);
+							nopl_addOperator(NoPL_BYTE_NUMERIC_LOGICAL_INEQUALITY, context);
 							break;
 						case NoPL_type_Boolean:
-							addOperator(NoPL_BYTE_BOOLEAN_LOGICAL_INEQUALITY, context);
+							nopl_addOperator(NoPL_BYTE_BOOLEAN_LOGICAL_INEQUALITY, context);
 							break;
 						case NoPL_type_Object:
-							addOperator(NoPL_BYTE_OBJECT_LOGICAL_INEQUALITY, context);
+							nopl_addOperator(NoPL_BYTE_OBJECT_LOGICAL_INEQUALITY, context);
 							break;
 						case NoPL_type_String:
-							addOperator(NoPL_BYTE_STRING_LOGICAL_INEQUALITY, context);
+							nopl_addOperator(NoPL_BYTE_STRING_LOGICAL_INEQUALITY, context);
 							break;
 						default:
 							nopl_error(tree, NoPL_ErrStr_CouldNotDetermineType, context);
@@ -1310,8 +1402,8 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 					}
 					
 					//append the expressions
-					appendNodeWithRequiredType(child1, exprType, context, options);
-					appendNodeWithRequiredType(child2, exprType, context, options);
+					nopl_appendNodeWithRequiredType(child1, exprType, context, options);
+					nopl_appendNodeWithRequiredType(child2, exprType, context, options);
 				}
 				else
 					nopl_error(tree, NoPL_ErrStr_EqualityDifferentType, context);
@@ -1323,10 +1415,10 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 				pANTLR3_BASE_TREE child1 = treeIndex(tree,0);
 				
 				//append the operator
-				addOperator(NoPL_BYTE_BOOLEAN_NEGATION, context);
+				nopl_addOperator(NoPL_BYTE_BOOLEAN_NEGATION, context);
 				
 				//append the expression
-				appendNodeWithRequiredType(child1, NoPL_type_Boolean, context, options);
+				nopl_appendNodeWithRequiredType(child1, NoPL_type_Boolean, context, options);
 			}
 				break;
 			case LOGICAL_OR:
@@ -1336,11 +1428,11 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 				pANTLR3_BASE_TREE child2 = treeIndex(tree,1);
 				
 				//append the operator
-				addOperator(NoPL_BYTE_BOOLEAN_OR, context);
+				nopl_addOperator(NoPL_BYTE_BOOLEAN_OR, context);
 				
 				//append the expressions
-				appendNodeWithRequiredType(child1, NoPL_type_Number, context, options);
-				appendNodeWithRequiredType(child2, NoPL_type_Number, context, options);
+				nopl_appendNodeWithRequiredType(child1, NoPL_type_Number, context, options);
+				nopl_appendNodeWithRequiredType(child2, NoPL_type_Number, context, options);
 			}
 				break;
 			case LOOP_DO:
@@ -1349,7 +1441,7 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 				pANTLR3_BASE_TREE conditional = treeIndex(tree,0);
 				
 				//get another byte buffer for everything inside this loop
-				NoPL_CompileContext loopCtx = newInnerCompileContext(context, 1, 1);
+				NoPL_CompileContext loopCtx = nopl_newInnerCompileContext(context, 1, 1);
 				
 				//push a scope for the loop
 				nopl_pushScope(&loopCtx);
@@ -1363,30 +1455,34 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 				for(i = 1; i < childCount; i++)
 				{
 					childArg = (pANTLR3_BASE_TREE)(tree->children->get(tree->children, i));
-					traverseAST(childArg, options, &loopCtx);
+					nopl_traverseAST(childArg, options, &loopCtx);
 				}
 				
 				//pop a scope for the loop
 				nopl_popScope(&loopCtx);
 				
+				//store the position that the buffer should move to when a continue statement is evaluated
+				NoPL_Index continueIndex = loopCtx.dataLength;
+				
 				//a loop gets compiled as a repeating conditional
-				addOperator(NoPL_BYTE_CONDITIONAL, &loopCtx);
+				nopl_addOperator(NoPL_BYTE_CONDITIONAL, &loopCtx);
 				
 				//append the boolean expression for the conditional
-				appendNodeWithRequiredType(conditional, NoPL_type_Boolean, &loopCtx, options);
+				nopl_appendNodeWithRequiredType(conditional, NoPL_type_Boolean, &loopCtx, options);
 				
 				//add the number of bytes to skip when the conditional fails
 				NoPL_BufferMove condMove = sizeof(NoPL_Instruction)+sizeof(NoPL_BufferMove);
-				addBytesToContext(&condMove, sizeof(NoPL_BufferMove), &loopCtx);
+				nopl_addBytesToContext(&condMove, sizeof(NoPL_BufferMove), &loopCtx);
 				
 				//the only content of the conditional is a buffer move that restarts the loop
 				NoPL_BufferMove loopMove = -((NoPL_BufferMove)(loopCtx.dataLength));
-				addBytesToContext(&loopMove, sizeof(NoPL_BufferMove), &loopCtx);
+				nopl_addBytesToContext(&loopMove, sizeof(NoPL_BufferMove), &loopCtx);
 				
 				//append the loop
-				addBytesToContext(loopCtx.compiledData, loopCtx.dataLength, context);
+				nopl_finalizeControlFlowMoves(&loopCtx, loopCtx.dataLength, continueIndex);
+				nopl_appendContext(&loopCtx, context);
 				
-				freeInnerCompileContext(&loopCtx);
+				nopl_freeInnerCompileContext(&loopCtx);
 			}
 				break;
 			case LOOP_FOR:
@@ -1400,19 +1496,19 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 				pANTLR3_BASE_TREE increment = treeIndex(tree,2);
 				
 				//append the declaration
-				traverseAST(declaration, options, context);
+				nopl_traverseAST(declaration, options, context);
 				
 				//get a byte buffer for everything at the top of this loop
-				NoPL_CompileContext outerLoopCtx = newInnerCompileContext(context, 0, 0);
+				NoPL_CompileContext outerLoopCtx = nopl_newInnerCompileContext(context, 0, 0);
 				
 				//a loop gets compiled as a repeating conditional
-				addOperator(NoPL_BYTE_CONDITIONAL, &outerLoopCtx);
+				nopl_addOperator(NoPL_BYTE_CONDITIONAL, &outerLoopCtx);
 				
 				//append the boolean expression for the conditional
-				appendNodeWithRequiredType(conditional, NoPL_type_Boolean, &outerLoopCtx, options);
+				nopl_appendNodeWithRequiredType(conditional, NoPL_type_Boolean, &outerLoopCtx, options);
 				
 				//get another byte buffer for everything inside this loop
-				NoPL_CompileContext innerLoopCtx = newInnerCompileContext(&outerLoopCtx, 1, 1);
+				NoPL_CompileContext innerLoopCtx = nopl_newInnerCompileContext(&outerLoopCtx, 1, 1);
 				
 				//push a scope for the loop
 				nopl_pushScope(&innerLoopCtx);
@@ -1426,36 +1522,37 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 				for(i = 3; i < childCount; i++)
 				{
 					childArg = (pANTLR3_BASE_TREE)(tree->children->get(tree->children, i));
-					traverseAST(childArg, options, &innerLoopCtx);
+					nopl_traverseAST(childArg, options, &innerLoopCtx);
 				}
 				
 				//append the increment at the end of the loop
-				traverseAST(increment, options, &innerLoopCtx);
+				nopl_traverseAST(increment, options, &innerLoopCtx);
 				
 				//pop a scope for the loop
 				nopl_popScope(&innerLoopCtx);
 				
 				//go back to the beginning of the loop
-				addOperator(NoPL_BYTE_BUFFER_MOVE, &innerLoopCtx);
+				nopl_addOperator(NoPL_BYTE_BUFFER_MOVE, &innerLoopCtx);
 				NoPL_BufferMove repeatMove = -((NoPL_BufferMove)(outerLoopCtx.dataLength+innerLoopCtx.dataLength+(2*sizeof(NoPL_BufferMove))));
-				addBytesToContext(&repeatMove, sizeof(NoPL_BufferMove), &innerLoopCtx);
+				nopl_addBytesToContext(&repeatMove, sizeof(NoPL_BufferMove), &innerLoopCtx);
 				
 				//add the number of bytes to skip when the conditional fails
 				NoPL_BufferMove condMove = (NoPL_BufferMove)innerLoopCtx.dataLength;
-				addBytesToContext(&condMove, sizeof(NoPL_BufferMove), &outerLoopCtx);
+				nopl_addBytesToContext(&condMove, sizeof(NoPL_BufferMove), &outerLoopCtx);
 				
-				//append the logic for the loop
-				addBytesToContext(outerLoopCtx.compiledData, outerLoopCtx.dataLength, context);
+				//append the inner loop to the outer loop
+				nopl_appendContext(&innerLoopCtx, &outerLoopCtx);
+				nopl_finalizeControlFlowMoves(&outerLoopCtx, outerLoopCtx.dataLength, 0);
 				
 				//append the loop contents
-				addBytesToContext(innerLoopCtx.compiledData, innerLoopCtx.dataLength, context);
+				nopl_appendContext(&outerLoopCtx, context);
 				
 				//pop the scope for the statements in the top of the loop
 				nopl_popScope(context);
 				
 				//free contexts
-				freeInnerCompileContext(&innerLoopCtx);
-				freeInnerCompileContext(&outerLoopCtx);
+				nopl_freeInnerCompileContext(&innerLoopCtx);
+				nopl_freeInnerCompileContext(&outerLoopCtx);
 			}
 				break;
 			case LOOP_WHILE:
@@ -1464,16 +1561,16 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 				pANTLR3_BASE_TREE conditional = treeIndex(tree,0);
 				
 				//get a byte buffer for everything at the top of this loop
-				NoPL_CompileContext outerLoopCtx = newInnerCompileContext(context, 0, 0);
+				NoPL_CompileContext outerLoopCtx = nopl_newInnerCompileContext(context, 0, 0);
 				
 				//a loop gets compiled as a repeating conditional
-				addOperator(NoPL_BYTE_CONDITIONAL, &outerLoopCtx);
+				nopl_addOperator(NoPL_BYTE_CONDITIONAL, &outerLoopCtx);
 				
 				//append the boolean expression for the conditional
-				appendNodeWithRequiredType(conditional, NoPL_type_Boolean, &outerLoopCtx, options);
+				nopl_appendNodeWithRequiredType(conditional, NoPL_type_Boolean, &outerLoopCtx, options);
 				
 				//get another byte buffer for everything inside this loop
-				NoPL_CompileContext innerLoopCtx = newInnerCompileContext(&outerLoopCtx, 1, 1);
+				NoPL_CompileContext innerLoopCtx = nopl_newInnerCompileContext(&outerLoopCtx, 1, 1);
 				
 				//push a scope for the loop
 				nopl_pushScope(&innerLoopCtx);
@@ -1487,30 +1584,31 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 				for(i = 1; i < childCount; i++)
 				{
 					childArg = (pANTLR3_BASE_TREE)(tree->children->get(tree->children, i));
-					traverseAST(childArg, options, &innerLoopCtx);
+					nopl_traverseAST(childArg, options, &innerLoopCtx);
 				}
 				
 				//pop a scope for the loop
 				nopl_popScope(&innerLoopCtx);
 				
 				//go back to the beginning of the loop
-				addOperator(NoPL_BYTE_BUFFER_MOVE, &innerLoopCtx);
+				nopl_addOperator(NoPL_BYTE_BUFFER_MOVE, &innerLoopCtx);
 				NoPL_BufferMove repeatMove = -((NoPL_BufferMove)(outerLoopCtx.dataLength+innerLoopCtx.dataLength+(2*sizeof(NoPL_BufferMove))));
-				addBytesToContext(&repeatMove, sizeof(NoPL_BufferMove), &innerLoopCtx);
+				nopl_addBytesToContext(&repeatMove, sizeof(NoPL_BufferMove), &innerLoopCtx);
 				
 				//add the number of bytes to skip when the conditional fails
 				NoPL_BufferMove condMove = (NoPL_BufferMove)innerLoopCtx.dataLength;
-				addBytesToContext(&condMove, sizeof(NoPL_BufferMove), &outerLoopCtx);
+				nopl_addBytesToContext(&condMove, sizeof(NoPL_BufferMove), &outerLoopCtx);
+				
+				//append the inner loop to the outer loop
+				nopl_appendContext(&innerLoopCtx, &outerLoopCtx);
+				nopl_finalizeControlFlowMoves(&outerLoopCtx, outerLoopCtx.dataLength, 0);
 				
 				//append the logic for the loop
-				addBytesToContext(outerLoopCtx.compiledData, outerLoopCtx.dataLength, context);
-				
-				//append the loop contents
-				addBytesToContext(innerLoopCtx.compiledData, innerLoopCtx.dataLength, context);
+				nopl_appendContext(&outerLoopCtx, context);
 				
 				//free contexts
-				freeInnerCompileContext(&innerLoopCtx);
-				freeInnerCompileContext(&outerLoopCtx);
+				nopl_freeInnerCompileContext(&innerLoopCtx);
+				nopl_freeInnerCompileContext(&outerLoopCtx);
 			}
 				break;
 			case MOD:
@@ -1520,11 +1618,11 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 				pANTLR3_BASE_TREE child2 = treeIndex(tree,1);
 				
 				//add the operator
-				addOperator(NoPL_BYTE_NUMERIC_MODULO, context);
+				nopl_addOperator(NoPL_BYTE_NUMERIC_MODULO, context);
 				
 				//append the expressions
-				appendNodeWithRequiredType(child1, NoPL_type_Number, context, options);
-				appendNodeWithRequiredType(child2, NoPL_type_Number, context, options);
+				nopl_appendNodeWithRequiredType(child1, NoPL_type_Number, context, options);
+				nopl_appendNodeWithRequiredType(child2, NoPL_type_Number, context, options);
 			}
 				break;
 			case MOD_ASSIGN:
@@ -1534,18 +1632,18 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 				pANTLR3_BASE_TREE incrementVal = treeIndex(tree,1);
 				
 				//check the object on the left-hand side to make sure that it is the correct type
-				NoPL_DataType assignToType = dataTypeForTree(assignTo, context);
+				NoPL_DataType assignToType = nopl_dataTypeForTree(assignTo, context);
 				if(assignToType == NoPL_type_Number)
 				{
 					//append the operator
-					addOperator(NoPL_BYTE_NUMERIC_MODULO_ASSIGN, context);
+					nopl_addOperator(NoPL_BYTE_NUMERIC_MODULO_ASSIGN, context);
 					
 					//add the index for the variable
-					NoPL_Index index = indexOfVariableInStack(assignTo->getText(assignTo), context->numberStack, assignTo, context);
-					addBytesToContext(&index, sizeof(NoPL_Index), context);
+					NoPL_Index index = nopl_indexOfVariableInStack(assignTo->getText(assignTo), context->numberStack, assignTo, context);
+					nopl_addBytesToContext(&index, sizeof(NoPL_Index), context);
 					
 					//append the increment
-					appendNodeWithRequiredType(incrementVal, NoPL_type_Number, context, options);
+					nopl_appendNodeWithRequiredType(incrementVal, NoPL_type_Number, context, options);
 				}
 				else
 				{
@@ -1563,11 +1661,11 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 				pANTLR3_BASE_TREE child2 = treeIndex(tree,1);
 				
 				//add the operator
-				addOperator(NoPL_BYTE_NUMERIC_MULTIPLY, context);
+				nopl_addOperator(NoPL_BYTE_NUMERIC_MULTIPLY, context);
 				
 				//append the expressions
-				appendNodeWithRequiredType(child1, NoPL_type_Number, context, options);
-				appendNodeWithRequiredType(child2, NoPL_type_Number, context, options);
+				nopl_appendNodeWithRequiredType(child1, NoPL_type_Number, context, options);
+				nopl_appendNodeWithRequiredType(child2, NoPL_type_Number, context, options);
 			}
 				break;
 			case MULTIPLY_ASSIGN:
@@ -1577,18 +1675,18 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 				pANTLR3_BASE_TREE incrementVal = treeIndex(tree,1);
 				
 				//check the object on the left-hand side to make sure that it is the correct type
-				NoPL_DataType assignToType = dataTypeForTree(assignTo, context);
+				NoPL_DataType assignToType = nopl_dataTypeForTree(assignTo, context);
 				if(assignToType == NoPL_type_Number)
 				{
 					//append the operator
-					addOperator(NoPL_BYTE_NUMERIC_MULTIPLY_ASSIGN, context);
+					nopl_addOperator(NoPL_BYTE_NUMERIC_MULTIPLY_ASSIGN, context);
 					
 					//add the index for the variable
-					NoPL_Index index = indexOfVariableInStack(assignTo->getText(assignTo), context->numberStack, assignTo, context);
-					addBytesToContext(&index, sizeof(NoPL_Index), context);
+					NoPL_Index index = nopl_indexOfVariableInStack(assignTo->getText(assignTo), context->numberStack, assignTo, context);
+					nopl_addBytesToContext(&index, sizeof(NoPL_Index), context);
 					
 					//append the increment
-					appendNodeWithRequiredType(incrementVal, NoPL_type_Number, context, options);
+					nopl_appendNodeWithRequiredType(incrementVal, NoPL_type_Number, context, options);
 				}
 				else
 				{
@@ -1605,10 +1703,10 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 				float floatVal = atof(((const char*)tree->getText(tree)->chars));
 				
 				//add the operator
-				addOperator(NoPL_BYTE_LITERAL_NUMBER, context);
+				nopl_addOperator(NoPL_BYTE_LITERAL_NUMBER, context);
 				
 				//add the float
-				addBytesToContext(&floatVal, sizeof(float), context);
+				nopl_addBytesToContext(&floatVal, sizeof(float), context);
 			}
 				break;
 			case NUMERIC_NEGATION:
@@ -1617,10 +1715,10 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 				pANTLR3_BASE_TREE child1 = treeIndex(tree,0);
 				
 				//append the operator
-				addOperator(NoPL_BYTE_NUMERIC_NEGATION, context);
+				nopl_addOperator(NoPL_BYTE_NUMERIC_NEGATION, context);
 				
 				//append the expression
-				appendNodeWithRequiredType(child1, NoPL_type_Number, context, options);
+				nopl_appendNodeWithRequiredType(child1, NoPL_type_Number, context, options);
 			}
 				break;
 			case OBJECT_TO_MEMBER:
@@ -1648,7 +1746,7 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 				}
 				
 				//append the call
-				appendFunctionCall(treeIndex(tree,0), funcName, args, options, context);
+				nopl_appendFunctionCall(treeIndex(tree,0), funcName, args, options, context);
 			}
 				break;
 			case PRINT_VALUE:
@@ -1657,19 +1755,19 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 				pANTLR3_BASE_TREE child1 = treeIndex(tree,0);
 				
 				//add the operator
-				addOperator(NoPL_BYTE_STRING_PRINT, context);
+				nopl_addOperator(NoPL_BYTE_STRING_PRINT, context);
 				
 				//guarantee that the child is a string by casting if necessary
-				switch(dataTypeForTree(child1, context))
+				switch(nopl_dataTypeForTree(child1, context))
 				{
 					case NoPL_type_Boolean:
-						addOperator(NoPL_BYTE_CAST_BOOLEAN_TO_STRING, context);
+						nopl_addOperator(NoPL_BYTE_CAST_BOOLEAN_TO_STRING, context);
 						break;
 					case NoPL_type_FunctionResult:
-						addOperator(NoPL_BYTE_RESOLVE_RESULT_TO_STRING, context);
+						nopl_addOperator(NoPL_BYTE_RESOLVE_RESULT_TO_STRING, context);
 						break;
 					case NoPL_type_Number:
-						addOperator(NoPL_BYTE_CAST_NUMBER_TO_STRING, context);
+						nopl_addOperator(NoPL_BYTE_CAST_NUMBER_TO_STRING, context);
 						break;
 					case NoPL_type_String:
 						break;
@@ -1682,7 +1780,7 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 				}
 				
 				//append the expression
-				traverseAST(child1, options, context);
+				nopl_traverseAST(child1, options, context);
 			}
 				break;
 			case SCOPE_OPEN:
@@ -1700,7 +1798,7 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 				{
 					//get each child and append
 					child = (pANTLR3_BASE_TREE)(tree->children->get(tree->children, i));
-					traverseAST(child, options, context);
+					nopl_traverseAST(child, options, context);
 				}
 				
 				//pop the scope
@@ -1711,7 +1809,7 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 			{
 				//get the string and length
 				char* string = (char*)tree->getText(tree)->chars;
-				int length = strlen(string);
+				int length = (int)strlen(string);
 				
 				//strip the quotes
 				char stringCopy[length];
@@ -1719,10 +1817,10 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 				stringCopy[length-2] = 0;
 				
 				//add the operator
-				addOperator(NoPL_BYTE_LITERAL_STRING, context);
+				nopl_addOperator(NoPL_BYTE_LITERAL_STRING, context);
 				
 				//add the string
-				addBytesToContext(stringCopy, sizeof(char)*(length-1), context);
+				nopl_addBytesToContext(stringCopy, sizeof(char)*(length-1), context);
 			}
 				break;
 			case SUBSCRIPT_OPEN:
@@ -1732,22 +1830,22 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 				pANTLR3_BASE_TREE index = treeIndex(tree,1);
 				
 				//add the operator
-				addOperator(NoPL_BYTE_FUNCTION_INDEX, context);
+				nopl_addOperator(NoPL_BYTE_FUNCTION_INDEX, context);
 				
 				//append the object expression
-				appendNodeWithRequiredType(object, NoPL_type_Object, context, options);
+				nopl_appendNodeWithRequiredType(object, NoPL_type_Object, context, options);
 				
 				//we can only index numbers or strings
-				switch(dataTypeForTree(index, context))
+				switch(nopl_dataTypeForTree(index, context))
 				{
 					case NoPL_type_FunctionResult:
 						nopl_error(index, "This expression must be cast to either a numeric or string value", context);
 						break;
 					case NoPL_type_Number:
-						addOperator(NoPL_BYTE_ARG_NUMBER, context);
+						nopl_addOperator(NoPL_BYTE_ARG_NUMBER, context);
 						break;
 					case NoPL_type_String:
-						addOperator(NoPL_BYTE_ARG_STRING, context);
+						nopl_addOperator(NoPL_BYTE_ARG_STRING, context);
 						break;
 					default:
 						nopl_error(index, "Cannot use an expression of this type as an index", context);
@@ -1755,7 +1853,7 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 				}
 				
 				//append the index expression
-				traverseAST(index, options, context);
+				nopl_traverseAST(index, options, context);
 			}
 				break;
 			case SUBTRACT:
@@ -1765,11 +1863,11 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 				pANTLR3_BASE_TREE child2 = treeIndex(tree,1);
 				
 				//add the operator
-				addOperator(NoPL_BYTE_NUMERIC_SUBTRACT, context);
+				nopl_addOperator(NoPL_BYTE_NUMERIC_SUBTRACT, context);
 				
 				//append the expressions
-				appendNodeWithRequiredType(child1, NoPL_type_Number, context, options);
-				appendNodeWithRequiredType(child2, NoPL_type_Number, context, options);
+				nopl_appendNodeWithRequiredType(child1, NoPL_type_Number, context, options);
+				nopl_appendNodeWithRequiredType(child2, NoPL_type_Number, context, options);
 			}
 				break;
 			case SUBTRACT_ASSIGN:
@@ -1779,18 +1877,18 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 				pANTLR3_BASE_TREE incrementVal = treeIndex(tree,1);
 				
 				//check the object on the left-hand side to make sure that it is the correct type
-				NoPL_DataType assignToType = dataTypeForTree(assignTo, context);
+				NoPL_DataType assignToType = nopl_dataTypeForTree(assignTo, context);
 				if(assignToType == NoPL_type_Number)
 				{
 					//append the operator
-					addOperator(NoPL_BYTE_NUMERIC_SUBTRACT_ASSIGN, context);
+					nopl_addOperator(NoPL_BYTE_NUMERIC_SUBTRACT_ASSIGN, context);
 					
 					//add the index for the variable
-					NoPL_Index index = indexOfVariableInStack(assignTo->getText(assignTo), context->numberStack, assignTo, context);
-					addBytesToContext(&index, sizeof(NoPL_Index), context);
+					NoPL_Index index = nopl_indexOfVariableInStack(assignTo->getText(assignTo), context->numberStack, assignTo, context);
+					nopl_addBytesToContext(&index, sizeof(NoPL_Index), context);
 					
 					//append the expression
-					appendNodeWithRequiredType(incrementVal, NoPL_type_Number, context, options);
+					nopl_appendNodeWithRequiredType(incrementVal, NoPL_type_Number, context, options);
 				}
 				else
 				{
@@ -1811,8 +1909,8 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 				//get the expression which will be cast
 				pANTLR3_BASE_TREE expression = treeIndex(tree,1);
 				
-				NoPL_DataType castType = dataTypeForTree(tree, context);
-				NoPL_DataType expressionType = dataTypeForTree(expression, context);
+				NoPL_DataType castType = nopl_dataTypeForTree(tree, context);
+				NoPL_DataType expressionType = nopl_dataTypeForTree(expression, context);
 				
 				//only add this cast if the types are actually different
 				if(castType != expressionType)
@@ -1823,11 +1921,11 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 							
 							//cast to boolean
 							if(expressionType == NoPL_type_FunctionResult)
-								addOperator(NoPL_BYTE_RESOLVE_RESULT_TO_BOOLEAN, context);
+								nopl_addOperator(NoPL_BYTE_RESOLVE_RESULT_TO_BOOLEAN, context);
 							else if(expressionType == NoPL_type_Number)
-								addOperator(NoPL_BYTE_CAST_NUMBER_TO_BOOLEAN, context);
+								nopl_addOperator(NoPL_BYTE_CAST_NUMBER_TO_BOOLEAN, context);
 							else if(expressionType == NoPL_type_String)
-								addOperator(NoPL_BYTE_CAST_STRING_TO_BOOLEAN, context);
+								nopl_addOperator(NoPL_BYTE_CAST_STRING_TO_BOOLEAN, context);
 							else if(expressionType == NoPL_type_Object)
 								nopl_error(expression, NoPL_ErrStr_CannotCastObjectToPrimitive, context);
 							else
@@ -1838,11 +1936,11 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 							
 							//cast to number
 							if(expressionType == NoPL_type_FunctionResult)
-								addOperator(NoPL_BYTE_RESOLVE_RESULT_TO_NUMBER, context);
+								nopl_addOperator(NoPL_BYTE_RESOLVE_RESULT_TO_NUMBER, context);
 							else if(expressionType == NoPL_type_Boolean)
-								addOperator(NoPL_BYTE_CAST_BOOLEAN_TO_NUMBER, context);
+								nopl_addOperator(NoPL_BYTE_CAST_BOOLEAN_TO_NUMBER, context);
 							else if(expressionType == NoPL_type_String)
-								addOperator(NoPL_BYTE_CAST_STRING_TO_NUMBER, context);
+								nopl_addOperator(NoPL_BYTE_CAST_STRING_TO_NUMBER, context);
 							else if(expressionType == NoPL_type_Object)
 								nopl_error(expression, NoPL_ErrStr_CannotCastObjectToPrimitive, context);
 							else
@@ -1853,11 +1951,11 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 							
 							//cast to number
 							if(expressionType == NoPL_type_FunctionResult)
-								addOperator(NoPL_BYTE_RESOLVE_RESULT_TO_STRING, context);
+								nopl_addOperator(NoPL_BYTE_RESOLVE_RESULT_TO_STRING, context);
 							else if(expressionType == NoPL_type_Boolean)
-								addOperator(NoPL_BYTE_CAST_BOOLEAN_TO_STRING, context);
+								nopl_addOperator(NoPL_BYTE_CAST_BOOLEAN_TO_STRING, context);
 							else if(expressionType == NoPL_type_Number)
-								addOperator(NoPL_BYTE_CAST_NUMBER_TO_STRING, context);
+								nopl_addOperator(NoPL_BYTE_CAST_NUMBER_TO_STRING, context);
 							else if(expressionType == NoPL_type_Object)
 								nopl_error(expression, NoPL_ErrStr_CannotCastObjectToPrimitive, context);
 							else
@@ -1868,7 +1966,7 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 							
 							//can only cast to an object when dealing with values returned from an external function
 							if(expressionType == NoPL_type_FunctionResult)
-								addOperator(NoPL_BYTE_RESOLVE_RESULT_TO_OBJECT, context);
+								nopl_addOperator(NoPL_BYTE_RESOLVE_RESULT_TO_OBJECT, context);
 							else
 								nopl_error(tree, "Cannot cast non-Object primitives to Object", context);
 							
@@ -1879,14 +1977,14 @@ void traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* option
 				}
 				
 				//append the expression
-				traverseAST(expression, options, context);
+				nopl_traverseAST(expression, options, context);
 			}
 				break;
 		}
 	}
 }
 
-void traverseForErrors(const pANTLR3_BASE_TREE tree, NoPL_CompileContext* context)
+void nopl_traverseForErrors(const pANTLR3_BASE_TREE tree, NoPL_CompileContext* context)
 {
 	//check if this node is an error
 	if(tree->isNilNode && !strcmp("Tree Error Node", (char*)tree->getText(tree)->chars))
@@ -1902,11 +2000,11 @@ void traverseForErrors(const pANTLR3_BASE_TREE tree, NoPL_CompileContext* contex
 	{
 		//get each child and append
 		child = (pANTLR3_BASE_TREE)(tree->children->get(tree->children, i));
-		traverseForErrors(child, context);
+		nopl_traverseForErrors(child, context);
 	}
 }
 
-void compileWithInputStream(pANTLR3_INPUT_STREAM stream, const NoPL_CompileOptions* options, NoPL_CompileContext* context)
+void nopl_compileWithInputStream(pANTLR3_INPUT_STREAM stream, const NoPL_CompileOptions* options, NoPL_CompileContext* context)
 {
 	//attempt to parse the NoPL program
 	pNoPLLexer lex = NoPLLexerNew(stream);
@@ -1914,7 +2012,11 @@ void compileWithInputStream(pANTLR3_INPUT_STREAM stream, const NoPL_CompileOptio
 	pNoPLParser parser = NoPLParserNew(context->tokenStream);
 	NoPLParser_program_return syntaxTree = parser->program(parser);
 	
-	//TODO: pre-process the AST for optimization here?
+	//check if we want runtime performance over compile speed
+	if(options->optimizeForRuntime)
+	{
+		//TODO: pre-process the AST for optimization here
+	}
 	
 	//check for errors
 	pANTLR3_BASE_RECOGNIZER recognizer = parser->pParser->rec;
@@ -1922,7 +2024,7 @@ void compileWithInputStream(pANTLR3_INPUT_STREAM stream, const NoPL_CompileOptio
 	if(errCount > 0)
 	{
 		//this tree has errors, add them to the context
-		traverseForErrors(syntaxTree.tree, context);
+		nopl_traverseForErrors(syntaxTree.tree, context);
 	}
 	else
 	{
@@ -1937,7 +2039,7 @@ void compileWithInputStream(pANTLR3_INPUT_STREAM stream, const NoPL_CompileOptio
 		context->stringTableSize = &stringTableSize;
 		
 		//recurse to assemble the byte code
-		traverseAST(syntaxTree.tree, options, context);
+		nopl_traverseAST(syntaxTree.tree, options, context);
 		
 		//use a second context to create the symbol table
 		NoPL_CompileContext symbolTableContext = newNoPL_CompileContext();
@@ -1945,30 +2047,30 @@ void compileWithInputStream(pANTLR3_INPUT_STREAM stream, const NoPL_CompileOptio
 		//add the actual values for the symbol table sizes
 		if(objectTableSize > 0)
 		{
-			addOperator(NoPL_BYTE_OBJECT_TABLE_SIZE, &symbolTableContext);
-			addBytesToContext(&objectTableSize, sizeof(NoPL_Index), &symbolTableContext);
+			nopl_addOperator(NoPL_BYTE_OBJECT_TABLE_SIZE, &symbolTableContext);
+			nopl_addBytesToContext(&objectTableSize, sizeof(NoPL_Index), &symbolTableContext);
 		}
 		if(numberTableSize > 0)
 		{
-			addOperator(NoPL_BYTE_NUMERIC_TABLE_SIZE, &symbolTableContext);
-			addBytesToContext(&numberTableSize, sizeof(NoPL_Index), &symbolTableContext);
+			nopl_addOperator(NoPL_BYTE_NUMERIC_TABLE_SIZE, &symbolTableContext);
+			nopl_addBytesToContext(&numberTableSize, sizeof(NoPL_Index), &symbolTableContext);
 		}
 		if(booleanTableSize > 0)
 		{
-			addOperator(NoPL_BYTE_BOOLEAN_TABLE_SIZE, &symbolTableContext);
-			addBytesToContext(&booleanTableSize, sizeof(NoPL_Index), &symbolTableContext);
+			nopl_addOperator(NoPL_BYTE_BOOLEAN_TABLE_SIZE, &symbolTableContext);
+			nopl_addBytesToContext(&booleanTableSize, sizeof(NoPL_Index), &symbolTableContext);
 		}
 		if(stringTableSize > 0)
 		{
-			addOperator(NoPL_BYTE_STRING_TABLE_SIZE, &symbolTableContext);
-			addBytesToContext(&stringTableSize, sizeof(NoPL_Index), &symbolTableContext);
+			nopl_addOperator(NoPL_BYTE_STRING_TABLE_SIZE, &symbolTableContext);
+			nopl_addBytesToContext(&stringTableSize, sizeof(NoPL_Index), &symbolTableContext);
 		}
 		
 		//prepend the table
 		if(symbolTableContext.dataLength > 0)
 		{
 			//append the script to the table buffer
-			addBytesToContext(context->compiledData, context->dataLength, &symbolTableContext);
+			nopl_appendContext(context, &symbolTableContext);
 			
 			//replace the old buffer
 			if(context->compiledData)
@@ -1995,7 +2097,7 @@ void compileContextWithFilePath(const char* path, const NoPL_CompileOptions* opt
 {
 	//run the compiler with an input stream created from URL path
 	pANTLR3_INPUT_STREAM inputStream = antlr3AsciiFileStreamNew((pANTLR3_UINT8)path);
-	compileWithInputStream(inputStream, options, context);
+	nopl_compileWithInputStream(inputStream, options, context);
 	inputStream->free(inputStream);
 }
 
@@ -2003,7 +2105,7 @@ void compileContextWithString(const char* scriptString, const NoPL_CompileOption
 {
 	//run the compiler with an input stream created from a C string
 	pANTLR3_INPUT_STREAM inputStream = antlr3NewAsciiStringCopyStream((pANTLR3_UINT8)scriptString, (int)strlen((const char*)scriptString), 0);
-	compileWithInputStream(inputStream, options, context);
+	nopl_compileWithInputStream(inputStream, options, context);
 	inputStream->free(inputStream);
 }
 
@@ -2020,6 +2122,8 @@ NoPL_CompileContext newNoPL_CompileContext()
 	context.errDescriptions = NULL;
 	context.breakStatements = NULL;
 	context.continueStatements = NULL;
+	context.allowsBreakStatements = 0;
+	context.allowsContinueStatements = 0;
 	nopl_pushScope(&context);
 	return context;
 }
