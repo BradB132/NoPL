@@ -516,9 +516,6 @@ void nopl_finalizeControlFlowMoves(NoPL_CompileContext* context, NoPL_Index brea
 
 void nopl_appendContext(const NoPL_CompileContext* fromContext, NoPL_CompileContext* toContext)
 {
-	//add all bytes from the original context
-	nopl_addBytesToContext(fromContext->compiledData, fromContext->dataLength, toContext);
-	
 	//check for breaks
 	if(fromContext->breakStatements)
 	{
@@ -554,6 +551,9 @@ void nopl_appendContext(const NoPL_CompileContext* fromContext, NoPL_CompileCont
 			toContext->continueStatements->add(toContext->continueStatements, (void*)index, NULL);
 		}
 	}
+	
+	//add all bytes from the original context
+	nopl_addBytesToContext(fromContext->compiledData, fromContext->dataLength, toContext);
 }
 
 void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* options, NoPL_CompileContext* context)
