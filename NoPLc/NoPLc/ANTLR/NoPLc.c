@@ -496,6 +496,9 @@ void nopl_finalizeControlFlowMoves(NoPL_CompileContext* context, NoPL_Index brea
 			//set the correct value in the compiled data for this new amount
 			memcpy((context->compiledData+copyToIndex), &moveAmount, sizeof(NoPL_BufferMove));
 		}
+		
+		context->breakStatements->free(context->breakStatements);
+		context->breakStatements = NULL;
 	}
 	
 	//check for continues
@@ -511,6 +514,9 @@ void nopl_finalizeControlFlowMoves(NoPL_CompileContext* context, NoPL_Index brea
 			//set the correct value in the compiled data for this new amount
 			memcpy((context->compiledData+copyToIndex), &moveAmount, sizeof(NoPL_BufferMove));
 		}
+		
+		context->continueStatements->free(context->continueStatements);
+		context->continueStatements = NULL;
 	}
 }
 
