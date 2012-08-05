@@ -94,6 +94,8 @@ void testStrings(char* string, NoPL_StringFeedbackType type)
 {
 	if(type == NoPL_StringFeedbackType_PrintStatement)
 		printf("NoPL Print: %s\n", string);
+	else if(type == NoPL_StringFeedbackType_DebugInfo)
+		printf("NoPL Debug: %s\n", string);
 }
 
 int main(int argc, const char * argv[])

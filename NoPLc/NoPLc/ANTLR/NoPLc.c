@@ -57,6 +57,7 @@ void nopl_error(const pANTLR3_BASE_TREE tree, const char* desc, NoPL_CompileCont
 int nopl_variableExistsInStack(const pANTLR3_STRING varName, const pANTLR3_STACK whichStack);
 int nopl_variableExistsInContext(const pANTLR3_STRING varName, const NoPL_CompileContext* context);
 int nopl_declareVariableInStack(const pANTLR3_STRING varName, const pANTLR3_STACK whichStack);
+NoPL_Index nopl_declareAnonymousVariableInStack(const pANTLR3_STACK whichStack);
 NoPL_Index nopl_countVariablesInStack(const pANTLR3_STACK whichStack);
 NoPL_Index nopl_indexOfVariableInStack(const pANTLR3_STRING varName, const pANTLR3_STACK whichStack, const pANTLR3_BASE_TREE tree, NoPL_CompileContext* context);
 NoPL_CompileContext nopl_newInnerCompileContext(NoPL_CompileContext* parentContext, int allowBreak, int allowContinue);
@@ -196,6 +197,11 @@ int nopl_declareVariableInStack(const pANTLR3_STRING varName, const pANTLR3_STAC
 	return 1;
 }
 
+NoPL_Index nopl_declareAnonymousVariableInStack(const pANTLR3_STACK whichStack)
+{
+	//TODO: declare a variable with a NULL name, return variable index
+}
+
 NoPL_Index nopl_countVariablesInStack(const pANTLR3_STACK whichStack)
 {
 	NoPL_Index totalSize = 0;
@@ -234,6 +240,7 @@ NoPL_CompileContext nopl_newInnerCompileContext(NoPL_CompileContext* parentConte
 	context.compiledData = NULL;
 	context.dataLength = 0;
 	context.arrayLength = 0;
+	context.debugLine = parentContext->debugLine;
 	context.tokenStream = parentContext->tokenStream;
 	context.objectStack = parentContext->objectStack;
 	context.numberStack = parentContext->numberStack;
@@ -326,8 +333,8 @@ NoPL_DataType nopl_dataTypeForTree(const pANTLR3_BASE_TREE tree, const NoPL_Comp
 			return NoPL_type_String;
 		case TYPE_CAST:
 		{
-			pANTLR3_BASE_TREE castChild = treeIndex(tree,0);
-			ANTLR3_UINT32 castType = castChild->getType(castChild);
+			pANTLR3_BASE_TREE firstChild = treeIndex(tree,0);
+			ANTLR3_UINT32 castType = firstChild->getType(firstChild);
 			if(castType == DECL_NUMBER)
 				return NoPL_type_Number;
 			else if(castType == DECL_BOOL)
@@ -339,6 +346,8 @@ NoPL_DataType nopl_dataTypeForTree(const pANTLR3_BASE_TREE tree, const NoPL_Comp
 			else
 				return NoPL_type_Error;
 		}
+		case SWITCH_CASE:
+			return nopl_dataTypeForTree(treeIndex(tree, 0), context);
 		case ID:
 		{
 			//check the type of this symbol in the variable stacks
@@ -483,6 +492,7 @@ void nopl_appendFunctionCall(const pANTLR3_BASE_TREE objExpression, const pANTLR
 
 void nopl_finalizeControlFlowMoves(NoPL_CompileContext* context, NoPL_Index breakIndex, NoPL_Index continueIndex)
 {
+	//TODO: change BUFFER_MOVE to be different bytes for forward and backward moves, saves 2 bytes on each move
 	//check for breaks
 	if(context->breakStatements)
 	{
@@ -581,6 +591,19 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 	}
 	else
 	{
+		//check if this is a new line for debug
+		if(options->debugSymbols && (int)tree->getLine(tree) != context->debugLine)
+		{
+			//get the debug line
+			context->debugLine = (int)tree->getLine(tree);
+			
+			//add the debug line
+			nopl_addOperator(NoPL_BYTE_DEBUG_LINE, context);
+			NoPL_Index lineNum = (NoPL_Index)context->debugLine;
+			nopl_addBytesToContext(&lineNum, sizeof(NoPL_Index), context);
+		}
+		
+		//append to the script buffer based on the type of this AST node
 		switch(tree->getType(tree))
 		{
 			case ABS_VALUE:
@@ -1907,7 +1930,49 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				break;
 			case SWITCH:
 			{
-				//TODO:
+				//get the expression which is being evaluated
+				pANTLR3_BASE_TREE expression = treeIndex(tree,0);
+				NoPL_DataType expType = nopl_dataTypeForTree(expression, context);
+				
+				//attempt to get the result's type from the first case
+				if(expType == NoPL_type_FunctionResult && tree->children)
+				{
+					pANTLR3_BASE_TREE firstCase = treeIndex(tree, 1);
+					NoPL_DataType caseType = nopl_dataTypeForTree(firstCase, context);
+					if(caseType == NoPL_type_Boolean || caseType == NoPL_type_Number || caseType == NoPL_type_String)
+					{
+						expType = caseType;
+					}
+				}
+				
+				nopl_pushScope(context);
+				
+				//declare the result of the expression as a variable so that we only have to evaluate it once
+				switch (expType)
+				{
+					case NoPL_type_Boolean:
+					{
+						//we're assigning an anonymous variable
+						nopl_addOperator(NoPL_BYTE_BOOLEAN_ASSIGN, context);
+						
+						//add the index for the variable which will be assigned to
+						NoPL_Index index = nopl_declareAnonymousVariableInStack(context->booleanStack);
+						nopl_addBytesToContext(&index, sizeof(NoPL_Index), context);
+						
+						//append the expression
+						nopl_appendNodeWithRequiredType(expression, NoPL_type_String, context, options);
+					}
+						break;
+					case NoPL_type_Number:
+						index = nopl_declareAnonymousVariableInStack(context->numberStack);
+						break;
+					case NoPL_type_String:
+						index = nopl_declareAnonymousVariableInStack(context->stringStack);
+						break;
+				}
+				
+				//TODO: resolve all cases recursively
+				
 			}
 				break;
 			case TYPE_CAST:
@@ -2130,6 +2195,7 @@ NoPL_CompileContext newNoPL_CompileContext()
 	context.continueStatements = NULL;
 	context.allowsBreakStatements = 0;
 	context.allowsContinueStatements = 0;
+	context.debugLine = -1;
 	nopl_pushScope(&context);
 	return context;
 }

@@ -28,7 +28,7 @@ typedef struct
 	pANTLR3_VECTOR breakStatements;
 	pANTLR3_VECTOR continueStatements;
 	pANTLR3_STRING errDescriptions;
-	NoPL_Index debugLine;
+	int debugLine;
 	NoPL_Index* objectTableSize;
 	NoPL_Index* numberTableSize;
 	NoPL_Index* booleanTableSize;
