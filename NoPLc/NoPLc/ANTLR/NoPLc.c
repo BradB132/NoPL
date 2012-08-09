@@ -64,6 +64,8 @@ NoPL_CompileContext nopl_newInnerCompileContext(NoPL_CompileContext* parentConte
 void nopl_freeInnerCompileContext(NoPL_CompileContext* context);
 void nopl_appendContext(const NoPL_CompileContext* fromContext, NoPL_CompileContext* toContext);
 void nopl_finalizeControlFlowMoves(NoPL_CompileContext* context, NoPL_Index breakIndex, NoPL_Index continueIndex);
+void nopl_switchCaseRecurse(const pANTLR3_BASE_TREE switchNode, int caseIndex, NoPL_DataType expressionType, int anonVarIndex);
+void nopl_appendControlFlowMove(NoPL_CompileContext* context, NoPL_Index moveFromIndex, NoPL_Index moveToIndex);
 
 #pragma mark -
 #pragma mark Compilation
@@ -199,7 +201,19 @@ int nopl_declareVariableInStack(const pANTLR3_STRING varName, const pANTLR3_STAC
 
 NoPL_Index nopl_declareAnonymousVariableInStack(const pANTLR3_STACK whichStack)
 {
-	//TODO: declare a variable with a NULL name, return variable index
+	//count the index of this variable
+	NoPL_Index index = 0;
+	for(int i = 0; i < whichStack->size(whichStack); i++)
+	{
+		pANTLR3_VECTOR vect = (pANTLR3_VECTOR)(whichStack->get(whichStack, i));
+		index += vect->size(vect);
+	}
+	
+	//declare a variable with a NULL name, return variable index
+	pANTLR3_VECTOR topVector = whichStack->peek(whichStack);
+	topVector->add(topVector, NULL, NULL);
+	
+	return index;
 }
 
 NoPL_Index nopl_countVariablesInStack(const pANTLR3_STACK whichStack)
@@ -490,21 +504,37 @@ void nopl_appendFunctionCall(const pANTLR3_BASE_TREE objExpression, const pANTLR
 	}
 }
 
+void nopl_appendControlFlowMove(NoPL_CompileContext* context, NoPL_Index moveFromIndex, NoPL_Index moveToIndex)
+{
+	//calculate the move amount
+	NoPL_Index copyToIndex = moveFromIndex-sizeof(NoPL_Index);
+	NoPL_Index instructionIndex = copyToIndex-sizeof(NoPL_Instruction);
+	int moveAmount = ((int)moveToIndex) - ((int)moveFromIndex);
+	
+	//set the operator based on if we're going forward or backwards
+	NoPL_Instruction instr;
+	if(moveAmount < 0)
+		instr = NoPL_BYTE_BUFFER_MOVE_BACKWARD;
+	else
+		instr = NoPL_BYTE_BUFFER_MOVE_FORWARD;
+		
+	//set the instruction value in the compiled data
+	memcpy((context->compiledData+instructionIndex), &instr, sizeof(NoPL_Instruction));
+	
+	//set the correct value in the compiled data for this new amount
+	NoPL_Index moveAmt = (NoPL_Index)abs(moveAmount);
+	memcpy((context->compiledData+copyToIndex), &moveAmt, sizeof(NoPL_Index));
+}
+
 void nopl_finalizeControlFlowMoves(NoPL_CompileContext* context, NoPL_Index breakIndex, NoPL_Index continueIndex)
 {
-	//TODO: change BUFFER_MOVE to be different bytes for forward and backward moves, saves 2 bytes on each move
 	//check for breaks
 	if(context->breakStatements)
 	{
 		for(int i = 0; i < context->breakStatements->size(context->breakStatements); i++)
 		{
-			//calculate the move amount
 			NoPL_Index moveFromIndex = (NoPL_Index)(context->breakStatements->get(context->breakStatements,i));
-			NoPL_Index copyToIndex = moveFromIndex-sizeof(NoPL_BufferMove);
-			NoPL_BufferMove moveAmount = breakIndex - moveFromIndex;
-			
-			//set the correct value in the compiled data for this new amount
-			memcpy((context->compiledData+copyToIndex), &moveAmount, sizeof(NoPL_BufferMove));
+			nopl_appendControlFlowMove(context, moveFromIndex, breakIndex);
 		}
 		
 		context->breakStatements->free(context->breakStatements);
@@ -518,16 +548,21 @@ void nopl_finalizeControlFlowMoves(NoPL_CompileContext* context, NoPL_Index brea
 		{
 			//calculate the move amount
 			NoPL_Index moveFromIndex = (NoPL_Index)(context->continueStatements->get(context->continueStatements,i));
-			NoPL_Index copyToIndex = moveFromIndex-sizeof(NoPL_BufferMove);
-			NoPL_BufferMove moveAmount = continueIndex - moveFromIndex;
-			
-			//set the correct value in the compiled data for this new amount
-			memcpy((context->compiledData+copyToIndex), &moveAmount, sizeof(NoPL_BufferMove));
+			nopl_appendControlFlowMove(context, moveFromIndex, continueIndex);
 		}
 		
 		context->continueStatements->free(context->continueStatements);
 		context->continueStatements = NULL;
 	}
+}
+
+void nopl_switchCaseRecurse(const pANTLR3_BASE_TREE switchNode, int caseIndex, NoPL_DataType expressionType, int anonVarIndex)
+{
+	//get the case statement
+	pANTLR3_BASE_TREE caseStatement = treeIndex(switchNode, caseIndex);
+	
+	//TODO: is this function a bad idea?
+	
 }
 
 void nopl_appendContext(const NoPL_CompileContext* fromContext, NoPL_CompileContext* toContext)
@@ -781,12 +816,12 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				break;
 			case BREAK:
 			{
-				//append the operator
-				nopl_addOperator(NoPL_BYTE_BUFFER_MOVE, context);
+				//append the a placeholder for the operator
+				nopl_addOperator(0, context);
 				
 				//append an empty placeholder for the move
-				NoPL_BufferMove move = 0;
-				nopl_addBytesToContext(&move, sizeof(NoPL_BufferMove), context);
+				NoPL_Index move = 0;
+				nopl_addBytesToContext(&move, sizeof(NoPL_Index), context);
 				
 				//check if our current context even supports this
 				if(context->allowsBreakStatements)
@@ -831,13 +866,13 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				}
 				
 				//calc how many bytes to skip if the conditional is false
-				NoPL_BufferMove move = (NoPL_BufferMove)innerConditional.dataLength;
+				NoPL_Index move = (NoPL_Index)innerConditional.dataLength;
 				if(hasElse)
 				{
 					//else conditionals contain an extra buffer move at the beginning of the else statement
-					move += sizeof(NoPL_Instruction)+sizeof(NoPL_BufferMove);
+					move += sizeof(NoPL_Instruction)+sizeof(NoPL_Index);
 				}
-				nopl_addBytesToContext(&move, sizeof(NoPL_BufferMove), context);
+				nopl_addBytesToContext(&move, sizeof(NoPL_Index), context);
 				
 				//add the inner conditional
 				nopl_appendContext(&innerConditional, context);
@@ -865,9 +900,9 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 					}
 					
 					//skip over all this else stuff if we're coming from the block of code for true
-					nopl_addOperator(NoPL_BYTE_BUFFER_MOVE, context);
-					move = (NoPL_BufferMove)innerElse.dataLength;
-					nopl_addBytesToContext(&move, sizeof(NoPL_BufferMove), context);
+					nopl_addOperator(NoPL_BYTE_BUFFER_MOVE_FORWARD, context);
+					move = (NoPL_Index)innerElse.dataLength;
+					nopl_addBytesToContext(&move, sizeof(NoPL_Index), context);
 					
 					//add the else statement
 					nopl_appendContext(&innerElse, context);
@@ -880,12 +915,12 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				break;
 			case CONTINUE:
 			{
-				//append the operator
-				nopl_addOperator(NoPL_BYTE_BUFFER_MOVE, context);
+				//append the a placeholder for the operator
+				nopl_addOperator(0, context);
 				
 				//append an empty placeholder for the move
-				NoPL_BufferMove move = 0;
-				nopl_addBytesToContext(&move, sizeof(NoPL_BufferMove), context);
+				NoPL_Index move = 0;
+				nopl_addBytesToContext(&move, sizeof(NoPL_Index), context);
 				
 				//check if our current context even supports this
 				if(context->allowsContinueStatements)
@@ -1500,12 +1535,13 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				nopl_appendNodeWithRequiredType(conditional, NoPL_type_Boolean, &loopCtx, options);
 				
 				//add the number of bytes to skip when the conditional fails
-				NoPL_BufferMove condMove = sizeof(NoPL_Instruction)+sizeof(NoPL_BufferMove);
-				nopl_addBytesToContext(&condMove, sizeof(NoPL_BufferMove), &loopCtx);
+				NoPL_Index condMove = sizeof(NoPL_Instruction)+sizeof(NoPL_Index);
+				nopl_addBytesToContext(&condMove, sizeof(NoPL_Index), &loopCtx);
 				
 				//the only content of the conditional is a buffer move that restarts the loop
-				NoPL_BufferMove loopMove = -((NoPL_BufferMove)(loopCtx.dataLength));
-				nopl_addBytesToContext(&loopMove, sizeof(NoPL_BufferMove), &loopCtx);
+				nopl_addOperator(NoPL_BYTE_BUFFER_MOVE_BACKWARD, &loopCtx);
+				NoPL_Index loopMove = (NoPL_Index)(loopCtx.dataLength+sizeof(NoPL_Index));
+				nopl_addBytesToContext(&loopMove, sizeof(NoPL_Index), &loopCtx);
 				
 				//append the loop
 				nopl_finalizeControlFlowMoves(&loopCtx, loopCtx.dataLength, continueIndex);
@@ -1516,6 +1552,8 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				break;
 			case LOOP_FOR:
 			{
+				//TODO: bug - continue statements don't cause the i++ statement to run
+				
 				//push a scope for the statements in the top of the loop
 				nopl_pushScope(context);
 				
@@ -1561,13 +1599,13 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				nopl_popScope(&innerLoopCtx);
 				
 				//go back to the beginning of the loop
-				nopl_addOperator(NoPL_BYTE_BUFFER_MOVE, &innerLoopCtx);
-				NoPL_BufferMove repeatMove = -((NoPL_BufferMove)(outerLoopCtx.dataLength+innerLoopCtx.dataLength+(2*sizeof(NoPL_BufferMove))));
-				nopl_addBytesToContext(&repeatMove, sizeof(NoPL_BufferMove), &innerLoopCtx);
+				nopl_addOperator(NoPL_BYTE_BUFFER_MOVE_BACKWARD, &innerLoopCtx);
+				NoPL_Index repeatMove = (NoPL_Index)(outerLoopCtx.dataLength+innerLoopCtx.dataLength+(2*sizeof(NoPL_Index)));
+				nopl_addBytesToContext(&repeatMove, sizeof(NoPL_Index), &innerLoopCtx);
 				
 				//add the number of bytes to skip when the conditional fails
-				NoPL_BufferMove condMove = (NoPL_BufferMove)innerLoopCtx.dataLength;
-				nopl_addBytesToContext(&condMove, sizeof(NoPL_BufferMove), &outerLoopCtx);
+				NoPL_Index condMove = (NoPL_Index)innerLoopCtx.dataLength;
+				nopl_addBytesToContext(&condMove, sizeof(NoPL_Index), &outerLoopCtx);
 				
 				//append the inner loop to the outer loop
 				nopl_appendContext(&innerLoopCtx, &outerLoopCtx);
@@ -1620,13 +1658,13 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				nopl_popScope(&innerLoopCtx);
 				
 				//go back to the beginning of the loop
-				nopl_addOperator(NoPL_BYTE_BUFFER_MOVE, &innerLoopCtx);
-				NoPL_BufferMove repeatMove = -((NoPL_BufferMove)(outerLoopCtx.dataLength+innerLoopCtx.dataLength+(2*sizeof(NoPL_BufferMove))));
-				nopl_addBytesToContext(&repeatMove, sizeof(NoPL_BufferMove), &innerLoopCtx);
+				nopl_addOperator(NoPL_BYTE_BUFFER_MOVE_BACKWARD, &innerLoopCtx);
+				NoPL_Index repeatMove = (NoPL_Index)(outerLoopCtx.dataLength+innerLoopCtx.dataLength+(2*sizeof(NoPL_Index)));
+				nopl_addBytesToContext(&repeatMove, sizeof(NoPL_Index), &innerLoopCtx);
 				
 				//add the number of bytes to skip when the conditional fails
-				NoPL_BufferMove condMove = (NoPL_BufferMove)innerLoopCtx.dataLength;
-				nopl_addBytesToContext(&condMove, sizeof(NoPL_BufferMove), &outerLoopCtx);
+				NoPL_Index condMove = (NoPL_Index)innerLoopCtx.dataLength;
+				nopl_addBytesToContext(&condMove, sizeof(NoPL_Index), &outerLoopCtx);
 				
 				//append the inner loop to the outer loop
 				nopl_appendContext(&innerLoopCtx, &outerLoopCtx);
@@ -1948,7 +1986,7 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				nopl_pushScope(context);
 				
 				//declare the result of the expression as a variable so that we only have to evaluate it once
-				switch (expType)
+				switch(expType)
 				{
 					case NoPL_type_Boolean:
 					{
@@ -1960,18 +1998,42 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 						nopl_addBytesToContext(&index, sizeof(NoPL_Index), context);
 						
 						//append the expression
-						nopl_appendNodeWithRequiredType(expression, NoPL_type_String, context, options);
+						nopl_appendNodeWithRequiredType(expression, NoPL_type_Boolean, context, options);
 					}
 						break;
 					case NoPL_type_Number:
-						index = nopl_declareAnonymousVariableInStack(context->numberStack);
+					{
+						//we're assigning an anonymous variable
+						nopl_addOperator(NoPL_BYTE_NUMERIC_ASSIGN, context);
+						
+						//add the index for the variable which will be assigned to
+						NoPL_Index index = nopl_declareAnonymousVariableInStack(context->numberStack);
+						nopl_addBytesToContext(&index, sizeof(NoPL_Index), context);
+						
+						//append the expression
+						nopl_appendNodeWithRequiredType(expression, NoPL_type_Number, context, options);
+					}
 						break;
 					case NoPL_type_String:
-						index = nopl_declareAnonymousVariableInStack(context->stringStack);
+					{
+						//we're assigning an anonymous variable
+						nopl_addOperator(NoPL_BYTE_STRING_ASSIGN, context);
+						
+						//add the index for the variable which will be assigned to
+						NoPL_Index index = nopl_declareAnonymousVariableInStack(context->stringStack);
+						nopl_addBytesToContext(&index, sizeof(NoPL_Index), context);
+						
+						//append the expression
+						nopl_appendNodeWithRequiredType(expression, NoPL_type_Number, context, options);
+					}
+						break;
+					default:
 						break;
 				}
 				
-				//TODO: resolve all cases recursively
+				//resolve the case statements recursively
+				//TODO: figure out how to process cases
+				
 				
 			}
 				break;

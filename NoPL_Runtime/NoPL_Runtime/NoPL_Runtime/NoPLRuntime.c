@@ -12,6 +12,8 @@
 #include <string.h>
 #include "NoPLRuntime.h"
 
+//TODO: test every feature of this language to make sure it works
+
 typedef struct
 {
 	char* stringValue;
@@ -312,21 +314,31 @@ int evaluateStatement(NoPL_Evaluation* eval)
 			int condition = evaluateBoolean(eval);
 			
 			//get the buffer move if the conditional is not true
-			NoPL_BufferMove* buffMove = (NoPL_BufferMove*)(eval->scriptBuffer+eval->evaluationPosition);
-			eval->evaluationPosition += sizeof(NoPL_BufferMove);
+			NoPL_Index* buffMove = (NoPL_Index*)(eval->scriptBuffer+eval->evaluationPosition);
+			eval->evaluationPosition += sizeof(NoPL_Index);
 			
 			if(!condition)
 				eval->evaluationPosition += *buffMove;
 		}
 			break;
-		case NoPL_BYTE_BUFFER_MOVE:
+		case NoPL_BYTE_BUFFER_MOVE_FORWARD:
 		{
 			//get the buffer move amount
-			NoPL_BufferMove* buffMove = (NoPL_BufferMove*)(eval->scriptBuffer+eval->evaluationPosition);
-			eval->evaluationPosition += sizeof(NoPL_BufferMove);
+			NoPL_Index* buffMove = (NoPL_Index*)(eval->scriptBuffer+eval->evaluationPosition);
+			eval->evaluationPosition += sizeof(NoPL_Index);
 			
-			//adjust position by move amount
+			//adjust position forward by move amount
 			eval->evaluationPosition += *buffMove;
+		}
+			break;
+		case NoPL_BYTE_BUFFER_MOVE_BACKWARD:
+		{
+			//get the buffer move amount
+			NoPL_Index* buffMove = (NoPL_Index*)(eval->scriptBuffer+eval->evaluationPosition);
+			eval->evaluationPosition += sizeof(NoPL_Index);
+			
+			//adjust position backward by move amount
+			eval->evaluationPosition -= *buffMove;
 		}
 			break;
 		case NoPL_BYTE_PROGRAM_EXIT:
