@@ -61,7 +61,7 @@ NoPL_FunctionValue nopl_standardFunctions(void* calledOnObject, char* functionNa
 		//return pointers to classes based on name
 		switch (hashedFunctionName)
 		{
-			case 193471326://Str
+			case 8921961://Str
 				returnVal.type = NoPL_DataType_Pointer;
 				returnVal.pointerValue = &NoPL_StandardFunction_Identifier_String;
 				break;
@@ -221,7 +221,7 @@ NoPL_FunctionValue nopl_standardFunctions(void* calledOnObject, char* functionNa
 				returnVal.numberValue = sqrtf(argv[0].numberValue);
 			}
 				break;
-			case 193505807://sin
+			case 8956442://sin
 			{
 				//bail if we don't have the correct args
 				if(argc != 1 || argv[0].type != NoPL_DataType_Number)
@@ -231,7 +231,7 @@ NoPL_FunctionValue nopl_standardFunctions(void* calledOnObject, char* functionNa
 				returnVal.numberValue = sinf(argv[0].numberValue);
 			}
 				break;
-			case 193488586://cos
+			case 8939221://cos
 			{
 				//bail if we don't have the correct args
 				if(argc != 1 || argv[0].type != NoPL_DataType_Number)
@@ -241,7 +241,7 @@ NoPL_FunctionValue nopl_standardFunctions(void* calledOnObject, char* functionNa
 				returnVal.numberValue = cosf(argv[0].numberValue);
 			}
 				break;
-			case 193506632://tan
+			case 8957267://tan
 			{
 				//bail if we don't have the correct args
 				if(argc != 1 || argv[0].type != NoPL_DataType_Number)
@@ -320,7 +320,7 @@ NoPL_FunctionValue nopl_standardFunctions(void* calledOnObject, char* functionNa
 					returnVal.numberValue = argv[0].numberValue+returnVal.numberValue*(argv[1].numberValue-argv[0].numberValue);
 			}
 				break;
-			case 193498375://log
+			case 8949010://log
 			{
 				//bail if we have the wrong number of args, or if any non-numbers were passed in
 				if(argc < 1 || argc > 2 || argv[0].type != NoPL_DataType_Number || (argc == 2 && argv[1].type != NoPL_DataType_Number))
