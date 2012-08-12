@@ -49,8 +49,9 @@ typedef struct
 #pragma mark -
 #pragma mark Struct helpers
 
-#define NoPL_FunctionValue()	((NoPL_FunctionValue){0.0f,0,0,0,NoPL_DataType_Void})
-#define NoPL_Callbacks()		((NoPL_Callbacks){0,0,0})
+#define NoPL_FunctionValue()				(NoPL_FunctionValue){0.0f,0,0,0,NoPL_DataType_Void}
+#define NoPL_Callbacks()					(NoPL_Callbacks){0,0,0}
+#define NoPL_assignString(charStr, funcVal)	funcVal.stringValue = malloc(strlen(charStr));strcpy(funcVal.stringValue, charStr);
 
 #pragma mark -
 #pragma mark Script API

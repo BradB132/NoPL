@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "NoPLRuntime.h"
+#include "NoPLStandardFunctions.h"
 
 char* mallocBufferFromFilePath(const char* filePath, unsigned long* outLength)
 {
@@ -51,51 +52,32 @@ NoPL_FunctionValue testingEvalFunc(void* calledOnObject, char* functionName, NoP
 {
 	NoPL_FunctionValue returnValue = NoPL_FunctionValue();
 	
-	//do some stuff that just shows that this callback is happening
-	if(!strcmp(functionName, "getMyNumber"))
-	{
-		returnValue.type = NoPL_DataType_Number;
-		returnValue.numberValue = 5.7f;
-	}
-	else if(!strcmp(functionName, "sum"))
-	{
-		//sum all numeric args
-		returnValue.type = NoPL_DataType_Number;
-		returnValue.numberValue = 0.0f;
-		for(int i = 0; i < argc; i++)
-		{
-			if(argv[i].type == NoPL_DataType_Number)
-				returnValue.numberValue += argv[i].numberValue;
-		}
-	}
+	//check standard functions for a value
+	returnValue = nopl_standardFunctions(calledOnObject, functionName, argv, argc);
+	if(returnValue.type != NoPL_DataType_Void)
+		return returnValue;
 	
 	return returnValue;
 }
 
 NoPL_FunctionValue testingSubscript(void* calledOnObject, NoPL_FunctionValue index)
 {
-	NoPL_FunctionValue returnValue = NoPL_FunctionValue();
-	returnValue.type = NoPL_DataType_Number;
-	
-	//do some stuff that just shows that this callback is happening
-	if(index.type == NoPL_DataType_Number)
-	{
-		returnValue.numberValue = index.numberValue*2;
-	}
-	else if(index.type == NoPL_DataType_String)
-	{
-		returnValue.numberValue = (float)index.stringValue[0];
-	}
-	
-	return returnValue;
+	return NoPL_FunctionValue();
 }
 
 void testStrings(char* string, NoPL_StringFeedbackType type)
 {
-	if(type == NoPL_StringFeedbackType_PrintStatement)
-		printf("NoPL Print: %s\n", string);
-	else if(type == NoPL_StringFeedbackType_DebugInfo)
-		printf("NoPL Debug: %s\n", string);
+	switch (type) {
+		case NoPL_StringFeedbackType_PrintStatement:
+			printf("NoPL Print: %s\n", string);
+			return;
+		case NoPL_StringFeedbackType_DebugInfo:
+			printf("NoPL Debug: %s\n", string);
+			return;
+		case NoPL_StringFeedbackType_RuntimeError:
+			printf("NoPL Error: %s\n", string);
+			return;
+	}
 }
 
 int main(int argc, const char * argv[])

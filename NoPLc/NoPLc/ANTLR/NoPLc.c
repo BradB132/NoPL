@@ -13,6 +13,8 @@
 #define NoPL_StackSizeHint 16
 #define NoPL_VectorSizeHint 8
 
+//TODO: make everything C90 compliant
+
 //error codes
 const char* NoPL_ErrStr_Generic = "Syntax error";
 const char* NoPL_ErrStr_ExpressionMustBeNumeric = "This expression must evaluate to a numeric value";
@@ -72,6 +74,8 @@ void nopl_appendControlFlowMove(NoPL_CompileContext* context, NoPL_Index moveFro
 
 void nopl_error(const pANTLR3_BASE_TREE tree, const char* desc, NoPL_CompileContext* context)
 {
+	//TODO: check if this is a parse error, calc position differently if it is
+	
 	//TODO: get the actual beginning and end nodes
 	//find the first and last nodes
 	pANTLR3_BASE_TREE firstNode = NULL;
@@ -93,17 +97,20 @@ void nopl_error(const pANTLR3_BASE_TREE tree, const char* desc, NoPL_CompileCont
 	
 	//format the error
 	char appendStr[512];
-	sprintf(appendStr, "%s - %d:%d-%d:%d\n", desc, startLine, startChar, endLine, endChar);
+	snprintf(appendStr, 512, "%s - %d:%d-%d:%d\n", desc, startLine, startChar, endLine, endChar);
+
+	printf("NoPL Error: %s\n", appendStr);
 	
-	//lazy create the error string
-	if(!context->errDescriptions)
-	{
-		pANTLR3_STRING_FACTORY fctry = context->tokenStream->tstream->tokenSource->strFactory;
-		context->errDescriptions = fctry->newStr8(fctry, (pANTLR3_UINT8)"");
-	}
-	
-	//append error string to context
-	context->errDescriptions->append(context->errDescriptions, appendStr);
+	//TODO: this mechanism is broken
+//	//lazy create the error string
+//	if(!context->errDescriptions)
+//	{
+//		pANTLR3_STRING_FACTORY fctry = context->tokenStream->tstream->tokenSource->strFactory;
+//		context->errDescriptions = fctry->newStr8(fctry, (pANTLR3_UINT8)"");
+//	}
+//	
+//	//append error string to context
+//	context->errDescriptions->append(context->errDescriptions, appendStr);
 }
 
 void nopl_addBytesToContext(const void* bytes, int byteCount, NoPL_CompileContext* context)
@@ -561,7 +568,7 @@ void nopl_switchCaseRecurse(const pANTLR3_BASE_TREE switchNode, int caseIndex, N
 	//get the case statement
 	pANTLR3_BASE_TREE caseStatement = treeIndex(switchNode, caseIndex);
 	
-	//TODO: is this function a bad idea?
+	//TODO: figure out how to process cases
 	
 }
 
@@ -1552,8 +1559,6 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				break;
 			case LOOP_FOR:
 			{
-				//TODO: bug - continue statements don't cause the i++ statement to run
-				
 				//push a scope for the statements in the top of the loop
 				nopl_pushScope(context);
 				
@@ -1592,6 +1597,9 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 					nopl_traverseAST(childArg, options, &innerLoopCtx);
 				}
 				
+				//store the position that the buffer should move to when a continue statement is evaluated
+				NoPL_Index continueIndex = innerLoopCtx.dataLength;
+				
 				//append the increment at the end of the loop
 				nopl_traverseAST(increment, options, &innerLoopCtx);
 				
@@ -1608,8 +1616,9 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				nopl_addBytesToContext(&condMove, sizeof(NoPL_Index), &outerLoopCtx);
 				
 				//append the inner loop to the outer loop
+				continueIndex += outerLoopCtx.dataLength;
 				nopl_appendContext(&innerLoopCtx, &outerLoopCtx);
-				nopl_finalizeControlFlowMoves(&outerLoopCtx, outerLoopCtx.dataLength, 0);
+				nopl_finalizeControlFlowMoves(&outerLoopCtx, outerLoopCtx.dataLength, continueIndex);
 				
 				//append the loop contents
 				nopl_appendContext(&outerLoopCtx, context);
