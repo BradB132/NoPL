@@ -158,26 +158,78 @@ NoPL_FunctionValue nopl_standardFunctions(void* calledOnObject, char* functionNa
 			break;
 		case 1452132://replaceAll
 		{
-			if(argc != 2 || argv[0].type != NoPL_DataType_String || argv[1].type != NoPL_DataType_String)
+			if(argc != 3 || argv[0].type != NoPL_DataType_String || argv[1].type != NoPL_DataType_String || argv[2].type != NoPL_DataType_String)
 				break;
 			
-			//TODO: implement replace
+			//TODO: implement replaceAll
 		}
 			break;
 		case 11849711://replaceFirst
 		{
-			if(argc != 2 || argv[0].type != NoPL_DataType_String || argv[1].type != NoPL_DataType_String)
+			if(argc != 3 || argv[0].type != NoPL_DataType_String || argv[1].type != NoPL_DataType_String || argv[2].type != NoPL_DataType_String)
 				break;
 			
-			//TODO: implement replaceFirst
+			returnVal.type = NoPL_DataType_String;
+			
+			//check to make sure the substring exists in the searched string
+			char* found = strstr(argv[0].stringValue, argv[1].stringValue);
+			if(!found)
+			{
+				//we didn't find the substring, return the original string
+				NoPL_assignString(argv[0].stringValue, returnVal);
+				break;
+			}
+			
+			//calc the size of the new string
+			unsigned long arg1Length = strlen(argv[1].stringValue);
+			unsigned long arg2Length = strlen(argv[2].stringValue);
+			returnVal.stringValue = malloc(1+strlen(argv[0].stringValue)+(arg2Length-arg1Length));
+			
+			//copy the string, taking the replaced section from the new string
+			unsigned long replaceIndex = found-argv[0].stringValue;
+			memcpy(returnVal.stringValue, argv[0].stringValue, replaceIndex);
+			memcpy(returnVal.stringValue+replaceIndex, argv[2].stringValue, arg2Length);
+			strcpy(returnVal.stringValue+replaceIndex+arg2Length, argv[0].stringValue+replaceIndex+arg1Length);
 		}
 			break;
 		case 13832097://replaceLast
 		{
-			if(argc != 2 || argv[0].type != NoPL_DataType_String || argv[1].type != NoPL_DataType_String)
+			if(argc != 3 || argv[0].type != NoPL_DataType_String || argv[1].type != NoPL_DataType_String || argv[2].type != NoPL_DataType_String)
 				break;
 			
-			//TODO: implement replaceLast
+			returnVal.type = NoPL_DataType_String;
+			
+			//check to make sure the substring exists in the searched string
+			char* found = strstr(argv[0].stringValue, argv[1].stringValue);
+			if(!found)
+			{
+				//we didn't find the substring, return the original string
+				NoPL_assignString(argv[0].stringValue, returnVal);
+				break;
+			}
+			
+			//iterate over the string to find the last instance of the string
+			unsigned long arg1Length = strlen(argv[1].stringValue);
+			unsigned long arg2Length = strlen(argv[2].stringValue);
+			char* nextStr = found;
+			while(1)
+			{
+				nextStr = nextStr+arg1Length;
+				nextStr = strstr(nextStr, argv[1].stringValue);
+				if(nextStr)
+					found = nextStr;
+				else
+					break;
+			}
+			
+			//calc the size of the new string
+			returnVal.stringValue = malloc(1+strlen(argv[0].stringValue)+(arg2Length-arg1Length));
+			
+			//copy the string, taking the replaced section from the new string
+			unsigned long replaceIndex = found-argv[0].stringValue;
+			memcpy(returnVal.stringValue, argv[0].stringValue, replaceIndex);
+			memcpy(returnVal.stringValue+replaceIndex, argv[2].stringValue, arg2Length);
+			strcpy(returnVal.stringValue+replaceIndex+arg2Length, argv[0].stringValue+replaceIndex+arg1Length);
 		}
 			break;
 		case 5862622://PI
