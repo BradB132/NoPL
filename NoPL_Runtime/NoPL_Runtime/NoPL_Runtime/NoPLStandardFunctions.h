@@ -14,8 +14,4 @@
 //function that handles all standard function calls
 NoPL_FunctionValue nopl_standardFunctions(void* calledOnObject, char* functionName, NoPL_FunctionValue* argv, unsigned int argc);
 
-//pointers to objects that could be used to extend the existing classes
-void* nopl_standardMath();
-void* nopl_standardString();
-
 #endif
