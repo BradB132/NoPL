@@ -161,7 +161,58 @@ NoPL_FunctionValue nopl_standardFunctions(void* calledOnObject, char* functionNa
 			if(argc != 3 || argv[0].type != NoPL_DataType_String || argv[1].type != NoPL_DataType_String || argv[2].type != NoPL_DataType_String)
 				break;
 			
-			//TODO: implement replaceAll
+			returnVal.type = NoPL_DataType_String;
+			
+			//check to make sure the substring exists in the searched string
+			char* found = strstr(argv[0].stringValue, argv[1].stringValue);
+			if(!found)
+			{
+				//we didn't find the substring, return the original string
+				NoPL_assignString(argv[0].stringValue, returnVal);
+				break;
+			}
+			
+			//iterate over the string to find the last instance of the string
+			unsigned long arg1Length = strlen(argv[1].stringValue);
+			unsigned long arg2Length = strlen(argv[2].stringValue);
+			char* nextStr = found;
+			int foundCount = 1;
+			while(1)
+			{
+				nextStr = nextStr+arg1Length;
+				nextStr = strstr(nextStr, argv[1].stringValue);
+				if(nextStr)
+					foundCount++;
+				else
+					break;
+			}
+			
+			//calc the size of the new string
+			returnVal.stringValue = malloc(1+strlen(argv[0].stringValue)+foundCount*(arg2Length-arg1Length));
+			
+			//loop to do all of the replacements
+			unsigned long copyFromIndex = 0;
+			unsigned long copyToIndex = 0;
+			for(int i = 0; i < foundCount; i++)
+			{
+				//copy everything before the replacement
+				unsigned long copyAmount = found-(argv[0].stringValue+copyFromIndex);
+				memcpy(returnVal.stringValue+copyToIndex, argv[0].stringValue+copyFromIndex, copyAmount);
+				
+				//adjust counters
+				copyFromIndex += (copyAmount+arg1Length);
+				copyToIndex += copyAmount;
+				
+				//copy the replacement string
+				memcpy(returnVal.stringValue+copyToIndex, argv[2].stringValue, arg2Length);
+				
+				//adjust the counter
+				copyToIndex += arg2Length;
+				found = strstr(found+arg1Length, argv[1].stringValue);
+			}
+			
+			//copy the end of the string
+			strcpy(returnVal.stringValue+copyToIndex, argv[0].stringValue+copyFromIndex);
 		}
 			break;
 		case 11849711://replaceFirst
