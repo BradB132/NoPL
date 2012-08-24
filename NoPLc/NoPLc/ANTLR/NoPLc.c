@@ -66,7 +66,6 @@ NoPL_CompileContext nopl_newInnerCompileContext(NoPL_CompileContext* parentConte
 void nopl_freeInnerCompileContext(NoPL_CompileContext* context);
 void nopl_appendContext(const NoPL_CompileContext* fromContext, NoPL_CompileContext* toContext);
 void nopl_finalizeControlFlowMoves(NoPL_CompileContext* context, NoPL_Index breakIndex, NoPL_Index continueIndex);
-void nopl_switchCaseRecurse(const pANTLR3_BASE_TREE switchNode, int caseIndex, NoPL_DataType expressionType, int anonVarIndex);
 void nopl_appendControlFlowMove(NoPL_CompileContext* context, NoPL_Index moveFromIndex, NoPL_Index moveToIndex);
 
 #pragma mark -
@@ -561,15 +560,6 @@ void nopl_finalizeControlFlowMoves(NoPL_CompileContext* context, NoPL_Index brea
 		context->continueStatements->free(context->continueStatements);
 		context->continueStatements = NULL;
 	}
-}
-
-void nopl_switchCaseRecurse(const pANTLR3_BASE_TREE switchNode, int caseIndex, NoPL_DataType expressionType, int anonVarIndex)
-{
-	//get the case statement
-	pANTLR3_BASE_TREE caseStatement = treeIndex(switchNode, caseIndex);
-	
-	//TODO: figure out how to process cases
-	
 }
 
 void nopl_appendContext(const NoPL_CompileContext* fromContext, NoPL_CompileContext* toContext)
@@ -1992,7 +1982,9 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 					}
 				}
 				
+				//push a scope and set up a inner context
 				nopl_pushScope(context);
+				NoPL_CompileContext switchCtx = nopl_newInnerCompileContext(context, 1, 0);
 				
 				//declare the result of the expression as a variable so that we only have to evaluate it once
 				switch(expType)
@@ -2008,6 +2000,17 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 						
 						//append the expression
 						nopl_appendNodeWithRequiredType(expression, NoPL_type_Boolean, context, options);
+						
+						//TODO: do this in a loop
+						//append a conditional for each case value
+						NoPL_Index skipAheadAmount = sizeof(NoPL_Instruction)+sizeof(NoPL_Index);
+						nopl_addOperator(NoPL_BYTE_CONDITIONAL, &switchCtx);
+						nopl_addOperator(NoPL_BYTE_BOOLEAN_LOGICAL_EQUALITY, &switchCtx);
+						nopl_addOperator(NoPL_BYTE_VARIABLE_BOOLEAN, &switchCtx);
+						nopl_addBytesToContext(&index, sizeof(NoPL_Index), &switchCtx);
+						//TODO: append value of first child of case node
+						nopl_addBytesToContext(&skipAheadAmount, sizeof(NoPL_Index), &switchCtx);
+						//TODO: check for redundancy in case values
 					}
 						break;
 					case NoPL_type_Number:
@@ -2040,10 +2043,16 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 						break;
 				}
 				
-				//resolve the case statements recursively
+				
 				//TODO: figure out how to process cases
 				
 				
+				
+				//copy the inner context
+				nopl_finalizeControlFlowMoves(&switchCtx, switchCtx.dataLength, 0);
+				nopl_appendContext(&switchCtx, context);
+				
+				nopl_popScope(context);
 			}
 				break;
 			case TYPE_CAST:

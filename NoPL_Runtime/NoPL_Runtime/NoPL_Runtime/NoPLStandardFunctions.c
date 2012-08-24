@@ -80,6 +80,7 @@ NoPL_FunctionValue nopl_standardFunctions(const void* calledOnObject, const char
 			//create the string
 			returnVal.type = NoPL_DataType_String;
 			returnVal.stringValue = malloc(returnLength+1);
+			memset(returnVal.stringValue, 0, returnLength+1);
 			
 			//loop to format the string
 			char* copyFrom = formatStr;
@@ -94,8 +95,8 @@ NoPL_FunctionValue nopl_standardFunctions(const void* calledOnObject, const char
 					//check if we have a double '%'
 					if(*(copyFrom+1) != '%')
 					{
-						char* copyBuffer;
 						//we have a '%' character that represents a variable
+						char* copyBuffer;
 						switch(argv[argIndex].type)
 						{
 							case NoPL_DataType_Boolean:
@@ -134,8 +135,6 @@ NoPL_FunctionValue nopl_standardFunctions(const void* calledOnObject, const char
 				copyTo++;
 				copyFrom++;
 			}
-			
-			printf("String Value: %s\n", returnVal.stringValue);
 		}
 			break;
 		case 3423698://length

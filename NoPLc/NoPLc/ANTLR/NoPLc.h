@@ -27,7 +27,7 @@ typedef struct
 	int allowsContinueStatements;
 	pANTLR3_VECTOR breakStatements;
 	pANTLR3_VECTOR continueStatements;
-	pANTLR3_STRING errDescriptions;
+	char* errDescriptions;
 	int debugLine;
 	NoPL_Index* objectTableSize;
 	NoPL_Index* numberTableSize;
