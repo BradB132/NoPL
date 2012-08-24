@@ -41,9 +41,9 @@ typedef enum
 
 typedef struct
 {
-	NoPL_FunctionValue (*evaluateFunction)(void* calledOnObject, char* functionName, NoPL_FunctionValue* argv, unsigned int argc);
+	NoPL_FunctionValue (*evaluateFunction)(void* calledOnObject, const char* functionName, const NoPL_FunctionValue* argv, unsigned int argc);
 	NoPL_FunctionValue (*subscript)(void* calledOnObject, NoPL_FunctionValue index);
-	void (*stringFeedback)(char* string, NoPL_StringFeedbackType type);
+	void (*stringFeedback)(const char* string, NoPL_StringFeedbackType type);
 } NoPL_Callbacks;
 
 #pragma mark -

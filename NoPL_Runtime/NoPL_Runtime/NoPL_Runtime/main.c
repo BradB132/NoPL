@@ -48,7 +48,7 @@ char* mallocBufferFromFilePath(const char* filePath, unsigned long* outLength)
 	return buffer;
 }
 
-NoPL_FunctionValue testingEvalFunc(void* calledOnObject, char* functionName, NoPL_FunctionValue* argv, unsigned int argc)
+NoPL_FunctionValue testingEvalFunc(void* calledOnObject, const char* functionName, const NoPL_FunctionValue* argv, unsigned int argc)
 {
 	NoPL_FunctionValue returnValue = NoPL_FunctionValue();
 	
@@ -65,7 +65,7 @@ NoPL_FunctionValue testingSubscript(void* calledOnObject, NoPL_FunctionValue ind
 	return NoPL_FunctionValue();
 }
 
-void testStrings(char* string, NoPL_StringFeedbackType type)
+void testStrings(const char* string, NoPL_StringFeedbackType type)
 {
 	switch (type) {
 		case NoPL_StringFeedbackType_PrintStatement:

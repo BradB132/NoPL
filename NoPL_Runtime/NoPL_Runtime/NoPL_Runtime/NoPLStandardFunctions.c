@@ -29,7 +29,7 @@ unsigned long hash_djb2ToInt(unsigned char* str)
 #pragma mark -
 #pragma mark standard functions
 
-NoPL_FunctionValue nopl_standardFunctions(void* calledOnObject, char* functionName, NoPL_FunctionValue* argv, unsigned int argc)
+NoPL_FunctionValue nopl_standardFunctions(const void* calledOnObject, const char* functionName, const NoPL_FunctionValue* argv, unsigned int argc)
 {
 	//create a blank function result
 	NoPL_FunctionValue returnVal = NoPL_FunctionValue();
@@ -39,7 +39,7 @@ NoPL_FunctionValue nopl_standardFunctions(void* calledOnObject, char* functionNa
 		return returnVal;
 	
 	//use hashed names to quickly look up the correct function
-	switch (hash_djb2ToInt((unsigned char*)functionName))
+	switch(hash_djb2ToInt((unsigned char*)functionName))
 	{
 		case 15501227://format
 		{
@@ -47,7 +47,95 @@ NoPL_FunctionValue nopl_standardFunctions(void* calledOnObject, char* functionNa
 			if(argc < 1 || argv[0].type != NoPL_DataType_String)
 				break;
 			
-			//TODO: figure out how to do this
+			//copy the string
+			char formatStr[strlen(argv[0].stringValue)+1];
+			strcpy(formatStr, argv[0].stringValue);
+			
+			//loop to count how many extra chars we want
+			int returnLength = 0;
+			for(int i = 0; i < argc; i++)
+			{
+				switch (argv[i].type)
+				{
+					case NoPL_DataType_Boolean:
+						if(argv[i].booleanValue)
+							returnLength += 4;
+						else
+							returnLength += 5;
+						break;
+					case NoPL_DataType_Number:
+						returnLength += 16;
+						break;
+					case NoPL_DataType_Pointer:
+						returnLength += sizeof(void*)*2+2;
+						break;
+					case NoPL_DataType_String:
+						returnLength += strlen(argv[i].stringValue);
+						break;
+					default:
+						break;
+				}
+			}
+			
+			//create the string
+			returnVal.type = NoPL_DataType_String;
+			returnVal.stringValue = malloc(returnLength+1);
+			
+			//loop to format the string
+			char* copyFrom = formatStr;
+			char* copyTo = returnVal.stringValue;
+			char varBuffer[18];
+			char c;
+			int argIndex = 1;
+			while((c = *copyFrom))
+			{
+				if(c == '%')
+				{
+					//check if we have a double '%'
+					if(*(copyFrom+1) != '%')
+					{
+						char* copyBuffer;
+						//we have a '%' character that represents a variable
+						switch(argv[argIndex].type)
+						{
+							case NoPL_DataType_Boolean:
+								copyBuffer = varBuffer;
+								if(argv[argIndex].booleanValue)
+									strcpy(copyBuffer, "true");
+								else
+									strcpy(copyBuffer, "false");
+								break;
+							case NoPL_DataType_Number:
+								copyBuffer = varBuffer;
+								sprintf(copyBuffer, "%g", argv[argIndex].numberValue);
+								break;
+							case NoPL_DataType_Pointer:
+								copyBuffer = varBuffer;
+								sprintf(copyBuffer, "0x%X", (unsigned int)argv[argIndex].pointerValue);
+								break;
+							case NoPL_DataType_String:
+								copyBuffer = argv[argIndex].stringValue;
+								break;
+							default:
+								break;
+						}
+						size_t copyLength = strlen(copyBuffer);
+						memcpy(copyTo, copyBuffer, copyLength);
+						copyTo += copyLength;
+						argIndex++;
+					}
+					
+					//skip the '%' character
+					copyFrom++;
+				}
+				
+				//copy the characters in the string
+				*copyTo = *copyFrom;
+				copyTo++;
+				copyFrom++;
+			}
+			
+			printf("String Value: %s\n", returnVal.stringValue);
 		}
 			break;
 		case 3423698://length
@@ -303,7 +391,7 @@ NoPL_FunctionValue nopl_standardFunctions(void* calledOnObject, char* functionNa
 			returnVal.numberValue = M_E;
 		}
 			break;
-		case 15378630://DEGREE_TO_RADIAN
+		case 3307147://degreeToRadian
 		{
 			//bail if we don't have the correct args
 			if(argc > 1 || (argc == 1 && argv[0].type != NoPL_DataType_Number))
@@ -319,7 +407,7 @@ NoPL_FunctionValue nopl_standardFunctions(void* calledOnObject, char* functionNa
 			}
 		}
 			break;
-		case 911202://RADIAN_TO_DEGREE
+		case 3525386://radianToDegree
 		{
 			//bail if we don't have the correct args
 			if(argc > 1 || (argc == 1 && argv[0].type != NoPL_DataType_Number))

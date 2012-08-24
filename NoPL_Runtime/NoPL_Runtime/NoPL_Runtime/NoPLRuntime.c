@@ -279,7 +279,8 @@ int evaluateStatement(NoPL_Evaluation* eval)
 			evaluateString(eval, &strObj);
 			
 			//print to callback function
-			eval->callbacks->stringFeedback(strObj.stringValue, NoPL_StringFeedbackType_PrintStatement);
+			if(eval->callbacks->stringFeedback)
+				eval->callbacks->stringFeedback(strObj.stringValue, NoPL_StringFeedbackType_PrintStatement);
 			
 			freeNoPL_String(&strObj);
 		}
@@ -354,7 +355,8 @@ int evaluateStatement(NoPL_Evaluation* eval)
 			sprintf(str, "Line: %d", (int)(*lineNum));
 			
 			//call the callback function
-			eval->callbacks->stringFeedback(str, NoPL_StringFeedbackType_DebugInfo);
+			if(eval->callbacks->stringFeedback)
+				eval->callbacks->stringFeedback(str, NoPL_StringFeedbackType_DebugInfo);
 		}
 			break;
 		default:

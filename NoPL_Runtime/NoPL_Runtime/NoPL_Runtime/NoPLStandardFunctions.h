@@ -12,6 +12,6 @@
 #include "NoPLRuntime.h"
 
 //function that handles all standard function calls
-NoPL_FunctionValue nopl_standardFunctions(void* calledOnObject, char* functionName, NoPL_FunctionValue* argv, unsigned int argc);
+NoPL_FunctionValue nopl_standardFunctions(const void* calledOnObject, const char* functionName, const NoPL_FunctionValue* argv, unsigned int argc);
 
 #endif
