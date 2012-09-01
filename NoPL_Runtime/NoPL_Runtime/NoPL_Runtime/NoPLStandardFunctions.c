@@ -47,10 +47,6 @@ NoPL_FunctionValue nopl_standardFunctions(const void* calledOnObject, const char
 			if(argc < 1 || argv[0].type != NoPL_DataType_String)
 				break;
 			
-			//copy the string
-			char formatStr[strlen(argv[0].stringValue)+1];
-			strcpy(formatStr, argv[0].stringValue);
-			
 			//loop to count how many extra chars we want
 			int returnLength = 0;
 			for(int i = 0; i < argc; i++)
@@ -83,7 +79,7 @@ NoPL_FunctionValue nopl_standardFunctions(const void* calledOnObject, const char
 			memset(returnVal.stringValue, 0, returnLength+1);
 			
 			//loop to format the string
-			char* copyFrom = formatStr;
+			const char* copyFrom = argv[0].stringValue;
 			char* copyTo = returnVal.stringValue;
 			char varBuffer[18];
 			char c;

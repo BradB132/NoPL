@@ -322,6 +322,52 @@ int evaluateStatement(NoPL_Evaluation* eval)
 				eval->evaluationPosition += *buffMove;
 		}
 			break;
+		case NoPL_BYTE_SWITCH_CASE_BOOLEAN:
+		{
+			//get the values from this case
+			NoPL_Index* variableIndex = (NoPL_Index*)(eval->scriptBuffer+eval->evaluationPosition);
+			eval->evaluationPosition += sizeof(NoPL_Index);
+			NoPL_Instruction* caseValue = (NoPL_Instruction*)(eval->scriptBuffer+eval->evaluationPosition);
+			eval->evaluationPosition += sizeof(NoPL_Instruction);
+			NoPL_Index* buffMove = (NoPL_Index*)(eval->scriptBuffer+eval->evaluationPosition);
+			eval->evaluationPosition += sizeof(NoPL_Index);
+			
+			//check if this case value matches the expression at the top of the switch
+			if(eval->booleanTable[*variableIndex] == *caseValue)
+				eval->evaluationPosition += *buffMove;
+		}
+			break;
+		case NoPL_BYTE_SWITCH_CASE_NUMBER:
+		{
+			//get the values from this case
+			NoPL_Index* variableIndex = (NoPL_Index*)(eval->scriptBuffer+eval->evaluationPosition);
+			eval->evaluationPosition += sizeof(NoPL_Index);
+			float* caseValue = (float*)(eval->scriptBuffer+eval->evaluationPosition);
+			eval->evaluationPosition += sizeof(float);
+			NoPL_Index* buffMove = (NoPL_Index*)(eval->scriptBuffer+eval->evaluationPosition);
+			eval->evaluationPosition += sizeof(NoPL_Index);
+			
+			//check if this case value matches the expression at the top of the switch
+			if(eval->numberTable[*variableIndex] == *caseValue)
+				eval->evaluationPosition += *buffMove;
+		}
+			break;
+		case NoPL_BYTE_SWITCH_CASE_STRING:
+		{
+			//TODO: finish this
+//			//get the values from this case
+//			NoPL_Index* variableIndex = (NoPL_Index*)(eval->scriptBuffer+eval->evaluationPosition);
+//			eval->evaluationPosition += sizeof(NoPL_Index);
+//			NoPL_Instruction* caseValue = (NoPL_Instruction*)(eval->scriptBuffer+eval->evaluationPosition);
+//			eval->evaluationPosition += sizeof(NoPL_Instruction);
+//			NoPL_Index* buffMove = (NoPL_Index*)(eval->scriptBuffer+eval->evaluationPosition);
+//			eval->evaluationPosition += sizeof(NoPL_Index);
+//			
+//			//check if this case value matches the expression at the top of the switch
+//			if(eval->booleanTable[*variableIndex] == *caseValue)
+//				eval->evaluationPosition += *buffMove;
+		}
+			break;
 		case NoPL_BYTE_BUFFER_MOVE_FORWARD:
 		{
 			//get the buffer move amount
