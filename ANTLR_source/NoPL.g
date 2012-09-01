@@ -11,13 +11,6 @@ options
 //*/
 }
 
-//TO DO:
-//	error when doing: boolean b = (5 % 2 == 0);
-//	Pre-compile:
-//		includes
-//		value defines
-//
-
 tokens
 {
 	TYPE_CAST;
@@ -26,177 +19,13 @@ tokens
 	FUNCTION_CALL;
 }
 
-//////////////////////////////////
-//JAVA
-//////////////////////////////////
-//*
-@members
-{
-
-//declare variable stack
-public Stack variableStack = null;
-
-//dummy object to make API's match with C target
-Object ctx = null;
-
-public void pushScope()
-{
-	variableStack.push(new ArrayList());
-}
-
-public void popScope()
-{
-	variableStack.pop();
-}
-
-public void parsingWillStart()
-{
-	//create stack
-	variableStack = new Stack();
-	
-	//push the first scope
-	pushScope();
-}
-
-public void parsingDidFinish()
-{
-	//pop the last scope
-	popScope();
-}
-
-public boolean variableExists(String varName)
-{
-	for(int i = 0; i < variableStack.size(); i++)
-	{
-		ArrayList arr = (ArrayList)(variableStack.get(i));
-		for(int j = 0; j < arr.size(); j++)
-		{
-			String str = (String)(arr.get(j));
-			if(str.equals(varName))
-				return true;
-		}
-	}
-	return false;
-}
-
-public void declareVariable(String name)
-{
-	if(variableStack.size() == 0)
-		return;//just in case
-	
-	ArrayList arr = (ArrayList)(variableStack.peek());
-	arr.add(name);
-}
-
-public String nextString(Object obj)
-{
-	return input.LT(1).getText();
-}
-
-}
-//*/
-
-//////////////////////////////////
-//C
-//////////////////////////////////
-/*
-
-@parser::includes
-{
-//pANTLR3_VECTOR errorStrings = NULL;
-//pANTLR3_VECTOR errorTokens = NULL;
-}
-
-@members
-{
-
-#define NoPL_StackSizeHint 16
-#define NoPL_VectorSizeHint 8
-
-//declare various typed stacks
-pANTLR3_STACK variableStack = NULL;
-
-void pushScope()
-{
-	//create a new vector
-	pANTLR3_VECTOR variableVector = antlr3VectorNew(NoPL_VectorSizeHint);
-	
-	//push new vectors onto stack
-	variableStack->push(variableStack, variableVector, (void(*)(void*))(variableVector->free));
-}
-
-void popScope()
-{
-	variableStack->pop(variableStack);
-}
-
-//void reportError(pANTLR3_STRING errDesc, pANTLR3_COMMON_TOKEN errToken)
-//{
-//	//lazy create error vectors
-//	if(!errorStrings)
-//		errorStrings = antlr3VectorNew(NoPL_VectorSizeHint);
-//	if(!errorTokens)
-//		errorTokens = antlr3VectorNew(NoPL_VectorSizeHint);
-//	
-//	//add the error
-//	errorStrings->add(errorStrings, errDesc, NULL);
-//	errorTokens->add(errorTokens, errToken, NULL);
-//}
-
-void parsingWillStart()
-{
-	//create the stacks if this is the first time we've needed them
-	if(!variableStack)
-		variableStack = antlr3StackNew(NoPL_StackSizeHint);
-	
-	//push the first scope
-	pushScope();
-}
-
-void parsingDidFinish()
-{
-	//pop the last scope
-	popScope();
-}
-
-int variableExists(pANTLR3_STRING varName)
-{
-	//search the stack for the given variable name
-	for(int i = 0; i < variableStack->size(variableStack); i++)
-	{
-		pANTLR3_VECTOR vect = (pANTLR3_VECTOR)(variableStack->get(variableStack, i));
-		for(int j = 0; j < vect->size(vect); j++)
-		{
-			pANTLR3_STRING str = (pANTLR3_STRING)(vect->get(vect,j));
-			if(!strcmp((const char*)str->chars, (const char*)varName->chars))
-				return 1;
-		}
-	}
-	return 0;
-}
-
-void declareVariable(pANTLR3_STRING name)
-{
-	pANTLR3_VECTOR vect = (pANTLR3_VECTOR)(variableStack->peek(variableStack));
-	vect->add(vect, name, NULL);
-}
-
-pANTLR3_STRING nextString(pNoPLParser ctx)
-{
-	pANTLR3_COMMON_TOKEN tok = LT(1);
-	return tok->getText(tok);
-}
-
-}
-//*/
-
 //PARSER
 program
-	:	{ parsingWillStart(); } (statement|variableScope)+ EOF! { parsingDidFinish(); }
+	:	(statement|variableScope)+ EOF!
 	;
 
 variableScope
-	:	SCOPE_OPEN^ { pushScope(); } statement+ { popScope(); } SCOPE_CLOSE!
+	:	SCOPE_OPEN^ statement+ SCOPE_CLOSE!
 	;
 
 statement
@@ -237,7 +66,7 @@ booleanExpression
 	;
 
 booleanSubExpression
-	:	atom
+	:	numericExpression
 		(
 			LOGICAL_EQUALITY^ |
 			LOGICAL_INEQUALITY^ |
@@ -288,14 +117,14 @@ modNumericExpression
 
 //VARIABLES
 variableDeclaration
-	:	DECL_NUMBER^ { !variableExists(nextString(ctx)) }? => ID (ASSIGN! expression)? { declareVariable($ID.text); }
-	|	DECL_BOOL^ { !variableExists(nextString(ctx)) }? => ID (ASSIGN! expression)? { declareVariable($ID.text); }
-	|	DECL_STRING^ { !variableExists(nextString(ctx)) }? => ID (ASSIGN! expression)? { declareVariable($ID.text); }
-	|	DECL_OBJ^ { !variableExists(nextString(ctx)) }? => ID (ASSIGN! expression)? { declareVariable($ID.text); }
+	:	DECL_NUMBER^ ID (ASSIGN! expression)?
+	|	DECL_BOOL^ ID (ASSIGN! expression)?
+	|	DECL_STRING^ ID (ASSIGN! expression)?
+	|	DECL_OBJ^ ID (ASSIGN! expression)?
 	;
 
 variableAssign
-	:	{}{ variableExists(nextString(ctx)) }? => ID 
+	:	ID 
 		(
 			ASSIGN^ |
 			ADD_ASSIGN^ |
@@ -308,8 +137,8 @@ variableAssign
 	;
 
 unaryOperation
-	:	{ variableExists(nextString(ctx)) }? => ID (INCREMENT^|DECREMENT^)
-	|	(INCREMENT^|DECREMENT^) { variableExists(nextString(ctx)) }? => ID
+	:	ID (INCREMENT^|DECREMENT^)
+	|	(INCREMENT^|DECREMENT^) ID
 	;
 
 //OBJECTS AND FUNCTIONS
@@ -340,23 +169,23 @@ loopBody
 	;
 
 whileLoop
-	:	LOOP_WHILE^ { pushScope(); } PAREN_OPEN! expression PAREN_CLOSE! loopBody { popScope(); }
+	:	LOOP_WHILE^ PAREN_OPEN! expression PAREN_CLOSE! loopBody
 	;
 
 forLoop
-	:	LOOP_FOR^ { pushScope(); } PAREN_OPEN! nonControlStatement STATEMENT_DELIMITER! expression STATEMENT_DELIMITER! nonControlStatement PAREN_CLOSE! loopBody { popScope(); }
+	:	LOOP_FOR^ PAREN_OPEN! nonControlStatement STATEMENT_DELIMITER! expression STATEMENT_DELIMITER! nonControlStatement PAREN_CLOSE! loopBody
 	;
 
 doWhileLoop
-	:	LOOP_DO { pushScope(); } loopBody LOOP_WHILE PAREN_OPEN expression PAREN_CLOSE STATEMENT_DELIMITER { popScope(); } -> ^(LOOP_DO expression loopBody)
+	:	LOOP_DO loopBody LOOP_WHILE PAREN_OPEN expression PAREN_CLOSE STATEMENT_DELIMITER -> ^(LOOP_DO expression loopBody)
 	;
 
 conditional
-	:	CONDITIONAL { pushScope(); } PAREN_OPEN expression PAREN_CLOSE loopBody { popScope(); } (elseConditional)? -> ^(CONDITIONAL expression (elseConditional)? loopBody)
+	:	CONDITIONAL PAREN_OPEN expression PAREN_CLOSE loopBody (elseConditional)? -> ^(CONDITIONAL expression (elseConditional)? loopBody)
 	;
 
 elseConditional
-	:	CONDITIONAL_ELSE^ { pushScope(); } loopBody { popScope(); }
+	:	CONDITIONAL_ELSE^ loopBody
 	;
 
 innerSwitchStatement

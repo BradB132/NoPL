@@ -33,7 +33,7 @@ int main(int argc, const char * argv[])
 	if(compileCtx.errDescriptions)
 	{
 		//display errors if there are any
-		printf("Errors:\n%s", compileCtx.errDescriptions->chars);
+		printf("Errors:\n%s", compileCtx.errDescriptions);
 	}
 	
 	//save the output to file
