@@ -9,7 +9,8 @@
 #include <stdio.h>
 #include "NoPLc.h"
 
-#define treeIndex(tree,index) (pANTLR3_BASE_TREE)(tree->children->get(tree->children, index))
+#define treeIndex(tree,index)	(pANTLR3_BASE_TREE)(tree->children->get(tree->children, index))
+#define isErrorNode(tree)		(!strcmp("Tree Error Node", (char*)tree->getText(tree)->chars))
 #define NoPL_StackSizeHint 16
 #define NoPL_VectorSizeHint 8
 
@@ -53,11 +54,10 @@ void nopl_addOperator(const NoPL_Instruction operator, NoPL_CompileContext* cont
 void nopl_appendNodeWithRequiredType(const pANTLR3_BASE_TREE tree, const NoPL_DataType type, NoPL_CompileContext* context, const NoPL_CompileOptions* options);
 void nopl_appendFunctionCall(const pANTLR3_BASE_TREE objExpression, const pANTLR3_BASE_TREE funcName, const pANTLR3_BASE_TREE args, const NoPL_CompileOptions* options, NoPL_CompileContext* context);
 void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* options, NoPL_CompileContext* context);
-void nopl_traverseForErrors(const pANTLR3_BASE_TREE tree, NoPL_CompileContext* context);
 NoPL_DataType nopl_dataTypeForTree(const pANTLR3_BASE_TREE tree, const NoPL_CompileContext* context);
 void nopl_pushScope(NoPL_CompileContext* context);
 void nopl_popScope(NoPL_CompileContext* context);
-void nopl_error(const pANTLR3_BASE_TREE tree, const char* desc, int isParserError, NoPL_CompileContext* context);
+void nopl_error(const pANTLR3_BASE_TREE tree, const char* desc, NoPL_CompileContext* context);
 int nopl_variableExistsInStack(const pANTLR3_STRING varName, const pANTLR3_STACK whichStack);
 int nopl_variableExistsInContext(const pANTLR3_STRING varName, const NoPL_CompileContext* context);
 int nopl_declareVariableInStack(const pANTLR3_STRING varName, const pANTLR3_STACK whichStack);
@@ -69,48 +69,115 @@ void nopl_freeInnerCompileContext(NoPL_CompileContext* context);
 void nopl_appendContext(const NoPL_CompileContext* fromContext, NoPL_CompileContext* toContext);
 void nopl_finalizeControlFlowMoves(NoPL_CompileContext* context, NoPL_Index breakIndex, NoPL_Index continueIndex);
 void nopl_appendControlFlowMove(NoPL_CompileContext* context, NoPL_Index moveFromIndex, NoPL_Index moveToIndex);
+void nopl_findStartPositionForNode(const pANTLR3_BASE_TREE tree, int* line, int* character);
+void nopl_findEndPositionForNode(const pANTLR3_BASE_TREE tree, int* line, int* character);
+void nopl_appendErrorString(NoPL_CompileContext* context, const char* errString);
 
 #pragma mark -
 #pragma mark Compilation
 
-void nopl_error(const pANTLR3_BASE_TREE tree, const char* desc, int isParserError, NoPL_CompileContext* context)
+void nopl_appendErrorString(NoPL_CompileContext* context, const char* errString)
 {
-	//declare some vars for the text position of this error
-	int startLine;
-	int startChar;
-	int endLine;
-	int endChar;
+	//get the root context
+	while(context->parentContext)
+		context = context->parentContext;
 	
-	//handle the error differently if it is a parser error
-	if(isParserError)
+	//get the error length
+	int errLength = (int)strlen(errString);
+	
+	//create the string if we don't already have one
+	if(!context->errDescriptions)
 	{
-		//TODO: find the range of this error
+		context->errDescriptions = malloc(errLength*2);
+		memcpy(context->errDescriptions, errString, errLength+1);
+		context->errDescLength = errLength*2;
+		return;
 	}
-	else
+	
+	//check if we're too long for the buffer
+	int currentLength = (int)strlen(context->errDescriptions)+1;
+	if(errLength+currentLength > context->errDescLength)
 	{
-		//TODO: get the actual beginning and end nodes
-		pANTLR3_BASE_TREE firstNode = NULL;
-		pANTLR3_BASE_TREE lastNode = NULL;
-		pANTLR3_BASE_TREE loopNode = tree;
-		while(loopNode->children && loopNode->children->size(loopNode->children))
-			loopNode = loopNode->children->get(loopNode->children, 0);
-		firstNode = loopNode;
-		loopNode = tree;
-		while(loopNode->children && loopNode->children->size(loopNode->children))
-			loopNode = loopNode->children->get(loopNode->children, loopNode->children->size(loopNode->children)-1);
-		lastNode = loopNode;
+		//create a bigger buffer
+		int newLength = context->errDescLength*2+errLength;
+		char* newString = malloc(context->errDescLength);
 		
-		//get the start and end line number and char position
-		startLine = firstNode->getLine(firstNode);
-		startChar = firstNode->getCharPositionInLine(firstNode);
-		endLine = lastNode->getLine(lastNode);
-		endChar = lastNode->getCharPositionInLine(lastNode)+(int)strlen((char*)lastNode->getText(lastNode)->chars);
+		//copy the buffer
+		memcpy(newString, context->errDescriptions, currentLength);
+		free(context->errDescriptions);
+		context->errDescriptions = newString;
+		context->errDescLength = newLength;
 	}
 	
-	//TODO: append to the context instead of this hack
+	//append
+	strcat(context->errDescriptions, errString);
+}
+
+void nopl_findStartPositionForNode(const pANTLR3_BASE_TREE tree, int* line, int* character)
+{
+	//check if this position is before
+	if(tree->getLine(tree) < *line || (tree->getLine(tree) == *line && tree->getCharPositionInLine(tree) < *character))
+	{
+		*line = tree->getLine(tree);
+		*character = tree->getCharPositionInLine(tree);
+	}
+	
+	//recursively check all nodes in this AST
+	NoPL_Index childCount = 0;
+	if(tree->children)
+		childCount = (NoPL_Index)tree->children->size(tree->children);
+	ANTLR3_UINT32 i;
+	pANTLR3_BASE_TREE child;
+	for(i = 0; i < childCount; i++)
+	{
+		//get each child and traverse
+		child = (pANTLR3_BASE_TREE)(tree->children->get(tree->children, i));
+		if(!isErrorNode(child))
+			nopl_findStartPositionForNode(child, line, character);
+	}
+}
+
+void nopl_findEndPositionForNode(const pANTLR3_BASE_TREE tree, int* line, int* character)
+{
+	//check if this position is after
+	int characterLength = (int)strlen((char*)tree->getText(tree)->chars);
+	if(tree->getLine(tree) > *line || (tree->getLine(tree) == *line && (tree->getCharPositionInLine(tree)+characterLength) > *character))
+	{
+		*line = tree->getLine(tree);
+		*character = (tree->getCharPositionInLine(tree)+characterLength);
+	}
+	
+	//recursively check all nodes in this AST
+	NoPL_Index childCount = 0;
+	if(tree->children)
+		childCount = (NoPL_Index)tree->children->size(tree->children);
+	ANTLR3_UINT32 i;
+	pANTLR3_BASE_TREE child;
+	for(i = 0; i < childCount; i++)
+	{
+		//get each child and traverse
+		child = (pANTLR3_BASE_TREE)(tree->children->get(tree->children, i));
+		if(!isErrorNode(child))
+			nopl_findEndPositionForNode(child, line, character);
+	}
+}
+
+void nopl_error(const pANTLR3_BASE_TREE tree, const char* desc, NoPL_CompileContext* context)
+{
+	//init with some reasonable values
+	int startLine, endLine;
+	startLine = endLine = tree->getLine(tree);
+	int startChar, endChar;
+	startChar = endChar = tree->getCharPositionInLine(tree);
+	
+	//find the start and end positions
+	nopl_findStartPositionForNode(tree, &startLine, &startChar);
+	nopl_findEndPositionForNode(tree, &endLine, &endChar);
+	
+	//append string
 	char appendStr[512];
 	snprintf(appendStr, 512, "%s(%d:%d-%d:%d)\n", desc, startLine, startChar, endLine, endChar);
-	printf("NoPL Error: %s\n", appendStr);
+	nopl_appendErrorString(context, appendStr);
 }
 
 void nopl_addBytesToContext(const void* bytes, int byteCount, NoPL_CompileContext* context)
@@ -251,23 +318,24 @@ NoPL_Index nopl_indexOfVariableInStack(const pANTLR3_STRING varName, const pANTL
 	}
 	
 	//we didn't find the variable
-	nopl_error(tree, NoPL_ErrStr_VariableNotDeclared, 0, context);
+	nopl_error(tree, NoPL_ErrStr_VariableNotDeclared, context);
 	return (NoPL_Index)0;
 }
 
 NoPL_CompileContext nopl_newInnerCompileContext(NoPL_CompileContext* parentContext, int allowBreak, int allowContinue)
 {
 	NoPL_CompileContext context;
+	context.parentContext = parentContext;
 	context.compiledData = NULL;
 	context.dataLength = 0;
 	context.arrayLength = 0;
 	context.debugLine = parentContext->debugLine;
-	context.tokenStream = parentContext->tokenStream;
 	context.objectStack = parentContext->objectStack;
 	context.numberStack = parentContext->numberStack;
 	context.booleanStack = parentContext->booleanStack;
 	context.stringStack = parentContext->stringStack;
 	context.errDescriptions = parentContext->errDescriptions;
+	context.errDescLength = parentContext->errDescLength;
 	context.objectTableSize = parentContext->objectTableSize;
 	context.numberTableSize = parentContext->numberTableSize;
 	context.booleanTableSize = parentContext->booleanTableSize;
@@ -291,12 +359,11 @@ NoPL_CompileContext nopl_newInnerCompileContext(NoPL_CompileContext* parentConte
 void nopl_freeInnerCompileContext(NoPL_CompileContext* context)
 {
 	//null these pointers so that they aren't freed
+	context->parentContext = NULL;
 	context->objectStack = NULL;
 	context->numberStack = NULL;
 	context->booleanStack = NULL;
 	context->stringStack = NULL;
-	context->tokenStream = NULL;
-	context->errDescriptions = NULL;
 	
 	if(context->breakStatements)
 	{
@@ -442,7 +509,7 @@ void nopl_appendNodeWithRequiredType(const pANTLR3_BASE_TREE tree, const NoPL_Da
 				break;
 		}
 		if(error)
-			nopl_error(tree, error, 0, context);
+			nopl_error(tree, error, context);
 	}
 	
 	//append the node
@@ -495,9 +562,9 @@ void nopl_appendFunctionCall(const pANTLR3_BASE_TREE objExpression, const pANTLR
 			else if(argType == NoPL_type_Object)
 				nopl_addOperator(NoPL_BYTE_ARG_OBJECT, context);
 			else if(argType == NoPL_type_FunctionResult)
-				nopl_error(childArg, "The type of this argument is ambiguous and requires an explicit cast", 0, context);
+				nopl_error(childArg, "The type of this argument is ambiguous and requires an explicit cast", context);
 			else
-				nopl_error(childArg, "Cannot determine the type of this argument", 0, context);
+				nopl_error(childArg, "Cannot determine the type of this argument", context);
 			
 			//append the arg
 			nopl_traverseAST(childArg, options, context);
@@ -685,7 +752,7 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 					else if(childType1 == NoPL_type_FunctionResult)
 						nopl_addOperator(NoPL_BYTE_RESOLVE_RESULT_TO_STRING, context);
 					else if(childType1 == NoPL_type_Object)
-						nopl_error(child1, NoPL_ErrStr_CannotImplicitCastObject, 0, context);
+						nopl_error(child1, NoPL_ErrStr_CannotImplicitCastObject, context);
 					
 					//add the first child
 					nopl_traverseAST(child1, options, context);
@@ -698,14 +765,14 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 					else if(childType2 == NoPL_type_FunctionResult)
 						nopl_addOperator(NoPL_BYTE_RESOLVE_RESULT_TO_STRING, context);
 					else if(childType2 == NoPL_type_Object)
-						nopl_error(child2, NoPL_ErrStr_CannotImplicitCastObject, 0, context);
+						nopl_error(child2, NoPL_ErrStr_CannotImplicitCastObject, context);
 					
 					//add the second child
 					nopl_traverseAST(child2, options, context);
 				}
 				else
 				{
-					nopl_error(tree, "something is wrong with the + operator", 0, context);
+					nopl_error(tree, "something is wrong with the + operator", context);
 				}
 			}
 				break;
@@ -744,9 +811,9 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				else
 				{
 					if(nopl_variableExistsInContext(assignTo->getText(assignTo), context))
-						nopl_error(assignTo, NoPL_ErrStr_CannotIncrement, 0, context);
+						nopl_error(assignTo, NoPL_ErrStr_CannotIncrement, context);
 					else
-						nopl_error(assignTo, NoPL_ErrStr_VariableNotDeclared, 0, context);
+						nopl_error(assignTo, NoPL_ErrStr_VariableNotDeclared, context);
 				}
 			}
 				break;
@@ -808,7 +875,7 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				}
 				else
 				{
-					nopl_error(assignTo, NoPL_ErrStr_VariableNotDeclared, 0, context);
+					nopl_error(assignTo, NoPL_ErrStr_VariableNotDeclared, context);
 				}
 			}
 				break;
@@ -828,7 +895,7 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 					context->breakStatements->add(context->breakStatements, (void*)(context->dataLength), NULL);
 				}
 				else
-					nopl_error(tree, NoPL_ErrStr_CannotControlFlow, 0, context);
+					nopl_error(tree, NoPL_ErrStr_CannotControlFlow, context);
 			}
 				break;
 			case CONDITIONAL:
@@ -927,7 +994,7 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 					context->continueStatements->add(context->continueStatements, (void*)(context->dataLength), NULL);
 				}
 				else
-					nopl_error(tree, NoPL_ErrStr_CannotControlFlow, 0, context);
+					nopl_error(tree, NoPL_ErrStr_CannotControlFlow, context);
 			}
 				break;
 			case DECL_BOOL:
@@ -953,7 +1020,7 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				
 				//check if the variable was already declared elsewhere
 				if(nopl_variableExistsInContext(declaredName, context))
-					nopl_error(declaredVar, NoPL_ErrStr_VariableAlreadyDeclared, 0, context);
+					nopl_error(declaredVar, NoPL_ErrStr_VariableAlreadyDeclared, context);
 				
 				//declare the variable
 				nopl_declareVariableInStack(declaredName, context->booleanStack);
@@ -996,7 +1063,7 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				
 				//check if the variable was already declared elsewhere
 				if(nopl_variableExistsInContext(declaredName, context))
-					nopl_error(declaredVar, NoPL_ErrStr_VariableAlreadyDeclared, 0, context);
+					nopl_error(declaredVar, NoPL_ErrStr_VariableAlreadyDeclared, context);
 				
 				//declare the variable
 				nopl_declareVariableInStack(declaredName, context->numberStack);
@@ -1037,7 +1104,7 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				
 				//check if the variable was already declared elsewhere
 				if(nopl_variableExistsInContext(declaredName, context))
-					nopl_error(declaredVar, NoPL_ErrStr_VariableAlreadyDeclared, 0, context);
+					nopl_error(declaredVar, NoPL_ErrStr_VariableAlreadyDeclared, context);
 				
 				//declare the variable
 				nopl_declareVariableInStack(declaredName, context->objectStack);
@@ -1080,7 +1147,7 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				
 				//check if the variable was already declared elsewhere
 				if(nopl_variableExistsInContext(declaredName, context))
-					nopl_error(declaredVar, NoPL_ErrStr_VariableAlreadyDeclared, 0, context);
+					nopl_error(declaredVar, NoPL_ErrStr_VariableAlreadyDeclared, context);
 				
 				//declare the variable
 				nopl_declareVariableInStack(declaredName, context->stringStack);
@@ -1108,7 +1175,7 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				
 				//check the data type of the variable
 				if(nopl_dataTypeForTree(var, context) != NoPL_type_Number)
-					nopl_error(var, NoPL_ErrStr_CannotIncrement, 0, context);
+					nopl_error(var, NoPL_ErrStr_CannotIncrement, context);
 				
 				//append the index for the variable
 				NoPL_Index index = nopl_indexOfVariableInStack(var->getText(var), context->numberStack, var, context);
@@ -1152,9 +1219,9 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				else
 				{
 					if(nopl_variableExistsInContext(assignTo->getText(assignTo), context))
-						nopl_error(assignTo, NoPL_ErrStr_CannotIncrement, 0, context);
+						nopl_error(assignTo, NoPL_ErrStr_CannotIncrement, context);
 					else
-						nopl_error(assignTo, NoPL_ErrStr_VariableNotDeclared, 0, context);
+						nopl_error(assignTo, NoPL_ErrStr_VariableNotDeclared, context);
 				}
 			}
 				break;
@@ -1198,9 +1265,9 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				else
 				{
 					if(nopl_variableExistsInContext(assignTo->getText(assignTo), context))
-						nopl_error(assignTo, NoPL_ErrStr_CannotIncrement, 0, context);
+						nopl_error(assignTo, NoPL_ErrStr_CannotIncrement, context);
 					else
-						nopl_error(assignTo, NoPL_ErrStr_VariableNotDeclared, 0, context);
+						nopl_error(assignTo, NoPL_ErrStr_VariableNotDeclared, context);
 				}
 			}
 				break;
@@ -1307,7 +1374,7 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				
 				//check the data type of the variable
 				if(nopl_dataTypeForTree(var, context) != NoPL_type_Number)
-					nopl_error(var, NoPL_ErrStr_CannotIncrement, 0, context);
+					nopl_error(var, NoPL_ErrStr_CannotIncrement, context);
 				
 				//append the index for the variable
 				NoPL_Index index = nopl_indexOfVariableInStack(var->getText(var), context->numberStack, var, context);
@@ -1384,7 +1451,7 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				//make sure we're looking at comparable expressions
 				if(child1Type == NoPL_type_FunctionResult && child2Type == NoPL_type_FunctionResult)
 				{
-					nopl_error(tree, NoPL_ErrStr_EqualityExpressionsAbiguous, 0, context);
+					nopl_error(tree, NoPL_ErrStr_EqualityExpressionsAbiguous, context);
 				}
 				else if(child1Type == child2Type || child1Type == NoPL_type_FunctionResult || child2Type == NoPL_type_FunctionResult)
 				{
@@ -1409,7 +1476,7 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 							nopl_addOperator(NoPL_BYTE_STRING_LOGICAL_EQUALITY, context);
 							break;
 						default:
-							nopl_error(tree, NoPL_ErrStr_CouldNotDetermineType, 0, context);
+							nopl_error(tree, NoPL_ErrStr_CouldNotDetermineType, context);
 							break;
 					}
 					
@@ -1418,7 +1485,7 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 					nopl_appendNodeWithRequiredType(child2, exprType, context, options);
 				}
 				else
-					nopl_error(tree, NoPL_ErrStr_EqualityDifferentType, 0, context);
+					nopl_error(tree, NoPL_ErrStr_EqualityDifferentType, context);
 			}
 				break;
 			case LOGICAL_INEQUALITY:
@@ -1434,7 +1501,7 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				//make sure we're looking at comparable expressions
 				if(child1Type == NoPL_type_FunctionResult && child2Type == NoPL_type_FunctionResult)
 				{
-					nopl_error(tree, NoPL_ErrStr_EqualityExpressionsAbiguous, 0, context);
+					nopl_error(tree, NoPL_ErrStr_EqualityExpressionsAbiguous, context);
 				}
 				else if(child1Type == child2Type || child1Type == NoPL_type_FunctionResult || child2Type == NoPL_type_FunctionResult)
 				{
@@ -1459,7 +1526,7 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 							nopl_addOperator(NoPL_BYTE_STRING_LOGICAL_INEQUALITY, context);
 							break;
 						default:
-							nopl_error(tree, NoPL_ErrStr_CouldNotDetermineType, 0, context);
+							nopl_error(tree, NoPL_ErrStr_CouldNotDetermineType, context);
 							break;
 					}
 					
@@ -1468,7 +1535,7 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 					nopl_appendNodeWithRequiredType(child2, exprType, context, options);
 				}
 				else
-					nopl_error(tree, NoPL_ErrStr_EqualityDifferentType, 0, context);
+					nopl_error(tree, NoPL_ErrStr_EqualityDifferentType, context);
 			}
 				break;
 			case LOGICAL_NEGATION:
@@ -1715,9 +1782,9 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				else
 				{
 					if(nopl_variableExistsInContext(assignTo->getText(assignTo), context))
-						nopl_error(assignTo, NoPL_ErrStr_CannotIncrement, 0, context);
+						nopl_error(assignTo, NoPL_ErrStr_CannotIncrement, context);
 					else
-						nopl_error(assignTo, NoPL_ErrStr_VariableNotDeclared, 0, context);
+						nopl_error(assignTo, NoPL_ErrStr_VariableNotDeclared, context);
 				}
 			}
 				break;
@@ -1758,9 +1825,9 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				else
 				{
 					if(nopl_variableExistsInContext(assignTo->getText(assignTo), context))
-						nopl_error(assignTo, NoPL_ErrStr_CannotIncrement, 0, context);
+						nopl_error(assignTo, NoPL_ErrStr_CannotIncrement, context);
 					else
-						nopl_error(assignTo, NoPL_ErrStr_VariableNotDeclared, 0, context);
+						nopl_error(assignTo, NoPL_ErrStr_VariableNotDeclared, context);
 				}
 			}
 				break;
@@ -1839,10 +1906,10 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 					case NoPL_type_String:
 						break;
 					case NoPL_type_Object:
-						nopl_error(child1, NoPL_ErrStr_CannotImplicitCastObject, 0, context);
+						nopl_error(child1, NoPL_ErrStr_CannotImplicitCastObject, context);
 						break;
 					default:
-						nopl_error(child1, NoPL_ErrStr_CouldNotDetermineType, 0, context);
+						nopl_error(child1, NoPL_ErrStr_CouldNotDetermineType, context);
 						break;
 				}
 				
@@ -1906,7 +1973,7 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				switch(nopl_dataTypeForTree(index, context))
 				{
 					case NoPL_type_FunctionResult:
-						nopl_error(index, "This expression must be cast to either a numeric or string value", 0, context);
+						nopl_error(index, "This expression must be cast to either a numeric or string value", context);
 						break;
 					case NoPL_type_Number:
 						nopl_addOperator(NoPL_BYTE_ARG_NUMBER, context);
@@ -1915,7 +1982,7 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 						nopl_addOperator(NoPL_BYTE_ARG_STRING, context);
 						break;
 					default:
-						nopl_error(index, "Cannot use an expression of this type as an index", 0, context);
+						nopl_error(index, "Cannot use an expression of this type as an index", context);
 						break;
 				}
 				
@@ -1960,9 +2027,9 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				else
 				{
 					if(nopl_variableExistsInContext(assignTo->getText(assignTo), context))
-						nopl_error(assignTo, NoPL_ErrStr_CannotIncrement, 0, context);
+						nopl_error(assignTo, NoPL_ErrStr_CannotIncrement, context);
 					else
-						nopl_error(assignTo, NoPL_ErrStr_VariableNotDeclared, 0, context);
+						nopl_error(assignTo, NoPL_ErrStr_VariableNotDeclared, context);
 				}
 			}
 				break;
@@ -2029,7 +2096,7 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 							{
 								//throw an error if this is not the last case
 								if(i != (caseCount-1))
-									nopl_error(caseNode, NoPL_ErrStr_MisplacedDefault, 0, &switchCtx);
+									nopl_error(caseNode, NoPL_ErrStr_MisplacedDefault, &switchCtx);
 								nopl_addOperator(NoPL_BYTE_BUFFER_MOVE_FORWARD, &switchCtx);
 							}
 							else
@@ -2055,7 +2122,7 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 									//check if the value is the same
 									if(caseValue->getType(caseValue) == possibleDuplicateValue->getType(possibleDuplicateValue))
 									{
-										nopl_error(caseValue, NoPL_ErrStr_DuplicateSwitchCase, 0, &switchCtx);
+										nopl_error(caseValue, NoPL_ErrStr_DuplicateSwitchCase, &switchCtx);
 										break;
 									}
 								}
@@ -2098,7 +2165,7 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 							{
 								//throw an error if this is not the last case
 								if(i != (caseCount-1))
-									nopl_error(caseNode, NoPL_ErrStr_MisplacedDefault, 0, &switchCtx);
+									nopl_error(caseNode, NoPL_ErrStr_MisplacedDefault, &switchCtx);
 								nopl_addOperator(NoPL_BYTE_BUFFER_MOVE_FORWARD, &switchCtx);
 							}
 							else
@@ -2123,7 +2190,7 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 									float possibleDuplicateFloat = (float)atof((const char*)possibleDuplicateValue->getText(possibleDuplicateValue)->chars);
 									if(floatValue == possibleDuplicateFloat)
 									{
-										nopl_error(caseValue, NoPL_ErrStr_DuplicateSwitchCase, 0, &switchCtx);
+										nopl_error(caseValue, NoPL_ErrStr_DuplicateSwitchCase, &switchCtx);
 										break;
 									}
 								}
@@ -2166,7 +2233,7 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 							{
 								//throw an error if this is not the last case
 								if(i != (caseCount-1))
-									nopl_error(caseNode, NoPL_ErrStr_MisplacedDefault, 0, &switchCtx);
+									nopl_error(caseNode, NoPL_ErrStr_MisplacedDefault, &switchCtx);
 								nopl_addOperator(NoPL_BYTE_BUFFER_MOVE_FORWARD, &switchCtx);
 							}
 							else
@@ -2198,7 +2265,7 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 									//check if the value is the same
 									if(!strcmp((char*)caseValue->getText(caseValue)->chars, (char*)possibleDuplicateValue->getText(possibleDuplicateValue)->chars))
 									{
-										nopl_error(caseValue, NoPL_ErrStr_DuplicateSwitchCase, 0, &switchCtx);
+										nopl_error(caseValue, NoPL_ErrStr_DuplicateSwitchCase, &switchCtx);
 										break;
 									}
 								}
@@ -2277,9 +2344,9 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 							else if(expressionType == NoPL_type_String)
 								nopl_addOperator(NoPL_BYTE_CAST_STRING_TO_BOOLEAN, context);
 							else if(expressionType == NoPL_type_Object)
-								nopl_error(expression, NoPL_ErrStr_CannotCastObjectToPrimitive, 0, context);
+								nopl_error(expression, NoPL_ErrStr_CannotCastObjectToPrimitive, context);
 							else
-								nopl_error(expression, NoPL_ErrStr_CouldNotDetermineType, 0, context);
+								nopl_error(expression, NoPL_ErrStr_CouldNotDetermineType, context);
 							
 							break;
 						case NoPL_type_Number:
@@ -2292,9 +2359,9 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 							else if(expressionType == NoPL_type_String)
 								nopl_addOperator(NoPL_BYTE_CAST_STRING_TO_NUMBER, context);
 							else if(expressionType == NoPL_type_Object)
-								nopl_error(expression, NoPL_ErrStr_CannotCastObjectToPrimitive, 0, context);
+								nopl_error(expression, NoPL_ErrStr_CannotCastObjectToPrimitive, context);
 							else
-								nopl_error(expression, NoPL_ErrStr_CouldNotDetermineType, 0, context);
+								nopl_error(expression, NoPL_ErrStr_CouldNotDetermineType, context);
 							
 							break;
 						case NoPL_type_String:
@@ -2307,9 +2374,9 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 							else if(expressionType == NoPL_type_Number)
 								nopl_addOperator(NoPL_BYTE_CAST_NUMBER_TO_STRING, context);
 							else if(expressionType == NoPL_type_Object)
-								nopl_error(expression, NoPL_ErrStr_CannotCastObjectToPrimitive, 0, context);
+								nopl_error(expression, NoPL_ErrStr_CannotCastObjectToPrimitive, context);
 							else
-								nopl_error(expression, NoPL_ErrStr_CouldNotDetermineType, 0, context);
+								nopl_error(expression, NoPL_ErrStr_CouldNotDetermineType, context);
 							
 							break;
 						case NoPL_type_Object:
@@ -2318,7 +2385,7 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 							if(expressionType == NoPL_type_FunctionResult)
 								nopl_addOperator(NoPL_BYTE_RESOLVE_RESULT_TO_OBJECT, context);
 							else
-								nopl_error(tree, "Cannot cast non-Object primitives to Object", 0, context);
+								nopl_error(tree, "Cannot cast non-Object primitives to Object", context);
 							
 							break;
 						default:
@@ -2334,32 +2401,12 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 	}
 }
 
-void nopl_traverseForErrors(const pANTLR3_BASE_TREE tree, NoPL_CompileContext* context)
-{
-	//check if this node is an error
-	if(tree->isNilNode && !strcmp("Tree Error Node", (char*)tree->getText(tree)->chars))
-		nopl_error(tree, NoPL_ErrStr_Generic, 1, context);
-	
-	//recursively check all nodes in this AST
-	NoPL_Index childCount = 0;
-	if(tree->children)
-		childCount = (NoPL_Index)tree->children->size(tree->children);
-	ANTLR3_UINT32 i;
-	pANTLR3_BASE_TREE child;
-	for(i = 0; i < childCount; i++)
-	{
-		//get each child and traverse
-		child = (pANTLR3_BASE_TREE)(tree->children->get(tree->children, i));
-		nopl_traverseForErrors(child, context);
-	}
-}
-
 void nopl_compileWithInputStream(pANTLR3_INPUT_STREAM stream, const NoPL_CompileOptions* options, NoPL_CompileContext* context)
 {
 	//attempt to parse the NoPL program
 	pNoPLLexer lex = NoPLLexerNew(stream);
-	context->tokenStream = antlr3CommonTokenStreamSourceNew(ANTLR3_SIZE_HINT, TOKENSOURCE(lex));
-	pNoPLParser parser = NoPLParserNew(context->tokenStream);
+	pANTLR3_COMMON_TOKEN_STREAM tokenStream = antlr3CommonTokenStreamSourceNew(ANTLR3_SIZE_HINT, TOKENSOURCE(lex));
+	pNoPLParser parser = NoPLParserNew(tokenStream);
 	NoPLParser_program_return syntaxTree = parser->program(parser);
 	
 	//check if we want runtime performance over compile speed
@@ -2374,7 +2421,7 @@ void nopl_compileWithInputStream(pANTLR3_INPUT_STREAM stream, const NoPL_Compile
 	if(errCount > 0)
 	{
 		//this tree has errors, add them to the context
-		nopl_traverseForErrors(syntaxTree.tree, context);
+		//TODO: find a better way to do this
 	}
 	else
 	{
@@ -2436,7 +2483,7 @@ void nopl_compileWithInputStream(pANTLR3_INPUT_STREAM stream, const NoPL_Compile
 	
 	//clean up
 	parser->free(parser);
-	context->tokenStream->free(context->tokenStream);
+	tokenStream->free(tokenStream);
 	lex->free(lex);
 }
 
@@ -2470,6 +2517,7 @@ NoPL_CompileContext newNoPL_CompileContext()
 	context.booleanStack = antlr3StackNew(NoPL_StackSizeHint);
 	context.stringStack = antlr3StackNew(NoPL_StackSizeHint);
 	context.errDescriptions = NULL;
+	context.errDescLength = 0;
 	context.breakStatements = NULL;
 	context.continueStatements = NULL;
 	context.allowsBreakStatements = 0;

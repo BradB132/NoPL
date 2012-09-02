@@ -18,7 +18,6 @@ typedef struct
 	NoPL_Instruction* compiledData;
 	NoPL_Index dataLength;
 	NoPL_Index arrayLength;
-	pANTLR3_COMMON_TOKEN_STREAM tokenStream;
 	pANTLR3_STACK objectStack;
 	pANTLR3_STACK numberStack;
 	pANTLR3_STACK booleanStack;
@@ -28,11 +27,13 @@ typedef struct
 	pANTLR3_VECTOR breakStatements;
 	pANTLR3_VECTOR continueStatements;
 	char* errDescriptions;
+	int errDescLength;
 	int debugLine;
 	NoPL_Index* objectTableSize;
 	NoPL_Index* numberTableSize;
 	NoPL_Index* booleanTableSize;
 	NoPL_Index* stringTableSize;
+	void* parentContext;
 } NoPL_CompileContext;
 
 typedef struct
