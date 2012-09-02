@@ -31,6 +31,7 @@ const char* NoPL_ErrStr_EqualityExpressionsAbiguous = "The type of both expressi
 const char* NoPL_ErrStr_EqualityDifferentType = "Both expressions compared by this equality operator must evaluate to the same type";
 const char* NoPL_ErrStr_CannotControlFlow = "Cannot use this control flow statement in this context";
 const char* NoPL_ErrStr_DuplicateSwitchCase = "This case's value matches another case in this switch statement";
+const char* NoPL_ErrStr_MisplacedDefault = "The default statement must be the last case in the switch statement";
 
 //enum for checking AST node types
 typedef enum
@@ -108,7 +109,7 @@ void nopl_error(const pANTLR3_BASE_TREE tree, const char* desc, int isParserErro
 	
 	//TODO: append to the context instead of this hack
 	char appendStr[512];
-	snprintf(appendStr, 512, "%s-%d:%d-%d:%d\n", desc, startLine, startChar, endLine, endChar);
+	snprintf(appendStr, 512, "%s(%d:%d-%d:%d)\n", desc, startLine, startChar, endLine, endChar);
 	printf("NoPL Error: %s\n", appendStr);
 }
 
@@ -1766,7 +1767,7 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 			case NUMBER:
 			{
 				//this is a literal number, get the float value from string
-				float floatVal = atof(((const char*)tree->getText(tree)->chars));
+				float floatVal = (float)atof((const char*)tree->getText(tree)->chars);
 				
 				//add the operator
 				nopl_addOperator(NoPL_BYTE_LITERAL_NUMBER, context);
@@ -1990,7 +1991,8 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				NoPL_Index caseCount = 0;
 				if(tree->children)
 					caseCount = (NoPL_Index)(tree->children->size(tree->children)-1);
-				NoPL_Instruction* caseBufferMoves[caseCount];
+				NoPL_Index caseBufferMoves[caseCount];
+				NoPL_Index lastBufferMove;
 				NoPL_Index bufferMoveDummyValue = 0;
 				
 				//declare the result of the expression as a variable so that we only have to evaluate it once
@@ -2021,57 +2023,229 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 						{
 							//get the case statement
 							pANTLR3_BASE_TREE caseNode = treeIndex(tree, i+1);
-							pANTLR3_BASE_TREE caseValue = treeIndex(caseNode, 0);
 							
-							//TODO: check for default
-							
-							//append a case statement for each case value
-							nopl_addOperator(NoPL_BYTE_SWITCH_CASE_BOOLEAN, &switchCtx);
-							nopl_addBytesToContext(&index, sizeof(NoPL_Index), &switchCtx);
-							if(caseValue->getType(caseValue) == LITERAL_TRUE)
-								nopl_addOperator(NoPL_BYTE_LITERAL_BOOLEAN_TRUE, &switchCtx);
-							else
-								nopl_addOperator(NoPL_BYTE_LITERAL_BOOLEAN_FALSE, &switchCtx);
-							nopl_addBytesToContext(&bufferMoveDummyValue, sizeof(NoPL_Index), &switchCtx);
-							//TODO: add pointer to dummy value to list
-							
-							//check all previous statements to see if this one is a duplicate
-							for(int j = 0; j < i; j++)
+							//check for default
+							if(caseNode->getType(caseNode) == SWITCH_DEFAULT)
 							{
-								//get the value for the possible duplicate
-								pANTLR3_BASE_TREE possibleDuplicate = treeIndex(tree, j+1);
-								pANTLR3_BASE_TREE possibleDuplicateValue = treeIndex(possibleDuplicate, 0);
+								//throw an error if this is not the last case
+								if(i != (caseCount-1))
+									nopl_error(caseNode, NoPL_ErrStr_MisplacedDefault, 0, &switchCtx);
+								nopl_addOperator(NoPL_BYTE_BUFFER_MOVE_FORWARD, &switchCtx);
+							}
+							else
+							{
+								//this is not a default statement
+								pANTLR3_BASE_TREE caseValue = treeIndex(caseNode, 0);
 								
-								//check if the value is the same
-								if(caseValue->getType(caseValue) == possibleDuplicateValue->getType(possibleDuplicateValue))
+								//append a case statement for each case value
+								nopl_addOperator(NoPL_BYTE_SWITCH_CASE_BOOLEAN, &switchCtx);
+								nopl_addBytesToContext(&index, sizeof(NoPL_Index), &switchCtx);
+								if(caseValue->getType(caseValue) == LITERAL_TRUE)
+									nopl_addOperator(NoPL_BYTE_LITERAL_BOOLEAN_TRUE, &switchCtx);
+								else
+									nopl_addOperator(NoPL_BYTE_LITERAL_BOOLEAN_FALSE, &switchCtx);
+								
+								//check all previous statements to see if this one is a duplicate
+								for(int j = 0; j < i; j++)
 								{
-									nopl_error(caseValue, NoPL_ErrStr_DuplicateSwitchCase, 0, &switchCtx);
-									break;
+									//get the value for the possible duplicate
+									pANTLR3_BASE_TREE possibleDuplicate = treeIndex(tree, j+1);
+									pANTLR3_BASE_TREE possibleDuplicateValue = treeIndex(possibleDuplicate, 0);
+									
+									//check if the value is the same
+									if(caseValue->getType(caseValue) == possibleDuplicateValue->getType(possibleDuplicateValue))
+									{
+										nopl_error(caseValue, NoPL_ErrStr_DuplicateSwitchCase, 0, &switchCtx);
+										break;
+									}
 								}
 							}
+							
+							//append a buffer move
+							caseBufferMoves[i] = switchCtx.dataLength;
+							nopl_addBytesToContext(&bufferMoveDummyValue, sizeof(NoPL_Index), &switchCtx);
 						}
-						
 					}
 						break;
 					case NoPL_type_Number:
 					{
-						//TODO: number cases
+						//check if we need an anonymous variable
+						NoPL_Index index;
+						if(expression->getType(expression) == ID && nopl_variableExistsInStack(expression->getText(expression), context->numberStack))
+						{
+							//this is already a variable
+							index = nopl_indexOfVariableInStack(expression->getText(expression), context->numberStack, expression, &switchCtx);
+						}
+						else
+						{
+							//we're assigning an anonymous variable
+							nopl_addOperator(NoPL_BYTE_NUMERIC_ASSIGN, &switchCtx);
+							index = nopl_declareAnonymousVariableInStack(switchCtx.numberStack);
+							nopl_addBytesToContext(&index, sizeof(NoPL_Index), &switchCtx);
+							
+							//append the expression
+							nopl_appendNodeWithRequiredType(expression, NoPL_type_Number, &switchCtx, options);
+						}
+						
+						//append checks for each of the cases
+						for(int i = 0; i < caseCount; i++)
+						{
+							//get the case statement
+							pANTLR3_BASE_TREE caseNode = treeIndex(tree, i+1);
+							
+							//check for default
+							if(caseNode->getType(caseNode) == SWITCH_DEFAULT)
+							{
+								//throw an error if this is not the last case
+								if(i != (caseCount-1))
+									nopl_error(caseNode, NoPL_ErrStr_MisplacedDefault, 0, &switchCtx);
+								nopl_addOperator(NoPL_BYTE_BUFFER_MOVE_FORWARD, &switchCtx);
+							}
+							else
+							{
+								//this is not a default statement
+								pANTLR3_BASE_TREE caseValue = treeIndex(caseNode, 0);
+								
+								//append a case statement for each case value
+								nopl_addOperator(NoPL_BYTE_SWITCH_CASE_NUMBER, &switchCtx);
+								nopl_addBytesToContext(&index, sizeof(NoPL_Index), &switchCtx);
+								float floatValue = (float)atof((const char*)caseValue->getText(caseValue)->chars);
+								nopl_addBytesToContext(&floatValue, sizeof(float), &switchCtx);
+								
+								//check all previous statements to see if this one is a duplicate
+								for(int j = 0; j < i; j++)
+								{
+									//get the value for the possible duplicate
+									pANTLR3_BASE_TREE possibleDuplicate = treeIndex(tree, j+1);
+									pANTLR3_BASE_TREE possibleDuplicateValue = treeIndex(possibleDuplicate, 0);
+									
+									//check if the value is the same
+									float possibleDuplicateFloat = (float)atof((const char*)possibleDuplicateValue->getText(possibleDuplicateValue)->chars);
+									if(floatValue == possibleDuplicateFloat)
+									{
+										nopl_error(caseValue, NoPL_ErrStr_DuplicateSwitchCase, 0, &switchCtx);
+										break;
+									}
+								}
+							}
+							
+							//append a buffer move
+							caseBufferMoves[i] = switchCtx.dataLength;
+							nopl_addBytesToContext(&bufferMoveDummyValue, sizeof(NoPL_Index), &switchCtx);
+						}
 					}
 						break;
 					case NoPL_type_String:
 					{
-						//TODO: string cases
+						//check if we need an anonymous variable
+						NoPL_Index index;
+						if(expression->getType(expression) == ID && nopl_variableExistsInStack(expression->getText(expression), context->stringStack))
+						{
+							//this is already a variable
+							index = nopl_indexOfVariableInStack(expression->getText(expression), context->stringStack, expression, &switchCtx);
+						}
+						else
+						{
+							//we're assigning an anonymous variable
+							nopl_addOperator(NoPL_BYTE_STRING_ASSIGN, &switchCtx);
+							index = nopl_declareAnonymousVariableInStack(switchCtx.stringStack);
+							nopl_addBytesToContext(&index, sizeof(NoPL_Index), &switchCtx);
+							
+							//append the expression
+							nopl_appendNodeWithRequiredType(expression, NoPL_type_String, &switchCtx, options);
+						}
+						
+						//append checks for each of the cases
+						for(int i = 0; i < caseCount; i++)
+						{
+							//get the case statement
+							pANTLR3_BASE_TREE caseNode = treeIndex(tree, i+1);
+							
+							//check for default
+							if(caseNode->getType(caseNode) == SWITCH_DEFAULT)
+							{
+								//throw an error if this is not the last case
+								if(i != (caseCount-1))
+									nopl_error(caseNode, NoPL_ErrStr_MisplacedDefault, 0, &switchCtx);
+								nopl_addOperator(NoPL_BYTE_BUFFER_MOVE_FORWARD, &switchCtx);
+							}
+							else
+							{
+								//this is not a default statement
+								pANTLR3_BASE_TREE caseValue = treeIndex(caseNode, 0);
+								
+								//append a case statement for each case value
+								nopl_addOperator(NoPL_BYTE_SWITCH_CASE_STRING, &switchCtx);
+								nopl_addBytesToContext(&index, sizeof(NoPL_Index), &switchCtx);
+								
+								//append string value
+								char* stringValue = (char*)caseValue->getText(caseValue)->chars;
+								int length = (int)strlen(stringValue);
+								//strip the quotes
+								char stringCopy[length];
+								strcpy(stringCopy, (stringValue+1));
+								stringCopy[length-2] = 0;
+								//add the string
+								nopl_addBytesToContext(stringCopy, sizeof(char)*(length-1), context);
+								
+								//check all previous statements to see if this one is a duplicate
+								for(int j = 0; j < i; j++)
+								{
+									//get the value for the possible duplicate
+									pANTLR3_BASE_TREE possibleDuplicate = treeIndex(tree, j+1);
+									pANTLR3_BASE_TREE possibleDuplicateValue = treeIndex(possibleDuplicate, 0);
+									
+									//check if the value is the same
+									if(!strcmp((char*)caseValue->getText(caseValue)->chars, (char*)possibleDuplicateValue->getText(possibleDuplicateValue)->chars))
+									{
+										nopl_error(caseValue, NoPL_ErrStr_DuplicateSwitchCase, 0, &switchCtx);
+										break;
+									}
+								}
+							}
+							
+							//append a buffer move
+							caseBufferMoves[i] = switchCtx.dataLength;
+							nopl_addBytesToContext(&bufferMoveDummyValue, sizeof(NoPL_Index), &switchCtx);
+						}
 					}
 						break;
 					default:
 						break;
 				}
 				
+				//store the location of the end of the case checks
+				nopl_addOperator(NoPL_BYTE_BUFFER_MOVE_FORWARD, &switchCtx);
+				lastBufferMove = switchCtx.dataLength;
+				nopl_addBytesToContext(&bufferMoveDummyValue, sizeof(NoPL_Index), &switchCtx);
 				
-				//TODO: append the data for all the cases
+				//append the contents of the case statements
+				for(int i = 0; i < caseCount; i++)
+				{
+					//set the buffer move for this case
+					NoPL_Index* bufferMovePtr = (NoPL_Index*)(switchCtx.compiledData+caseBufferMoves[i]);
+					*bufferMovePtr = (switchCtx.dataLength-(caseBufferMoves[i]+sizeof(NoPL_Index)));
+					
+					//iterate over the statements in this case
+					pANTLR3_BASE_TREE caseNode = treeIndex(tree, i+1);
+					
+					//recursively check all nodes in this AST
+					NoPL_Index childCount = 0;
+					if(tree->children)
+						childCount = (NoPL_Index)caseNode->children->size(caseNode->children);
+					ANTLR3_UINT32 j = (caseNode->getType(caseNode) == SWITCH_DEFAULT) ? 0 : 1;
+					pANTLR3_BASE_TREE child;
+					for(; j < childCount; j++)
+					{
+						//get each child and append
+						child = (pANTLR3_BASE_TREE)(caseNode->children->get(caseNode->children, j));
+						nopl_traverseAST(child, options, &switchCtx);
+					}
+				}
 				
-				//TODO: fix the indices for buffer moves
-				
+				//set the buffer move for this case
+				NoPL_Index* bufferMovePtr = (NoPL_Index*)(switchCtx.compiledData+lastBufferMove);
+				*bufferMovePtr = (switchCtx.dataLength-(lastBufferMove+sizeof(NoPL_Index)));
 				
 				//copy the inner context
 				nopl_finalizeControlFlowMoves(&switchCtx, switchCtx.dataLength, 0);
@@ -2174,7 +2348,7 @@ void nopl_traverseForErrors(const pANTLR3_BASE_TREE tree, NoPL_CompileContext* c
 	pANTLR3_BASE_TREE child;
 	for(i = 0; i < childCount; i++)
 	{
-		//get each child and append
+		//get each child and traverse
 		child = (pANTLR3_BASE_TREE)(tree->children->get(tree->children, i));
 		nopl_traverseForErrors(child, context);
 	}

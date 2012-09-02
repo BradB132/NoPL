@@ -333,7 +333,7 @@ int evaluateStatement(NoPL_Evaluation* eval)
 			eval->evaluationPosition += sizeof(NoPL_Index);
 			
 			//check if this case value matches the expression at the top of the switch
-			if(eval->booleanTable[*variableIndex] == *caseValue)
+			if(eval->booleanTable[*variableIndex] == (*caseValue == NoPL_BYTE_LITERAL_BOOLEAN_TRUE))
 				eval->evaluationPosition += *buffMove;
 		}
 			break;
@@ -354,18 +354,17 @@ int evaluateStatement(NoPL_Evaluation* eval)
 			break;
 		case NoPL_BYTE_SWITCH_CASE_STRING:
 		{
-			//TODO: finish this
-//			//get the values from this case
-//			NoPL_Index* variableIndex = (NoPL_Index*)(eval->scriptBuffer+eval->evaluationPosition);
-//			eval->evaluationPosition += sizeof(NoPL_Index);
-//			NoPL_Instruction* caseValue = (NoPL_Instruction*)(eval->scriptBuffer+eval->evaluationPosition);
-//			eval->evaluationPosition += sizeof(NoPL_Instruction);
-//			NoPL_Index* buffMove = (NoPL_Index*)(eval->scriptBuffer+eval->evaluationPosition);
-//			eval->evaluationPosition += sizeof(NoPL_Index);
-//			
-//			//check if this case value matches the expression at the top of the switch
-//			if(eval->booleanTable[*variableIndex] == *caseValue)
-//				eval->evaluationPosition += *buffMove;
+			//get the values from this case
+			NoPL_Index* variableIndex = (NoPL_Index*)(eval->scriptBuffer+eval->evaluationPosition);
+			eval->evaluationPosition += sizeof(NoPL_Index);
+			char* caseValue = (char*)(eval->scriptBuffer+eval->evaluationPosition);
+			eval->evaluationPosition += strlen(caseValue)+1;
+			NoPL_Index* buffMove = (NoPL_Index*)(eval->scriptBuffer+eval->evaluationPosition);
+			eval->evaluationPosition += sizeof(NoPL_Index);
+			
+			//check if this case value matches the expression at the top of the switch
+			if(!strcmp(eval->stringTable[*variableIndex].stringValue, caseValue))
+				eval->evaluationPosition += *buffMove;
 		}
 			break;
 		case NoPL_BYTE_BUFFER_MOVE_FORWARD:
@@ -764,7 +763,7 @@ void evaluateFunction(NoPL_Evaluation* eval, NoPL_FunctionValue* returnVal)
 			NoPL_FunctionValue argv[*argCount];
 			memset(argv, 0, sizeof(NoPL_FunctionValue)*(*argCount));
 			
-			//set up a list of string args (better way to do this?)
+			//set up a list of string args, TODO: (better way to do this?)
 			NoPL_String releaseStrings[*argCount];
 			memset(releaseStrings, 0, sizeof(NoPL_String)*(*argCount));
 			int releaseStringCount = 0;
