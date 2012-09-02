@@ -124,5 +124,9 @@ typedef unsigned char NoPL_Instruction;
 
 //DEBUGGING
 #define NoPL_BYTE_DEBUG_LINE 75
+#define NoPL_BYTE_DEBUG_VALUE_NUMBER 76
+#define NoPL_BYTE_DEBUG_VALUE_BOOLEAN 77
+#define NoPL_BYTE_DEBUG_VALUE_STRING 78
+#define NoPL_BYTE_DEBUG_VALUE_OBJECT 79
 
 #endif

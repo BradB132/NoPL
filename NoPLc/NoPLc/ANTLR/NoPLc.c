@@ -100,7 +100,7 @@ void nopl_appendErrorString(NoPL_CompileContext* context, const char* errString)
 	{
 		//create a bigger buffer
 		int newLength = context->errDescLength*2+errLength;
-		char* newString = malloc(context->errDescLength);
+		char* newString = malloc(newLength);
 		
 		//copy the buffer
 		memcpy(newString, context->errDescriptions, currentLength);
@@ -997,7 +997,7 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 					nopl_error(tree, NoPL_ErrStr_CannotControlFlow, context);
 			}
 				break;
-			case DECL_BOOL:
+			case DECL_BOOL://TODO: add support for NoPL_BYTE_DEBUG_VALUE
 			{
 				//get the name of the declared variable
 				pANTLR3_BASE_TREE declaredVar = treeIndex(tree,0);
