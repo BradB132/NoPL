@@ -2186,7 +2186,7 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 								strcpy(stringCopy, (stringValue+1));
 								stringCopy[length-2] = 0;
 								//add the string
-								nopl_addBytesToContext(stringCopy, sizeof(char)*(length-1), context);
+								nopl_addBytesToContext(stringCopy, sizeof(char)*(length-1), &switchCtx);
 								
 								//check all previous statements to see if this one is a duplicate
 								for(int j = 0; j < i; j++)
