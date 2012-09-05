@@ -35,11 +35,13 @@ int main(int argc, const char * argv[])
 		//display errors if there are any
 		printf("NoPL Compile Errors:\n%s", compileCtx.errDescriptions);
 	}
-	
-	//save the output to file
-	FILE* file = fopen(argv[2], "wb");
-	fwrite(compileCtx.compiledData, 1, compileCtx.dataLength, file);
-	fclose(file);
+	else
+	{
+		//no errors, save the output to file
+		FILE* file = fopen(argv[2], "wb");
+		fwrite(compileCtx.compiledData, 1, compileCtx.dataLength, file);
+		fclose(file);
+	}
 	
 	//free the context
 	freeNoPL_CompileContext(&compileCtx);

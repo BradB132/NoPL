@@ -10,30 +10,13 @@
 #define NoPLc_NoPLc_h
 
 #include "NoPLValues.h"
-#include "NoPLLexer.h"//TODO: move this back to .c file
-#include "NoPLParser.h"
 
 typedef struct
 {
 	NoPL_Instruction* compiledData;
 	NoPL_Index dataLength;
-	NoPL_Index arrayLength;
-	pANTLR3_STACK objectStack;
-	pANTLR3_STACK numberStack;
-	pANTLR3_STACK booleanStack;
-	pANTLR3_STACK stringStack;
-	int allowsBreakStatements;
-	int allowsContinueStatements;
-	pANTLR3_VECTOR breakStatements;
-	pANTLR3_VECTOR continueStatements;
 	char* errDescriptions;
-	int errDescLength;
-	int debugLine;
-	NoPL_Index* objectTableSize;
-	NoPL_Index* numberTableSize;
-	NoPL_Index* booleanTableSize;
-	NoPL_Index* stringTableSize;
-	void* parentContext;
+	void* privateAttributes;
 } NoPL_CompileContext;
 
 typedef struct

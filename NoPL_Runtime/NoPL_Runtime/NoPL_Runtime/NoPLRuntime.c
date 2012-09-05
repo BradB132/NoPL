@@ -397,7 +397,83 @@ int evaluateStatement(NoPL_Evaluation* eval)
 			
 			//format a string to send to the callback function
 			char str[32];
-			sprintf(str, "Line: %d", (int)(*lineNum));
+			sprintf(str, "Line:%d", (int)(*lineNum));
+			
+			//call the callback function
+			if(eval->callbacks->stringFeedback)
+				eval->callbacks->stringFeedback(str, NoPL_StringFeedbackType_DebugInfo);
+		}
+			break;
+		case NoPL_BYTE_DEBUG_VALUE_BOOLEAN:
+		{
+			//get the line number
+			NoPL_Index* lineNum = (NoPL_Index*)(eval->scriptBuffer+eval->evaluationPosition);
+			eval->evaluationPosition += sizeof(NoPL_Index);
+			
+			//get the variable name
+			char* varName = (char*)(eval->scriptBuffer+eval->evaluationPosition);
+			int varNameLength = (int)strlen(varName);
+			eval->evaluationPosition += (varNameLength+1);
+			
+			char str[32+varNameLength];
+			sprintf(str, "Boolean:%d=%s", (int)(*lineNum), varName);
+			
+			//call the callback function
+			if(eval->callbacks->stringFeedback)
+				eval->callbacks->stringFeedback(str, NoPL_StringFeedbackType_DebugInfo);
+		}
+			break;
+		case NoPL_BYTE_DEBUG_VALUE_NUMBER:
+		{
+			//get the line number
+			NoPL_Index* lineNum = (NoPL_Index*)(eval->scriptBuffer+eval->evaluationPosition);
+			eval->evaluationPosition += sizeof(NoPL_Index);
+			
+			//get the variable name
+			char* varName = (char*)(eval->scriptBuffer+eval->evaluationPosition);
+			int varNameLength = (int)strlen(varName);
+			eval->evaluationPosition += (varNameLength+1);
+			
+			char str[32+varNameLength];
+			sprintf(str, "Number:%d=%s", (int)(*lineNum), varName);
+			
+			//call the callback function
+			if(eval->callbacks->stringFeedback)
+				eval->callbacks->stringFeedback(str, NoPL_StringFeedbackType_DebugInfo);
+		}
+			break;
+		case NoPL_BYTE_DEBUG_VALUE_OBJECT:
+		{
+			//get the line number
+			NoPL_Index* lineNum = (NoPL_Index*)(eval->scriptBuffer+eval->evaluationPosition);
+			eval->evaluationPosition += sizeof(NoPL_Index);
+			
+			//get the variable name
+			char* varName = (char*)(eval->scriptBuffer+eval->evaluationPosition);
+			int varNameLength = (int)strlen(varName);
+			eval->evaluationPosition += (varNameLength+1);
+			
+			char str[32+varNameLength];
+			sprintf(str, "Pointer:%d=%s", (int)(*lineNum), varName);
+			
+			//call the callback function
+			if(eval->callbacks->stringFeedback)
+				eval->callbacks->stringFeedback(str, NoPL_StringFeedbackType_DebugInfo);
+		}
+			break;
+		case NoPL_BYTE_DEBUG_VALUE_STRING:
+		{
+			//get the line number
+			NoPL_Index* lineNum = (NoPL_Index*)(eval->scriptBuffer+eval->evaluationPosition);
+			eval->evaluationPosition += sizeof(NoPL_Index);
+			
+			//get the variable name
+			char* varName = (char*)(eval->scriptBuffer+eval->evaluationPosition);
+			int varNameLength = (int)strlen(varName);
+			eval->evaluationPosition += (varNameLength+1);
+			
+			char str[32+varNameLength];
+			sprintf(str, "String:%d=%s", (int)(*lineNum), varName);
 			
 			//call the callback function
 			if(eval->callbacks->stringFeedback)

@@ -8,9 +8,33 @@
 
 #include <stdio.h>
 #include "NoPLc.h"
+#include "NoPLLexer.h"
+#include "NoPLParser.h"
+
+typedef struct
+{
+	NoPL_Index arrayLength;
+	pANTLR3_STACK objectStack;
+	pANTLR3_STACK numberStack;
+	pANTLR3_STACK booleanStack;
+	pANTLR3_STACK stringStack;
+	int allowsBreakStatements;
+	int allowsContinueStatements;
+	pANTLR3_VECTOR breakStatements;
+	pANTLR3_VECTOR continueStatements;
+	int errDescLength;
+	int debugLine;
+	NoPL_Index* objectTableSize;
+	NoPL_Index* numberTableSize;
+	NoPL_Index* booleanTableSize;
+	NoPL_Index* stringTableSize;
+	void* parentContext;
+}NoPL_CompileContextPrivate;
 
 #define treeIndex(tree,index)	(pANTLR3_BASE_TREE)(tree->children->get(tree->children, index))
 #define isErrorNode(tree)		(!strcmp("Tree Error Node", (char*)tree->getText(tree)->chars))
+#define pContext				((NoPL_CompileContextPrivate*)context->privateAttributes)
+#define private(ctx)			((NoPL_CompileContextPrivate*)ctx.privateAttributes)
 #define NoPL_StackSizeHint 16
 #define NoPL_VectorSizeHint 8
 
@@ -64,7 +88,7 @@ int nopl_declareVariableInStack(const pANTLR3_STRING varName, const pANTLR3_STAC
 NoPL_Index nopl_declareAnonymousVariableInStack(const pANTLR3_STACK whichStack);
 NoPL_Index nopl_countVariablesInStack(const pANTLR3_STACK whichStack);
 NoPL_Index nopl_indexOfVariableInStack(const pANTLR3_STRING varName, const pANTLR3_STACK whichStack, const pANTLR3_BASE_TREE tree, NoPL_CompileContext* context);
-NoPL_CompileContext nopl_newInnerCompileContext(NoPL_CompileContext* parentContext, int allowBreak, int allowContinue);
+NoPL_CompileContext nopl_newInnerCompileContext(NoPL_CompileContext* context, int allowBreak, int allowContinue);
 void nopl_freeInnerCompileContext(NoPL_CompileContext* context);
 void nopl_appendContext(const NoPL_CompileContext* fromContext, NoPL_CompileContext* toContext);
 void nopl_finalizeControlFlowMoves(NoPL_CompileContext* context, NoPL_Index breakIndex, NoPL_Index continueIndex);
@@ -79,8 +103,8 @@ void nopl_appendErrorString(NoPL_CompileContext* context, const char* errString)
 void nopl_appendErrorString(NoPL_CompileContext* context, const char* errString)
 {
 	//get the root context
-	while(context->parentContext)
-		context = context->parentContext;
+	while(pContext->parentContext)
+		context = pContext->parentContext;
 	
 	//get the error length
 	int errLength = (int)strlen(errString);
@@ -90,23 +114,23 @@ void nopl_appendErrorString(NoPL_CompileContext* context, const char* errString)
 	{
 		context->errDescriptions = malloc(errLength*2);
 		memcpy(context->errDescriptions, errString, errLength+1);
-		context->errDescLength = errLength*2;
+		pContext->errDescLength = errLength*2;
 		return;
 	}
 	
 	//check if we're too long for the buffer
 	int currentLength = (int)strlen(context->errDescriptions)+1;
-	if(errLength+currentLength > context->errDescLength)
+	if(errLength+currentLength > pContext->errDescLength)
 	{
 		//create a bigger buffer
-		int newLength = context->errDescLength*2+errLength;
+		int newLength = pContext->errDescLength*2+errLength;
 		char* newString = malloc(newLength);
 		
 		//copy the buffer
 		memcpy(newString, context->errDescriptions, currentLength);
 		free(context->errDescriptions);
 		context->errDescriptions = newString;
-		context->errDescLength = newLength;
+		pContext->errDescLength = newLength;
 	}
 	
 	//append
@@ -175,29 +199,29 @@ void nopl_error(const pANTLR3_BASE_TREE tree, const char* desc, NoPL_CompileCont
 	nopl_findEndPositionForNode(tree, &endLine, &endChar);
 	
 	//append string
-	char appendStr[512];
-	snprintf(appendStr, 512, "%s(%d:%d-%d:%d)\n", desc, startLine, startChar, endLine, endChar);
+	char appendStr[256];
+	snprintf(appendStr, 256, "%s(%d:%d-%d:%d)\n", desc, startLine, startChar, endLine, endChar);
 	nopl_appendErrorString(context, appendStr);
 }
 
 void nopl_addBytesToContext(const void* bytes, int byteCount, NoPL_CompileContext* context)
 {
 	//check if the buffer size needs to be increased
-	if(!context->arrayLength)
+	if(!pContext->arrayLength)
 	{
-		context->arrayLength = 128;
-		context->compiledData = malloc(sizeof(NoPL_Instruction)*context->arrayLength);
+		pContext->arrayLength = 128;
+		context->compiledData = malloc(sizeof(NoPL_Instruction)*pContext->arrayLength);
 	}
-	else if(byteCount+context->dataLength > context->arrayLength)
+	else if(byteCount+context->dataLength > pContext->arrayLength)
 	{
 		//double the size of the buffer
 		NoPL_Instruction* oldBuffer = context->compiledData;
-		int newByteLength = sizeof(NoPL_Instruction)*(context->arrayLength*2+byteCount);
+		int newByteLength = sizeof(NoPL_Instruction)*(pContext->arrayLength*2+byteCount);
 		context->compiledData = malloc(newByteLength);
 		
 		//copy over and clean up the old buffer
-		memcpy(context->compiledData, oldBuffer, context->arrayLength);
-		context->arrayLength = newByteLength;
+		memcpy(context->compiledData, oldBuffer, pContext->arrayLength);
+		pContext->arrayLength = newByteLength;
 		free(oldBuffer);
 	}
 	
@@ -222,19 +246,19 @@ void nopl_pushScope(NoPL_CompileContext* context)
 	pANTLR3_VECTOR objectVector = antlr3VectorNew(NoPL_VectorSizeHint);
 	
 	//push new vectors onto stack
-	context->stringStack->push(context->stringStack, stringVector, (void(*)(void*))(stringVector->free));
-	context->booleanStack->push(context->booleanStack, boolVector, (void(*)(void*))(boolVector->free));
-	context->numberStack->push(context->numberStack, numberVector, (void(*)(void*))(numberVector->free));
-	context->objectStack->push(context->objectStack, objectVector, (void(*)(void*))(objectVector->free));
+	pContext->stringStack->push(pContext->stringStack, stringVector, (void(*)(void*))(stringVector->free));
+	pContext->booleanStack->push(pContext->booleanStack, boolVector, (void(*)(void*))(boolVector->free));
+	pContext->numberStack->push(pContext->numberStack, numberVector, (void(*)(void*))(numberVector->free));
+	pContext->objectStack->push(pContext->objectStack, objectVector, (void(*)(void*))(objectVector->free));
 }
 
 void nopl_popScope(NoPL_CompileContext* context)
 {
 	//remove the stop vector from each stack
-	context->stringStack->pop(context->stringStack);
-	context->booleanStack->pop(context->booleanStack);
-	context->numberStack->pop(context->numberStack);
-	context->objectStack->pop(context->objectStack);
+	pContext->stringStack->pop(pContext->stringStack);
+	pContext->booleanStack->pop(pContext->booleanStack);
+	pContext->numberStack->pop(pContext->numberStack);
+	pContext->objectStack->pop(pContext->objectStack);
 }
 
 int nopl_variableExistsInStack(const pANTLR3_STRING varName, const  pANTLR3_STACK whichStack)
@@ -255,10 +279,10 @@ int nopl_variableExistsInStack(const pANTLR3_STRING varName, const  pANTLR3_STAC
 
 int nopl_variableExistsInContext(const pANTLR3_STRING varName, const NoPL_CompileContext* context)
 {
-	return (nopl_variableExistsInStack(varName, context->objectStack) ||
-			nopl_variableExistsInStack(varName, context->numberStack) ||
-			nopl_variableExistsInStack(varName, context->booleanStack) ||
-			nopl_variableExistsInStack(varName, context->stringStack) );
+	return (nopl_variableExistsInStack(varName, pContext->objectStack) ||
+			nopl_variableExistsInStack(varName, pContext->numberStack) ||
+			nopl_variableExistsInStack(varName, pContext->booleanStack) ||
+			nopl_variableExistsInStack(varName, pContext->stringStack) );
 }
 
 int nopl_declareVariableInStack(const pANTLR3_STRING varName, const pANTLR3_STACK whichStack)
@@ -322,61 +346,54 @@ NoPL_Index nopl_indexOfVariableInStack(const pANTLR3_STRING varName, const pANTL
 	return (NoPL_Index)0;
 }
 
-NoPL_CompileContext nopl_newInnerCompileContext(NoPL_CompileContext* parentContext, int allowBreak, int allowContinue)
+NoPL_CompileContext nopl_newInnerCompileContext(NoPL_CompileContext* context, int allowBreak, int allowContinue)
 {
-	NoPL_CompileContext context;
-	context.parentContext = parentContext;
-	context.compiledData = NULL;
-	context.dataLength = 0;
-	context.arrayLength = 0;
-	context.debugLine = parentContext->debugLine;
-	context.objectStack = parentContext->objectStack;
-	context.numberStack = parentContext->numberStack;
-	context.booleanStack = parentContext->booleanStack;
-	context.stringStack = parentContext->stringStack;
-	context.errDescriptions = parentContext->errDescriptions;
-	context.errDescLength = parentContext->errDescLength;
-	context.objectTableSize = parentContext->objectTableSize;
-	context.numberTableSize = parentContext->numberTableSize;
-	context.booleanTableSize = parentContext->booleanTableSize;
-	context.stringTableSize = parentContext->stringTableSize;
-	context.allowsBreakStatements = (allowBreak || parentContext->allowsBreakStatements);
-	context.allowsContinueStatements = (allowContinue || parentContext->allowsContinueStatements);
+	NoPL_CompileContext newContext;
+	newContext.privateAttributes = malloc(sizeof(NoPL_CompileContextPrivate));
+	newContext.compiledData = NULL;
+	newContext.dataLength = 0;
+	newContext.errDescriptions = NULL;
+	private(newContext)->parentContext = pContext;
+	private(newContext)->arrayLength = 0;
+	private(newContext)->debugLine = pContext->debugLine;
+	private(newContext)->objectStack = pContext->objectStack;
+	private(newContext)->numberStack = pContext->numberStack;
+	private(newContext)->booleanStack = pContext->booleanStack;
+	private(newContext)->stringStack = pContext->stringStack;
+	private(newContext)->errDescLength = 0;
+	private(newContext)->objectTableSize = pContext->objectTableSize;
+	private(newContext)->numberTableSize = pContext->numberTableSize;
+	private(newContext)->booleanTableSize = pContext->booleanTableSize;
+	private(newContext)->stringTableSize = pContext->stringTableSize;
+	private(newContext)->allowsBreakStatements = (allowBreak || pContext->allowsBreakStatements);
+	private(newContext)->allowsContinueStatements = (allowContinue || pContext->allowsContinueStatements);
 	
-	if(context.allowsBreakStatements)
-		context.breakStatements = antlr3VectorNew(NoPL_VectorSizeHint);
+	if(private(newContext)->allowsBreakStatements)
+		private(newContext)->breakStatements = antlr3VectorNew(NoPL_VectorSizeHint);
 	else
-		context.breakStatements = NULL;
+		private(newContext)->breakStatements = NULL;
 	
-	if(context.allowsContinueStatements)
-		context.continueStatements = antlr3VectorNew(NoPL_VectorSizeHint);
+	if(private(newContext)->allowsContinueStatements)
+		private(newContext)->continueStatements = antlr3VectorNew(NoPL_VectorSizeHint);
 	else
-		context.continueStatements = NULL;
+		private(newContext)->continueStatements = NULL;
 	
-	return context;
+	return newContext;
 }
 
 void nopl_freeInnerCompileContext(NoPL_CompileContext* context)
 {
-	//null these pointers so that they aren't freed
-	context->parentContext = NULL;
-	context->objectStack = NULL;
-	context->numberStack = NULL;
-	context->booleanStack = NULL;
-	context->stringStack = NULL;
-	
-	if(context->breakStatements)
+	if(pContext->breakStatements)
+		pContext->breakStatements->free(pContext->breakStatements);
+	if(pContext->continueStatements)
+		pContext->continueStatements->free(pContext->continueStatements);
+	if(context->privateAttributes)
 	{
-		context->breakStatements->free(context->breakStatements);
-		context->breakStatements = NULL;
-	}
-	if(context->continueStatements)
-	{
-		context->continueStatements->free(context->continueStatements);
-		context->continueStatements = NULL;
+		free(context->privateAttributes);
+		context->privateAttributes = NULL;
 	}
 	
-	//free the byte buffer
+	//free the any other stuff
 	freeNoPL_CompileContext(context);
 }
 
@@ -440,13 +457,13 @@ NoPL_DataType nopl_dataTypeForTree(const pANTLR3_BASE_TREE tree, const NoPL_Comp
 		{
 			//check the type of this symbol in the variable stacks
 			pANTLR3_STRING varName = tree->getText(tree);
-			if(nopl_variableExistsInStack(varName, context->objectStack))
+			if(nopl_variableExistsInStack(varName, pContext->objectStack))
 			   return NoPL_type_Object;
-			else if(nopl_variableExistsInStack(varName, context->numberStack))
+			else if(nopl_variableExistsInStack(varName, pContext->numberStack))
 				return NoPL_type_Number;
-			else if(nopl_variableExistsInStack(varName, context->booleanStack))
+			else if(nopl_variableExistsInStack(varName, pContext->booleanStack))
 				return NoPL_type_Boolean;
-			else if(nopl_variableExistsInStack(varName, context->stringStack))
+			else if(nopl_variableExistsInStack(varName, pContext->stringStack))
 				return NoPL_type_String;
 			else
 				return NoPL_type_FunctionResult;
@@ -603,68 +620,68 @@ void nopl_appendControlFlowMove(NoPL_CompileContext* context, NoPL_Index moveFro
 void nopl_finalizeControlFlowMoves(NoPL_CompileContext* context, NoPL_Index breakIndex, NoPL_Index continueIndex)
 {
 	//check for breaks
-	if(context->breakStatements)
+	if(pContext->breakStatements)
 	{
-		for(int i = 0; i < context->breakStatements->size(context->breakStatements); i++)
+		for(int i = 0; i < pContext->breakStatements->size(pContext->breakStatements); i++)
 		{
-			NoPL_Index moveFromIndex = (NoPL_Index)(context->breakStatements->get(context->breakStatements,i));
+			NoPL_Index moveFromIndex = (NoPL_Index)(pContext->breakStatements->get(pContext->breakStatements,i));
 			nopl_appendControlFlowMove(context, moveFromIndex, breakIndex);
 		}
 		
-		context->breakStatements->free(context->breakStatements);
-		context->breakStatements = NULL;
+		pContext->breakStatements->free(pContext->breakStatements);
+		pContext->breakStatements = NULL;
 	}
 	
 	//check for continues
-	if(context->continueStatements)
+	if(pContext->continueStatements)
 	{
-		for(int i = 0; i < context->continueStatements->size(context->continueStatements); i++)
+		for(int i = 0; i < pContext->continueStatements->size(pContext->continueStatements); i++)
 		{
 			//calculate the move amount
-			NoPL_Index moveFromIndex = (NoPL_Index)(context->continueStatements->get(context->continueStatements,i));
+			NoPL_Index moveFromIndex = (NoPL_Index)(pContext->continueStatements->get(pContext->continueStatements,i));
 			nopl_appendControlFlowMove(context, moveFromIndex, continueIndex);
 		}
 		
-		context->continueStatements->free(context->continueStatements);
-		context->continueStatements = NULL;
+		pContext->continueStatements->free(pContext->continueStatements);
+		pContext->continueStatements = NULL;
 	}
 }
 
 void nopl_appendContext(const NoPL_CompileContext* fromContext, NoPL_CompileContext* toContext)
 {
 	//check for breaks
-	if(fromContext->breakStatements)
+	if(((NoPL_CompileContextPrivate*)fromContext->privateAttributes)->breakStatements)
 	{
-		int size = fromContext->breakStatements->size(fromContext->breakStatements);
-		if(!toContext->breakStatements)
-			toContext->breakStatements = antlr3VectorNew(size);
+		int size = ((NoPL_CompileContextPrivate*)fromContext->privateAttributes)->breakStatements->size(((NoPL_CompileContextPrivate*)fromContext->privateAttributes)->breakStatements);
+		if(!((NoPL_CompileContextPrivate*)toContext->privateAttributes)->breakStatements)
+			((NoPL_CompileContextPrivate*)toContext->privateAttributes)->breakStatements = antlr3VectorNew(size);
 		
 		for(int i = 0; i < size; i++)
 		{
 			//get the index and adjust by the amount of data in the new context
-			NoPL_Index index = (NoPL_Index)(fromContext->breakStatements->get(fromContext->breakStatements,i));
+			NoPL_Index index = (NoPL_Index)(((NoPL_CompileContextPrivate*)fromContext->privateAttributes)->breakStatements->get(((NoPL_CompileContextPrivate*)fromContext->privateAttributes)->breakStatements,i));
 			index += toContext->dataLength;
 			
 			//add the adjusted number to the new context
-			toContext->breakStatements->add(toContext->breakStatements, (void*)index, NULL);
+			((NoPL_CompileContextPrivate*)toContext->privateAttributes)->breakStatements->add(((NoPL_CompileContextPrivate*)toContext->privateAttributes)->breakStatements, (void*)index, NULL);
 		}
 	}
 	
 	//check for continues
-	if(fromContext->continueStatements)
+	if(((NoPL_CompileContextPrivate*)fromContext->privateAttributes)->continueStatements)
 	{
-		int size = fromContext->continueStatements->size(fromContext->continueStatements);
-		if(!toContext->continueStatements)
-			toContext->continueStatements = antlr3VectorNew(size);
+		int size = ((NoPL_CompileContextPrivate*)fromContext->privateAttributes)->continueStatements->size(((NoPL_CompileContextPrivate*)fromContext->privateAttributes)->continueStatements);
+		if(!((NoPL_CompileContextPrivate*)toContext->privateAttributes)->continueStatements)
+			((NoPL_CompileContextPrivate*)toContext->privateAttributes)->continueStatements = antlr3VectorNew(size);
 		
 		for(int i = 0; i < size; i++)
 		{
 			//calculate the move amount
-			NoPL_Index index = (NoPL_Index)(fromContext->continueStatements->get(fromContext->continueStatements,i));
+			NoPL_Index index = (NoPL_Index)(((NoPL_CompileContextPrivate*)fromContext->privateAttributes)->continueStatements->get(((NoPL_CompileContextPrivate*)fromContext->privateAttributes)->continueStatements,i));
 			index += toContext->dataLength;
 			
 			//add the adjusted number to the new context
-			toContext->continueStatements->add(toContext->continueStatements, (void*)index, NULL);
+			((NoPL_CompileContextPrivate*)toContext->privateAttributes)->continueStatements->add(((NoPL_CompileContextPrivate*)toContext->privateAttributes)->continueStatements, (void*)index, NULL);
 		}
 	}
 	
@@ -692,14 +709,14 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 	else
 	{
 		//check if this is a new line for debug
-		if(options->debugSymbols && (int)tree->getLine(tree) != context->debugLine)
+		if(options->debugSymbols && (int)tree->getLine(tree) != pContext->debugLine)
 		{
 			//get the debug line
-			context->debugLine = (int)tree->getLine(tree);
+			pContext->debugLine = (int)tree->getLine(tree);
 			
 			//add the debug line
 			nopl_addOperator(NoPL_BYTE_DEBUG_LINE, context);
-			NoPL_Index lineNum = (NoPL_Index)context->debugLine;
+			NoPL_Index lineNum = (NoPL_Index)pContext->debugLine;
 			nopl_addBytesToContext(&lineNum, sizeof(NoPL_Index), context);
 		}
 		
@@ -790,7 +807,7 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 					nopl_addOperator(NoPL_BYTE_NUMERIC_ADD_ASSIGN, context);
 					
 					//add the index for the variable which will be incremented
-					NoPL_Index index = nopl_indexOfVariableInStack(assignTo->getText(assignTo), context->numberStack, assignTo, context);
+					NoPL_Index index = nopl_indexOfVariableInStack(assignTo->getText(assignTo), pContext->numberStack, assignTo, context);
 					nopl_addBytesToContext(&index, sizeof(NoPL_Index), context);
 					
 					//append the increment
@@ -802,7 +819,7 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 					nopl_addOperator(NoPL_BYTE_STRING_CONCAT_ASSIGN, context);
 					
 					//add the index for the variable which will be incremented
-					NoPL_Index index = nopl_indexOfVariableInStack(assignTo->getText(assignTo), context->stringStack, assignTo, context);
+					NoPL_Index index = nopl_indexOfVariableInStack(assignTo->getText(assignTo), pContext->stringStack, assignTo, context);
 					nopl_addBytesToContext(&index, sizeof(NoPL_Index), context);
 					
 					//append the increment
@@ -831,7 +848,7 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 					nopl_addOperator(NoPL_BYTE_NUMERIC_ASSIGN, context);
 					
 					//add the index for the variable which will be assigned to
-					NoPL_Index index = nopl_indexOfVariableInStack(assignTo->getText(assignTo), context->numberStack, assignTo, context);
+					NoPL_Index index = nopl_indexOfVariableInStack(assignTo->getText(assignTo), pContext->numberStack, assignTo, context);
 					nopl_addBytesToContext(&index, sizeof(NoPL_Index), context);
 					
 					//append the expression
@@ -843,7 +860,7 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 					nopl_addOperator(NoPL_BYTE_STRING_ASSIGN, context);
 					
 					//add the index for the variable which will be assigned to
-					NoPL_Index index = nopl_indexOfVariableInStack(assignTo->getText(assignTo), context->stringStack, assignTo, context);
+					NoPL_Index index = nopl_indexOfVariableInStack(assignTo->getText(assignTo), pContext->stringStack, assignTo, context);
 					nopl_addBytesToContext(&index, sizeof(NoPL_Index), context);
 					
 					//append the expression
@@ -855,7 +872,7 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 					nopl_addOperator(NoPL_BYTE_BOOLEAN_ASSIGN, context);
 					
 					//add the index for the variable which will be assigned to
-					NoPL_Index index = nopl_indexOfVariableInStack(assignTo->getText(assignTo), context->booleanStack, assignTo, context);
+					NoPL_Index index = nopl_indexOfVariableInStack(assignTo->getText(assignTo), pContext->booleanStack, assignTo, context);
 					nopl_addBytesToContext(&index, sizeof(NoPL_Index), context);
 					
 					//append the expression
@@ -867,7 +884,7 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 					nopl_addOperator(NoPL_BYTE_OBJECT_ASSIGN, context);
 					
 					//add the index for the variable which will be assigned to
-					NoPL_Index index = nopl_indexOfVariableInStack(assignTo->getText(assignTo), context->objectStack, assignTo, context);
+					NoPL_Index index = nopl_indexOfVariableInStack(assignTo->getText(assignTo), pContext->objectStack, assignTo, context);
 					nopl_addBytesToContext(&index, sizeof(NoPL_Index), context);
 					
 					//append the expression
@@ -889,10 +906,10 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				nopl_addBytesToContext(&move, sizeof(NoPL_Index), context);
 				
 				//check if our current context even supports this
-				if(context->allowsBreakStatements)
+				if(pContext->allowsBreakStatements)
 				{
 					//keep a list of the positions of all break statements in the buffer
-					context->breakStatements->add(context->breakStatements, (void*)(context->dataLength), NULL);
+					pContext->breakStatements->add(pContext->breakStatements, (void*)(context->dataLength), NULL);
 				}
 				else
 					nopl_error(tree, NoPL_ErrStr_CannotControlFlow, context);
@@ -988,16 +1005,16 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				nopl_addBytesToContext(&move, sizeof(NoPL_Index), context);
 				
 				//check if our current context even supports this
-				if(context->allowsContinueStatements)
+				if(pContext->allowsContinueStatements)
 				{
 					//keep a list of the positions of all continue statements in the buffer
-					context->continueStatements->add(context->continueStatements, (void*)(context->dataLength), NULL);
+					pContext->continueStatements->add(pContext->continueStatements, (void*)(context->dataLength), NULL);
 				}
 				else
 					nopl_error(tree, NoPL_ErrStr_CannotControlFlow, context);
 			}
 				break;
-			case DECL_BOOL://TODO: add support for NoPL_BYTE_DEBUG_VALUE
+			case DECL_BOOL:
 			{
 				//get the name of the declared variable
 				pANTLR3_BASE_TREE declaredVar = treeIndex(tree,0);
@@ -1023,19 +1040,28 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 					nopl_error(declaredVar, NoPL_ErrStr_VariableAlreadyDeclared, context);
 				
 				//declare the variable
-				nopl_declareVariableInStack(declaredName, context->booleanStack);
-				NoPL_Index newCount = nopl_countVariablesInStack(context->booleanStack);
-				if(newCount > *(context->booleanTableSize))
-					*(context->booleanTableSize) = newCount;
+				nopl_declareVariableInStack(declaredName, pContext->booleanStack);
+				NoPL_Index newCount = nopl_countVariablesInStack(pContext->booleanStack);
+				if(newCount > *(pContext->booleanTableSize))
+					*(pContext->booleanTableSize) = newCount;
 				
 				//assign to the index of the newly created variable
 				nopl_addOperator(NoPL_BYTE_BOOLEAN_ASSIGN, context);
-				NoPL_Index index = nopl_indexOfVariableInStack(declaredName, context->booleanStack, declaredVar, context);
+				NoPL_Index index = nopl_indexOfVariableInStack(declaredName, pContext->booleanStack, declaredVar, context);
 				nopl_addBytesToContext(&index, sizeof(NoPL_Index), context);
 				
 				//append the initialization
 				nopl_appendContext(&initCtx, context);
 				nopl_freeInnerCompileContext(&initCtx);
+				
+				//add the variable's name if we want debug symbols
+				if(options->debugSymbols)
+				{
+					nopl_addOperator(NoPL_BYTE_DEBUG_VALUE_BOOLEAN, context);
+					nopl_addBytesToContext(&index, sizeof(NoPL_Index), context);
+					int varNameLength = (int)strlen((char*)declaredName->chars);
+					nopl_addBytesToContext(declaredName->chars, varNameLength+1, context);
+				}
 			}
 				break;
 			case DECL_NUMBER:
@@ -1066,19 +1092,28 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 					nopl_error(declaredVar, NoPL_ErrStr_VariableAlreadyDeclared, context);
 				
 				//declare the variable
-				nopl_declareVariableInStack(declaredName, context->numberStack);
-				NoPL_Index newCount = nopl_countVariablesInStack(context->numberStack);
-				if(newCount > *(context->numberTableSize))
-					*(context->numberTableSize) = newCount;
+				nopl_declareVariableInStack(declaredName, pContext->numberStack);
+				NoPL_Index newCount = nopl_countVariablesInStack(pContext->numberStack);
+				if(newCount > *(pContext->numberTableSize))
+					*(pContext->numberTableSize) = newCount;
 				
 				//assign to the index of the newly created variable
 				nopl_addOperator(NoPL_BYTE_NUMERIC_ASSIGN, context);
-				NoPL_Index index = nopl_indexOfVariableInStack(declaredName, context->numberStack, declaredVar, context);
+				NoPL_Index index = nopl_indexOfVariableInStack(declaredName, pContext->numberStack, declaredVar, context);
 				nopl_addBytesToContext(&index, sizeof(NoPL_Index), context);
 				
 				//append the initialization
 				nopl_appendContext(&initCtx, context);
 				nopl_freeInnerCompileContext(&initCtx);
+				
+				//add the variable's name if we want debug symbols
+				if(options->debugSymbols)
+				{
+					nopl_addOperator(NoPL_BYTE_DEBUG_VALUE_NUMBER, context);
+					nopl_addBytesToContext(&index, sizeof(NoPL_Index), context);
+					int varNameLength = (int)strlen((char*)declaredName->chars);
+					nopl_addBytesToContext(declaredName->chars, varNameLength+1, context);
+				}
 			}
 				break;
 			case DECL_OBJ:
@@ -1107,19 +1142,28 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 					nopl_error(declaredVar, NoPL_ErrStr_VariableAlreadyDeclared, context);
 				
 				//declare the variable
-				nopl_declareVariableInStack(declaredName, context->objectStack);
-				NoPL_Index newCount = nopl_countVariablesInStack(context->objectStack);
-				if(newCount > *(context->objectTableSize))
-					*(context->objectTableSize) = newCount;
+				nopl_declareVariableInStack(declaredName, pContext->objectStack);
+				NoPL_Index newCount = nopl_countVariablesInStack(pContext->objectStack);
+				if(newCount > *(pContext->objectTableSize))
+					*(pContext->objectTableSize) = newCount;
 				
 				//assign to the index of the newly created variable
 				nopl_addOperator(NoPL_BYTE_OBJECT_ASSIGN, context);
-				NoPL_Index index = nopl_indexOfVariableInStack(declaredName, context->objectStack, declaredVar, context);
+				NoPL_Index index = nopl_indexOfVariableInStack(declaredName, pContext->objectStack, declaredVar, context);
 				nopl_addBytesToContext(&index, sizeof(NoPL_Index), context);
 				
 				//append the initialization
 				nopl_appendContext(&initCtx, context);
 				nopl_freeInnerCompileContext(&initCtx);
+				
+				//add the variable's name if we want debug symbols
+				if(options->debugSymbols)
+				{
+					nopl_addOperator(NoPL_BYTE_DEBUG_VALUE_OBJECT, context);
+					nopl_addBytesToContext(&index, sizeof(NoPL_Index), context);
+					int varNameLength = (int)strlen((char*)declaredName->chars);
+					nopl_addBytesToContext(declaredName->chars, varNameLength+1, context);
+				}
 			}
 				break;
 			case DECL_STRING:
@@ -1150,19 +1194,28 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 					nopl_error(declaredVar, NoPL_ErrStr_VariableAlreadyDeclared, context);
 				
 				//declare the variable
-				nopl_declareVariableInStack(declaredName, context->stringStack);
-				NoPL_Index newCount = nopl_countVariablesInStack(context->stringStack);
-				if(newCount > *(context->stringTableSize))
-					*(context->stringTableSize) = newCount;
+				nopl_declareVariableInStack(declaredName, pContext->stringStack);
+				NoPL_Index newCount = nopl_countVariablesInStack(pContext->stringStack);
+				if(newCount > *(pContext->stringTableSize))
+					*(pContext->stringTableSize) = newCount;
 				
 				//assign to the index of the newly created variable
 				nopl_addOperator(NoPL_BYTE_STRING_ASSIGN, context);
-				NoPL_Index index = nopl_indexOfVariableInStack(declaredName, context->stringStack, declaredVar, context);
+				NoPL_Index index = nopl_indexOfVariableInStack(declaredName, pContext->stringStack, declaredVar, context);
 				nopl_addBytesToContext(&index, sizeof(NoPL_Index), context);
 				
 				//append the initialization
 				nopl_appendContext(&initCtx, context);
 				nopl_freeInnerCompileContext(&initCtx);
+				
+				//add the variable's name if we want debug symbols
+				if(options->debugSymbols)
+				{
+					nopl_addOperator(NoPL_BYTE_DEBUG_VALUE_STRING, context);
+					nopl_addBytesToContext(&index, sizeof(NoPL_Index), context);
+					int varNameLength = (int)strlen((char*)declaredName->chars);
+					nopl_addBytesToContext(declaredName->chars, varNameLength+1, context);
+				}
 			}
 				break;
 			case DECREMENT:
@@ -1178,7 +1231,7 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 					nopl_error(var, NoPL_ErrStr_CannotIncrement, context);
 				
 				//append the index for the variable
-				NoPL_Index index = nopl_indexOfVariableInStack(var->getText(var), context->numberStack, var, context);
+				NoPL_Index index = nopl_indexOfVariableInStack(var->getText(var), pContext->numberStack, var, context);
 				nopl_addBytesToContext(&index, sizeof(NoPL_Index), context);
 			}
 				break;
@@ -1210,7 +1263,7 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 					nopl_addOperator(NoPL_BYTE_NUMERIC_DIVIDE_ASSIGN, context);
 					
 					//add the index for the variable
-					NoPL_Index index = nopl_indexOfVariableInStack(assignTo->getText(assignTo), context->numberStack, assignTo, context);
+					NoPL_Index index = nopl_indexOfVariableInStack(assignTo->getText(assignTo), pContext->numberStack, assignTo, context);
 					nopl_addBytesToContext(&index, sizeof(NoPL_Index), context);
 					
 					//append the expression
@@ -1256,7 +1309,7 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 					nopl_addOperator(NoPL_BYTE_NUMERIC_EXPONENT_ASSIGN, context);
 					
 					//add the index for the variable
-					NoPL_Index index = nopl_indexOfVariableInStack(assignTo->getText(assignTo), context->numberStack, assignTo, context);
+					NoPL_Index index = nopl_indexOfVariableInStack(assignTo->getText(assignTo), pContext->numberStack, assignTo, context);
 					nopl_addBytesToContext(&index, sizeof(NoPL_Index), context);
 					
 					//append the increment
@@ -1321,7 +1374,7 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 						nopl_addOperator(NoPL_BYTE_VARIABLE_BOOLEAN, context);
 						
 						//append the index of the variable
-						NoPL_Index varIndex = nopl_indexOfVariableInStack(tree->getText(tree), context->booleanStack, tree, context);
+						NoPL_Index varIndex = nopl_indexOfVariableInStack(tree->getText(tree), pContext->booleanStack, tree, context);
 						nopl_addBytesToContext(&varIndex, sizeof(NoPL_Index), context);
 					}
 						break;
@@ -1331,7 +1384,7 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 						nopl_addOperator(NoPL_BYTE_VARIABLE_NUMBER, context);
 						
 						//append the index of the variable
-						NoPL_Index varIndex = nopl_indexOfVariableInStack(tree->getText(tree), context->numberStack, tree, context);
+						NoPL_Index varIndex = nopl_indexOfVariableInStack(tree->getText(tree), pContext->numberStack, tree, context);
 						nopl_addBytesToContext(&varIndex, sizeof(NoPL_Index), context);
 					}
 						break;
@@ -1341,7 +1394,7 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 						nopl_addOperator(NoPL_BYTE_VARIABLE_OBJECT, context);
 						
 						//append the index of the variable
-						NoPL_Index varIndex = nopl_indexOfVariableInStack(tree->getText(tree), context->objectStack, tree, context);
+						NoPL_Index varIndex = nopl_indexOfVariableInStack(tree->getText(tree), pContext->objectStack, tree, context);
 						nopl_addBytesToContext(&varIndex, sizeof(NoPL_Index), context);
 					}
 						break;
@@ -1351,7 +1404,7 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 						nopl_addOperator(NoPL_BYTE_VARIABLE_STRING, context);
 						
 						//append the index of the variable
-						NoPL_Index varIndex = nopl_indexOfVariableInStack(tree->getText(tree), context->stringStack, tree, context);
+						NoPL_Index varIndex = nopl_indexOfVariableInStack(tree->getText(tree), pContext->stringStack, tree, context);
 						nopl_addBytesToContext(&varIndex, sizeof(NoPL_Index), context);
 					}
 						break;
@@ -1377,7 +1430,7 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 					nopl_error(var, NoPL_ErrStr_CannotIncrement, context);
 				
 				//append the index for the variable
-				NoPL_Index index = nopl_indexOfVariableInStack(var->getText(var), context->numberStack, var, context);
+				NoPL_Index index = nopl_indexOfVariableInStack(var->getText(var), pContext->numberStack, var, context);
 				nopl_addBytesToContext(&index, sizeof(NoPL_Index), context);
 			}
 				break;
@@ -1773,7 +1826,7 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 					nopl_addOperator(NoPL_BYTE_NUMERIC_MODULO_ASSIGN, context);
 					
 					//add the index for the variable
-					NoPL_Index index = nopl_indexOfVariableInStack(assignTo->getText(assignTo), context->numberStack, assignTo, context);
+					NoPL_Index index = nopl_indexOfVariableInStack(assignTo->getText(assignTo), pContext->numberStack, assignTo, context);
 					nopl_addBytesToContext(&index, sizeof(NoPL_Index), context);
 					
 					//append the increment
@@ -1816,7 +1869,7 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 					nopl_addOperator(NoPL_BYTE_NUMERIC_MULTIPLY_ASSIGN, context);
 					
 					//add the index for the variable
-					NoPL_Index index = nopl_indexOfVariableInStack(assignTo->getText(assignTo), context->numberStack, assignTo, context);
+					NoPL_Index index = nopl_indexOfVariableInStack(assignTo->getText(assignTo), pContext->numberStack, assignTo, context);
 					nopl_addBytesToContext(&index, sizeof(NoPL_Index), context);
 					
 					//append the increment
@@ -2018,7 +2071,7 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 					nopl_addOperator(NoPL_BYTE_NUMERIC_SUBTRACT_ASSIGN, context);
 					
 					//add the index for the variable
-					NoPL_Index index = nopl_indexOfVariableInStack(assignTo->getText(assignTo), context->numberStack, assignTo, context);
+					NoPL_Index index = nopl_indexOfVariableInStack(assignTo->getText(assignTo), pContext->numberStack, assignTo, context);
 					nopl_addBytesToContext(&index, sizeof(NoPL_Index), context);
 					
 					//append the expression
@@ -2069,16 +2122,16 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 					{
 						//check if we need an anonymous variable
 						NoPL_Index index;
-						if(expression->getType(expression) == ID && nopl_variableExistsInStack(expression->getText(expression), context->booleanStack))
+						if(expression->getType(expression) == ID && nopl_variableExistsInStack(expression->getText(expression), pContext->booleanStack))
 						{
 							//this is already a variable
-							index = nopl_indexOfVariableInStack(expression->getText(expression), context->booleanStack, expression, &switchCtx);
+							index = nopl_indexOfVariableInStack(expression->getText(expression), pContext->booleanStack, expression, &switchCtx);
 						}
 						else
 						{
 							//we're assigning an anonymous variable
 							nopl_addOperator(NoPL_BYTE_BOOLEAN_ASSIGN, &switchCtx);
-							index = nopl_declareAnonymousVariableInStack(switchCtx.booleanStack);
+							index = nopl_declareAnonymousVariableInStack(pContext->booleanStack);
 							nopl_addBytesToContext(&index, sizeof(NoPL_Index), &switchCtx);
 							
 							//append the expression
@@ -2138,16 +2191,16 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 					{
 						//check if we need an anonymous variable
 						NoPL_Index index;
-						if(expression->getType(expression) == ID && nopl_variableExistsInStack(expression->getText(expression), context->numberStack))
+						if(expression->getType(expression) == ID && nopl_variableExistsInStack(expression->getText(expression), pContext->numberStack))
 						{
 							//this is already a variable
-							index = nopl_indexOfVariableInStack(expression->getText(expression), context->numberStack, expression, &switchCtx);
+							index = nopl_indexOfVariableInStack(expression->getText(expression), pContext->numberStack, expression, &switchCtx);
 						}
 						else
 						{
 							//we're assigning an anonymous variable
 							nopl_addOperator(NoPL_BYTE_NUMERIC_ASSIGN, &switchCtx);
-							index = nopl_declareAnonymousVariableInStack(switchCtx.numberStack);
+							index = nopl_declareAnonymousVariableInStack(private(switchCtx)->numberStack);
 							nopl_addBytesToContext(&index, sizeof(NoPL_Index), &switchCtx);
 							
 							//append the expression
@@ -2206,16 +2259,16 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 					{
 						//check if we need an anonymous variable
 						NoPL_Index index;
-						if(expression->getType(expression) == ID && nopl_variableExistsInStack(expression->getText(expression), context->stringStack))
+						if(expression->getType(expression) == ID && nopl_variableExistsInStack(expression->getText(expression), pContext->stringStack))
 						{
 							//this is already a variable
-							index = nopl_indexOfVariableInStack(expression->getText(expression), context->stringStack, expression, &switchCtx);
+							index = nopl_indexOfVariableInStack(expression->getText(expression), pContext->stringStack, expression, &switchCtx);
 						}
 						else
 						{
 							//we're assigning an anonymous variable
 							nopl_addOperator(NoPL_BYTE_STRING_ASSIGN, &switchCtx);
-							index = nopl_declareAnonymousVariableInStack(switchCtx.stringStack);
+							index = nopl_declareAnonymousVariableInStack(private(switchCtx)->stringStack);
 							nopl_addBytesToContext(&index, sizeof(NoPL_Index), &switchCtx);
 							
 							//append the expression
@@ -2430,10 +2483,10 @@ void nopl_compileWithInputStream(pANTLR3_INPUT_STREAM stream, const NoPL_Compile
 		NoPL_Index numberTableSize = 0;
 		NoPL_Index booleanTableSize = 0;
 		NoPL_Index stringTableSize = 0;
-		context->objectTableSize = &objectTableSize;
-		context->numberTableSize = &numberTableSize;
-		context->booleanTableSize = &booleanTableSize;
-		context->stringTableSize = &stringTableSize;
+		pContext->objectTableSize = &objectTableSize;
+		pContext->numberTableSize = &numberTableSize;
+		pContext->booleanTableSize = &booleanTableSize;
+		pContext->stringTableSize = &stringTableSize;
 		
 		//recurse to assemble the byte code
 		nopl_traverseAST(syntaxTree.tree, options, context);
@@ -2511,18 +2564,19 @@ NoPL_CompileContext newNoPL_CompileContext()
 	NoPL_CompileContext context;
 	context.compiledData = NULL;
 	context.dataLength = 0;
-	context.arrayLength = 0;
-	context.objectStack = antlr3StackNew(NoPL_StackSizeHint);
-	context.numberStack = antlr3StackNew(NoPL_StackSizeHint);
-	context.booleanStack = antlr3StackNew(NoPL_StackSizeHint);
-	context.stringStack = antlr3StackNew(NoPL_StackSizeHint);
 	context.errDescriptions = NULL;
-	context.errDescLength = 0;
-	context.breakStatements = NULL;
-	context.continueStatements = NULL;
-	context.allowsBreakStatements = 0;
-	context.allowsContinueStatements = 0;
-	context.debugLine = -1;
+	context.privateAttributes = malloc(sizeof(NoPL_CompileContextPrivate));
+	private(context)->arrayLength = 0;
+	private(context)->objectStack = antlr3StackNew(NoPL_StackSizeHint);
+	private(context)->numberStack = antlr3StackNew(NoPL_StackSizeHint);
+	private(context)->booleanStack = antlr3StackNew(NoPL_StackSizeHint);
+	private(context)->stringStack = antlr3StackNew(NoPL_StackSizeHint);
+	private(context)->errDescLength = 0;
+	private(context)->breakStatements = NULL;
+	private(context)->continueStatements = NULL;
+	private(context)->allowsBreakStatements = 0;
+	private(context)->allowsContinueStatements = 0;
+	private(context)->debugLine = -1;
 	nopl_pushScope(&context);
 	return context;
 }
@@ -2530,27 +2584,30 @@ NoPL_CompileContext newNoPL_CompileContext()
 void freeNoPL_CompileContext(NoPL_CompileContext* context)
 {
 	if(context->compiledData)
+	{
 		free(context->compiledData);
+		context->compiledData = NULL;
+	}
+	if(context->errDescriptions)
+	{
+		free(context->errDescriptions);
+		context->errDescriptions = NULL;
+	}
 	context->dataLength = 0;
-	context->arrayLength = 0;
-	if(context->objectStack)
+	
+	if(context->privateAttributes)
 	{
-		context->objectStack->free(context->objectStack);
-		context->objectStack = NULL;
-	}
-	if(context->numberStack)
-	{
-		context->numberStack->free(context->numberStack);
-		context->numberStack = NULL;
-	}
-	if(context->booleanStack)
-	{
-		context->booleanStack->free(context->booleanStack);
-		context->booleanStack = NULL;
-	}
-	if(context->stringStack)
-	{
-		context->stringStack->free(context->stringStack);
-		context->stringStack = NULL;
+		pContext->arrayLength = 0;
+		if(pContext->objectStack)
+			pContext->objectStack->free(pContext->objectStack);
+		if(pContext->numberStack)
+			pContext->numberStack->free(pContext->numberStack);
+		if(pContext->booleanStack)
+			pContext->booleanStack->free(pContext->booleanStack);
+		if(pContext->stringStack)
+			pContext->stringStack->free(pContext->stringStack);
+		
+		free(context->privateAttributes);
+		context->privateAttributes = NULL;
 	}
 }
