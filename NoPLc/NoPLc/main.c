@@ -22,9 +22,7 @@ int main(int argc, const char * argv[])
 	NoPL_CompileContext compileCtx = newNoPL_CompileContext();
 	
 	//set up the compile options
-	NoPL_CompileOptions compileOpt;
-	compileOpt.optimizeForRuntime = 1;
-	compileOpt.debugSymbols = 0;
+	NoPL_CompileOptions compileOpt = NoPL_CompileOptions();
 	
 	//compile the context
 	compileContextWithFilePath(argv[1], &compileOpt, &compileCtx);

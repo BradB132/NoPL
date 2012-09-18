@@ -93,27 +93,35 @@ void nopl_freeInnerCompileContext(NoPL_CompileContext* context);
 void nopl_appendContext(const NoPL_CompileContext* fromContext, NoPL_CompileContext* toContext);
 void nopl_finalizeControlFlowMoves(NoPL_CompileContext* context, NoPL_Index breakIndex, NoPL_Index continueIndex);
 void nopl_appendControlFlowMove(NoPL_CompileContext* context, NoPL_Index moveFromIndex, NoPL_Index moveToIndex);
-void nopl_findStartPositionForNode(const pANTLR3_BASE_TREE tree, int* line, int* character);
-void nopl_findEndPositionForNode(const pANTLR3_BASE_TREE tree, int* line, int* character);
-void nopl_appendErrorString(NoPL_CompileContext* context, const char* errString);
+void nopl_findEndLineForNode(const pANTLR3_BASE_TREE tree, int* line);
+void nopl_appendErrorString(NoPL_CompileContext* context, int startLine, int endLine, const char* errString);
+void nopl_findEndPositionForNode(const pANTLR3_BASE_TREE tree, int* line);
+static void nopl_displayRecognitionError(pANTLR3_BASE_RECOGNIZER recognizer, pANTLR3_UINT8* tokenNames);
 
 #pragma mark -
-#pragma mark Compilation
+#pragma mark Error Handling
 
-void nopl_appendErrorString(NoPL_CompileContext* context, const char* errString)
+void nopl_appendErrorString(NoPL_CompileContext* context, int startLine, int endLine, const char* errString)
 {
+	int length = (int)strlen(errString)+50;
+	char formattedString[length];
+	if(startLine == endLine)
+		snprintf(formattedString, length, "%s (line %d)", errString, startLine);
+	else
+		snprintf(formattedString, length, "%s (lines %d-%d)", errString, startLine, endLine);
+	
 	//get the root context
 	while(pContext->parentContext)
 		context = pContext->parentContext;
 	
 	//get the error length
-	int errLength = (int)strlen(errString);
+	int errLength = (int)strlen(formattedString);
 	
 	//create the string if we don't already have one
 	if(!context->errDescriptions)
 	{
 		context->errDescriptions = malloc(errLength*2);
-		memcpy(context->errDescriptions, errString, errLength+1);
+		memcpy(context->errDescriptions, formattedString, errLength+1);
 		pContext->errDescLength = errLength*2;
 		return;
 	}
@@ -134,42 +142,21 @@ void nopl_appendErrorString(NoPL_CompileContext* context, const char* errString)
 	}
 	
 	//append
-	strcat(context->errDescriptions, errString);
+	strcat(context->errDescriptions, formattedString);
 }
 
-void nopl_findStartPositionForNode(const pANTLR3_BASE_TREE tree, int* line, int* character)
+static void nopl_displayRecognitionError(pANTLR3_BASE_RECOGNIZER recognizer, pANTLR3_UINT8* tokenNames)
 {
-	//check if this position is before
-	if(tree->getLine(tree) < *line || (tree->getLine(tree) == *line && tree->getCharPositionInLine(tree) < *character))
-	{
-		*line = tree->getLine(tree);
-		*character = tree->getCharPositionInLine(tree);
-	}
-	
-	//recursively check all nodes in this AST
-	NoPL_Index childCount = 0;
-	if(tree->children)
-		childCount = (NoPL_Index)tree->children->size(tree->children);
-	ANTLR3_UINT32 i;
-	pANTLR3_BASE_TREE child;
-	for(i = 0; i < childCount; i++)
-	{
-		//get each child and traverse
-		child = (pANTLR3_BASE_TREE)(tree->children->get(tree->children, i));
-		if(!isErrorNode(child))
-			nopl_findStartPositionForNode(child, line, character);
-	}
+	//report when there has been a generic parse exception
+	pANTLR3_EXCEPTION ex = recognizer->state->exception;
+	nopl_appendErrorString((NoPL_CompileContext*)recognizer->state->custom, ex->line, ex->line, NoPL_ErrStr_Generic);
 }
 
-void nopl_findEndPositionForNode(const pANTLR3_BASE_TREE tree, int* line, int* character)
+void nopl_findEndPositionForNode(const pANTLR3_BASE_TREE tree, int* line)
 {
 	//check if this position is after
-	int characterLength = (int)strlen((char*)tree->getText(tree)->chars);
-	if(tree->getLine(tree) > *line || (tree->getLine(tree) == *line && (tree->getCharPositionInLine(tree)+characterLength) > *character))
-	{
+	if(tree->getLine(tree) > *line)
 		*line = tree->getLine(tree);
-		*character = (tree->getCharPositionInLine(tree)+characterLength);
-	}
 	
 	//recursively check all nodes in this AST
 	NoPL_Index childCount = 0;
@@ -182,27 +169,23 @@ void nopl_findEndPositionForNode(const pANTLR3_BASE_TREE tree, int* line, int* c
 		//get each child and traverse
 		child = (pANTLR3_BASE_TREE)(tree->children->get(tree->children, i));
 		if(!isErrorNode(child))
-			nopl_findEndPositionForNode(child, line, character);
+			nopl_findEndPositionForNode(child, line);
 	}
 }
 
 void nopl_error(const pANTLR3_BASE_TREE tree, const char* desc, NoPL_CompileContext* context)
 {
-	//init with some reasonable values
-	int startLine, endLine;
-	startLine = endLine = tree->getLine(tree);
-	int startChar, endChar;
-	startChar = endChar = tree->getCharPositionInLine(tree);
+	//attempt to find the end line
+	int endLine;
+	endLine = tree->getLine(tree);
+	nopl_findEndPositionForNode(tree, &endLine);
 	
-	//find the start and end positions
-	nopl_findStartPositionForNode(tree, &startLine, &startChar);
-	nopl_findEndPositionForNode(tree, &endLine, &endChar);
-	
-	//append string
-	char appendStr[256];
-	snprintf(appendStr, 256, "%s(%d:%d-%d:%d)\n", desc, startLine, startChar, endLine, endChar);
-	nopl_appendErrorString(context, appendStr);
+	//append the error
+	nopl_appendErrorString(context, tree->getLine(tree), endLine, desc);
 }
+
+#pragma mark -
+#pragma mark Compilation
 
 void nopl_addBytesToContext(const void* bytes, int byteCount, NoPL_CompileContext* context)
 {
@@ -351,9 +334,9 @@ NoPL_CompileContext nopl_newInnerCompileContext(NoPL_CompileContext* context, in
 	NoPL_CompileContext newContext;
 	newContext.privateAttributes = malloc(sizeof(NoPL_CompileContextPrivate));
 	newContext.compiledData = NULL;
-	newContext.dataLength = 0;
 	newContext.errDescriptions = NULL;
-	private(newContext)->parentContext = pContext;
+	newContext.dataLength = 0;
+	private(newContext)->parentContext = context;
 	private(newContext)->arrayLength = 0;
 	private(newContext)->debugLine = pContext->debugLine;
 	private(newContext)->objectStack = pContext->objectStack;
@@ -2456,10 +2439,17 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 
 void nopl_compileWithInputStream(pANTLR3_INPUT_STREAM stream, const NoPL_CompileOptions* options, NoPL_CompileContext* context)
 {
-	//attempt to parse the NoPL program
+	//set up a parser
 	pNoPLLexer lex = NoPLLexerNew(stream);
 	pANTLR3_COMMON_TOKEN_STREAM tokenStream = antlr3CommonTokenStreamSourceNew(ANTLR3_SIZE_HINT, TOKENSOURCE(lex));
 	pNoPLParser parser = NoPLParserNew(tokenStream);
+	
+	//we want custom error hanlding
+	pANTLR3_BASE_RECOGNIZER recognizer = parser->pParser->rec;
+	recognizer->state->custom = context;
+	parser->pParser->rec->displayRecognitionError = nopl_displayRecognitionError;
+	
+	//attempt to parse the program
 	NoPLParser_program_return syntaxTree = parser->program(parser);
 	
 	//check if we want runtime performance over compile speed
@@ -2469,7 +2459,6 @@ void nopl_compileWithInputStream(pANTLR3_INPUT_STREAM stream, const NoPL_Compile
 	}
 	
 	//check for errors
-	pANTLR3_BASE_RECOGNIZER recognizer = parser->pParser->rec;
 	int errCount = recognizer->getNumberOfSyntaxErrors(recognizer);
 	if(errCount > 0)
 	{
@@ -2566,6 +2555,7 @@ NoPL_CompileContext newNoPL_CompileContext()
 	context.dataLength = 0;
 	context.errDescriptions = NULL;
 	context.privateAttributes = malloc(sizeof(NoPL_CompileContextPrivate));
+	private(context)->parentContext = NULL;
 	private(context)->arrayLength = 0;
 	private(context)->objectStack = antlr3StackNew(NoPL_StackSizeHint);
 	private(context)->numberStack = antlr3StackNew(NoPL_StackSizeHint);
