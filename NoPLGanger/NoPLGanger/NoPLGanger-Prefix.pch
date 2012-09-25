@@ -1,0 +1,7 @@
+//
+// Prefix header for all source files of the 'NoPLGanger' target in the 'NoPLGanger' project
+//
+
+#ifdef __OBJC__
+	#import <Cocoa/Cocoa.h>
+#endif

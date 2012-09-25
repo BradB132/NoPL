@@ -38,8 +38,6 @@ typedef struct
 #define NoPL_StackSizeHint 16
 #define NoPL_VectorSizeHint 8
 
-//TODO: make everything C90 compliant
-
 //error codes
 const char* NoPL_ErrStr_Generic = "Syntax error";
 const char* NoPL_ErrStr_ExpressionMustBeNumeric = "This expression must evaluate to a numeric value";
@@ -2460,12 +2458,7 @@ void nopl_compileWithInputStream(pANTLR3_INPUT_STREAM stream, const NoPL_Compile
 	
 	//check for errors
 	int errCount = recognizer->getNumberOfSyntaxErrors(recognizer);
-	if(errCount > 0)
-	{
-		//this tree has errors, add them to the context
-		//TODO: find a better way to do this
-	}
-	else
+	if(errCount == 0)
 	{
 		//set up counts for symbol table
 		NoPL_Index objectTableSize = 0;
