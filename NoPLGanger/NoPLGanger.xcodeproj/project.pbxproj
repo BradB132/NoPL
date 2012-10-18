@@ -11,7 +11,18 @@
 		A24F59BA162F2A5900FC9181 /* FileSystemNode.m in Sources */ = {isa = PBXBuildFile; fileRef = A24F59B8162F2A5900FC9181 /* FileSystemNode.m */; };
 		A24F59BE162F579B00FC9181 /* DataListController.m in Sources */ = {isa = PBXBuildFile; fileRef = A24F59BD162F579B00FC9181 /* DataListController.m */; };
 		A24F59BF162F579B00FC9181 /* DataListController.m in Sources */ = {isa = PBXBuildFile; fileRef = A24F59BD162F579B00FC9181 /* DataListController.m */; };
+		A24F59C3163053CF00FC9181 /* DataManager.m in Sources */ = {isa = PBXBuildFile; fileRef = A24F59C2163053CF00FC9181 /* DataManager.m */; };
+		A24F59C4163053CF00FC9181 /* DataManager.m in Sources */ = {isa = PBXBuildFile; fileRef = A24F59C2163053CF00FC9181 /* DataManager.m */; };
+		A24F59C71630560500FC9181 /* XMLScriptData.m in Sources */ = {isa = PBXBuildFile; fileRef = A24F59C61630560500FC9181 /* XMLScriptData.m */; };
+		A24F59C81630560500FC9181 /* XMLScriptData.m in Sources */ = {isa = PBXBuildFile; fileRef = A24F59C61630560500FC9181 /* XMLScriptData.m */; };
+		A24F59CB1630561400FC9181 /* PlistScriptData.m in Sources */ = {isa = PBXBuildFile; fileRef = A24F59CA1630561400FC9181 /* PlistScriptData.m */; };
+		A24F59CC1630561400FC9181 /* PlistScriptData.m in Sources */ = {isa = PBXBuildFile; fileRef = A24F59CA1630561400FC9181 /* PlistScriptData.m */; };
+		A24F59CF163057F700FC9181 /* ScriptData.m in Sources */ = {isa = PBXBuildFile; fileRef = A24F59CE163057F700FC9181 /* ScriptData.m */; };
+		A24F59D0163057F700FC9181 /* ScriptData.m in Sources */ = {isa = PBXBuildFile; fileRef = A24F59CE163057F700FC9181 /* ScriptData.m */; };
 		A27219C4162210FF004350AC /* FileBrowserController.m in Sources */ = {isa = PBXBuildFile; fileRef = A27219C3162210FF004350AC /* FileBrowserController.m */; };
+		A27FA7DD1630A0DF00D686E9 /* libNoPLRuntime.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A27FA7DC1630A0DF00D686E9 /* libNoPLRuntime.a */; };
+		A27FA7E71630A81C00D686E9 /* NSDictionary+NSDictionary_NoPL.m in Sources */ = {isa = PBXBuildFile; fileRef = A27FA7E61630A81C00D686E9 /* NSDictionary+NSDictionary_NoPL.m */; };
+		A27FA7EA1630B5F900D686E9 /* NSArray+NSArray_NoPL.m in Sources */ = {isa = PBXBuildFile; fileRef = A27FA7E91630B5F900D686E9 /* NSArray+NSArray_NoPL.m */; };
 		A2BAAB37160F912500160FCE /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A2BAAB36160F912500160FCE /* Cocoa.framework */; };
 		A2BAAB41160F912500160FCE /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = A2BAAB3F160F912500160FCE /* InfoPlist.strings */; };
 		A2BAAB43160F912500160FCE /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = A2BAAB42160F912500160FCE /* main.m */; };
@@ -40,8 +51,21 @@
 		A24F59B8162F2A5900FC9181 /* FileSystemNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = FileSystemNode.m; path = FileBrowser/FileSystemNode.m; sourceTree = "<group>"; };
 		A24F59BC162F579B00FC9181 /* DataListController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DataListController.h; path = DataList/DataListController.h; sourceTree = "<group>"; };
 		A24F59BD162F579B00FC9181 /* DataListController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DataListController.m; path = DataList/DataListController.m; sourceTree = "<group>"; };
+		A24F59C1163053CF00FC9181 /* DataManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DataManager.h; sourceTree = "<group>"; };
+		A24F59C2163053CF00FC9181 /* DataManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DataManager.m; sourceTree = "<group>"; };
+		A24F59C51630560500FC9181 /* XMLScriptData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMLScriptData.h; sourceTree = "<group>"; };
+		A24F59C61630560500FC9181 /* XMLScriptData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMLScriptData.m; sourceTree = "<group>"; };
+		A24F59C91630561400FC9181 /* PlistScriptData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlistScriptData.h; sourceTree = "<group>"; };
+		A24F59CA1630561400FC9181 /* PlistScriptData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PlistScriptData.m; sourceTree = "<group>"; };
+		A24F59CD163057F700FC9181 /* ScriptData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScriptData.h; sourceTree = "<group>"; };
+		A24F59CE163057F700FC9181 /* ScriptData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ScriptData.m; sourceTree = "<group>"; };
 		A27219C2162210FF004350AC /* FileBrowserController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FileBrowserController.h; path = FileBrowser/FileBrowserController.h; sourceTree = "<group>"; };
 		A27219C3162210FF004350AC /* FileBrowserController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = FileBrowserController.m; path = FileBrowser/FileBrowserController.m; sourceTree = "<group>"; };
+		A27FA7DC1630A0DF00D686E9 /* libNoPLRuntime.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libNoPLRuntime.a; path = ../CompiledLibs/runtime/libNoPLRuntime.a; sourceTree = "<group>"; };
+		A27FA7E51630A81C00D686E9 /* NSDictionary+NSDictionary_NoPL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSDictionary+NSDictionary_NoPL.h"; sourceTree = "<group>"; };
+		A27FA7E61630A81C00D686E9 /* NSDictionary+NSDictionary_NoPL.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSDictionary+NSDictionary_NoPL.m"; sourceTree = "<group>"; };
+		A27FA7E81630B5F900D686E9 /* NSArray+NSArray_NoPL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSArray+NSArray_NoPL.h"; sourceTree = "<group>"; };
+		A27FA7E91630B5F900D686E9 /* NSArray+NSArray_NoPL.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSArray+NSArray_NoPL.m"; sourceTree = "<group>"; };
 		A2BAAB32160F912500160FCE /* NoPLGanger.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NoPLGanger.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A2BAAB36160F912500160FCE /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		A2BAAB39160F912500160FCE /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -70,6 +94,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A2BAAB37160F912500160FCE /* Cocoa.framework in Frameworks */,
+				A27FA7DD1630A0DF00D686E9 /* libNoPLRuntime.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -92,6 +117,25 @@
 				A24F59BD162F579B00FC9181 /* DataListController.m */,
 			);
 			name = DataList;
+			sourceTree = "<group>";
+		};
+		A24F59C0163053C000FC9181 /* ScriptData */ = {
+			isa = PBXGroup;
+			children = (
+				A24F59C1163053CF00FC9181 /* DataManager.h */,
+				A24F59C2163053CF00FC9181 /* DataManager.m */,
+				A24F59CD163057F700FC9181 /* ScriptData.h */,
+				A24F59CE163057F700FC9181 /* ScriptData.m */,
+				A24F59C51630560500FC9181 /* XMLScriptData.h */,
+				A24F59C61630560500FC9181 /* XMLScriptData.m */,
+				A24F59C91630561400FC9181 /* PlistScriptData.h */,
+				A24F59CA1630561400FC9181 /* PlistScriptData.m */,
+				A27FA7E51630A81C00D686E9 /* NSDictionary+NSDictionary_NoPL.h */,
+				A27FA7E61630A81C00D686E9 /* NSDictionary+NSDictionary_NoPL.m */,
+				A27FA7E81630B5F900D686E9 /* NSArray+NSArray_NoPL.h */,
+				A27FA7E91630B5F900D686E9 /* NSArray+NSArray_NoPL.m */,
+			);
+			path = ScriptData;
 			sourceTree = "<group>";
 		};
 		A27219C0162210CA004350AC /* FileBrowser */ = {
@@ -127,6 +171,7 @@
 		A2BAAB35160F912500160FCE /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				A27FA7DC1630A0DF00D686E9 /* libNoPLRuntime.a */,
 				A2BAAB36160F912500160FCE /* Cocoa.framework */,
 				A2BAAB57160F912500160FCE /* SenTestingKit.framework */,
 				A2BAAB38160F912500160FCE /* Other Frameworks */,
@@ -147,6 +192,7 @@
 		A2BAAB3C160F912500160FCE /* NoPLGanger */ = {
 			isa = PBXGroup;
 			children = (
+				A24F59C0163053C000FC9181 /* ScriptData */,
 				A24F59BB162F575E00FC9181 /* DataList */,
 				A27219C0162210CA004350AC /* FileBrowser */,
 				A2BAAB48160F912500160FCE /* Document.h */,
@@ -303,6 +349,12 @@
 				A27219C4162210FF004350AC /* FileBrowserController.m in Sources */,
 				A24F59B9162F2A5900FC9181 /* FileSystemNode.m in Sources */,
 				A24F59BE162F579B00FC9181 /* DataListController.m in Sources */,
+				A24F59C3163053CF00FC9181 /* DataManager.m in Sources */,
+				A24F59C71630560500FC9181 /* XMLScriptData.m in Sources */,
+				A24F59CB1630561400FC9181 /* PlistScriptData.m in Sources */,
+				A24F59CF163057F700FC9181 /* ScriptData.m in Sources */,
+				A27FA7E71630A81C00D686E9 /* NSDictionary+NSDictionary_NoPL.m in Sources */,
+				A27FA7EA1630B5F900D686E9 /* NSArray+NSArray_NoPL.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -313,6 +365,10 @@
 				A2BAAB64160F912500160FCE /* NoPLGangerTests.m in Sources */,
 				A24F59BA162F2A5900FC9181 /* FileSystemNode.m in Sources */,
 				A24F59BF162F579B00FC9181 /* DataListController.m in Sources */,
+				A24F59C4163053CF00FC9181 /* DataManager.m in Sources */,
+				A24F59C81630560500FC9181 /* XMLScriptData.m in Sources */,
+				A24F59CC1630561400FC9181 /* PlistScriptData.m in Sources */,
+				A24F59D0163057F700FC9181 /* ScriptData.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -430,8 +486,14 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "NoPLGanger/NoPLGanger-Prefix.pch";
+				HEADER_SEARCH_PATHS = "$(SRCROOT)/../CompiledLibs/runtime/include/";
 				INFOPLIST_FILE = "NoPLGanger/NoPLGanger-Info.plist";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../CompiledLibs/runtime\"",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				USER_HEADER_SEARCH_PATHS = "";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -443,8 +505,14 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "NoPLGanger/NoPLGanger-Prefix.pch";
+				HEADER_SEARCH_PATHS = "$(SRCROOT)/../CompiledLibs/runtime/include/";
 				INFOPLIST_FILE = "NoPLGanger/NoPLGanger-Info.plist";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../CompiledLibs/runtime\"",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				USER_HEADER_SEARCH_PATHS = "";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;

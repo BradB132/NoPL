@@ -70,7 +70,7 @@
 													<reference key="NSNextResponder" ref="1004323517"/>
 													<int key="NSvFlags">256</int>
 													<array class="NSMutableArray" key="NSSubviews">
-														<object class="NSBrowser" id="918843459">
+														<object class="NSBrowser" id="838711574">
 															<reference key="NSNextResponder" ref="397627593"/>
 															<int key="NSvFlags">274</int>
 															<string key="NSFrameSize">{476, 268}</string>
@@ -105,7 +105,7 @@
 													<string key="NSFrameSize">{476, 246}</string>
 													<reference key="NSSuperview" ref="1004323517"/>
 													<reference key="NSWindow"/>
-													<reference key="NSNextKeyView" ref="918843459"/>
+													<reference key="NSNextKeyView" ref="838711574"/>
 													<string key="NSReuseIdentifierKey">_NS:11</string>
 													<string key="NSClassName">NSView</string>
 												</object>
@@ -1069,7 +1069,7 @@ wGw</bytes>
 			<object class="NSCustomObject" id="507123136">
 				<string key="NSClassName">FileBrowserController</string>
 			</object>
-			<object class="NSCustomObject" id="951411667">
+			<object class="NSCustomObject" id="899204569">
 				<string key="NSClassName">DataListController</string>
 			</object>
 		</array>
@@ -1095,7 +1095,7 @@ wGw</bytes>
 					<object class="IBOutletConnection" key="connection">
 						<string key="label">_browser</string>
 						<reference key="source" ref="507123136"/>
-						<reference key="destination" ref="918843459"/>
+						<reference key="destination" ref="838711574"/>
 					</object>
 					<int key="connectionID">100910</int>
 				</object>
@@ -1103,14 +1103,14 @@ wGw</bytes>
 					<object class="IBActionConnection" key="connection">
 						<string key="label">browserClicked:</string>
 						<reference key="source" ref="507123136"/>
-						<reference key="destination" ref="918843459"/>
+						<reference key="destination" ref="838711574"/>
 					</object>
 					<int key="connectionID">100914</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBOutletConnection" key="connection">
 						<string key="label">delegate</string>
-						<reference key="source" ref="918843459"/>
+						<reference key="source" ref="838711574"/>
 						<reference key="destination" ref="507123136"/>
 					</object>
 					<int key="connectionID">100912</int>
@@ -1118,10 +1118,18 @@ wGw</bytes>
 				<object class="IBConnectionRecord">
 					<object class="IBOutletConnection" key="connection">
 						<string key="label">_browser</string>
-						<reference key="source" ref="951411667"/>
-						<reference key="destination" ref="918843459"/>
+						<reference key="source" ref="899204569"/>
+						<reference key="destination" ref="838711574"/>
 					</object>
 					<int key="connectionID">100916</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBOutletConnection" key="connection">
+						<string key="label">dataTable</string>
+						<reference key="source" ref="899204569"/>
+						<reference key="destination" ref="398314658"/>
+					</object>
+					<int key="connectionID">100917</int>
 				</object>
 			</array>
 			<object class="IBMutableOrderedSet" key="objectRecords">
@@ -1205,7 +1213,7 @@ wGw</bytes>
 						<int key="objectID">100342</int>
 						<reference key="object" ref="397627593"/>
 						<array class="NSMutableArray" key="children">
-							<reference ref="918843459"/>
+							<reference ref="838711574"/>
 						</array>
 						<reference key="parent" ref="1004323517"/>
 					</object>
@@ -1404,12 +1412,12 @@ wGw</bytes>
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">100909</int>
-						<reference key="object" ref="918843459"/>
+						<reference key="object" ref="838711574"/>
 						<reference key="parent" ref="397627593"/>
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">100915</int>
-						<reference key="object" ref="951411667"/>
+						<reference key="object" ref="899204569"/>
 						<reference key="parent" ref="0"/>
 						<string key="objectName">Data List Controller</string>
 					</object>
@@ -1464,7 +1472,7 @@ wGw</bytes>
 			<nil key="activeLocalization"/>
 			<dictionary class="NSMutableDictionary" key="localizations"/>
 			<nil key="sourceID"/>
-			<int key="maxID">100916</int>
+			<int key="maxID">100917</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<array class="NSMutableArray" key="referencedPartialClassDescriptions">

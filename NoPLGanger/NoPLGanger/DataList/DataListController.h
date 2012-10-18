@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
-@interface DataListController : NSObject
+@interface DataListController : NSObject <NSTableViewDelegate, NSTableViewDataSource>
 {
 	IBOutlet NSTableView* dataTable;
 }

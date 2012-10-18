@@ -7,9 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A24F59EA163098ED00FC9181 /* NoPLRuntime.c in Sources */ = {isa = PBXBuildFile; fileRef = A261C29C15C0E878008AE0C4 /* NoPLRuntime.c */; };
+		A24F59EB163098F100FC9181 /* NoPLStandardFunctions.c in Sources */ = {isa = PBXBuildFile; fileRef = A2807F3715D6ACD9003FDDCD /* NoPLStandardFunctions.c */; };
+		A24F59EC163098F900FC9181 /* NoPLRuntime.h in Headers */ = {isa = PBXBuildFile; fileRef = A261C29E15C0E892008AE0C4 /* NoPLRuntime.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		A24F59ED1630990200FC9181 /* NoPLStandardFunctions.h in Headers */ = {isa = PBXBuildFile; fileRef = A2807F3A15D6ACEF003FDDCD /* NoPLStandardFunctions.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A261C29315C0E846008AE0C4 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = A261C29215C0E846008AE0C4 /* main.c */; };
 		A261C29515C0E846008AE0C4 /* NoPL_Runtime.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = A261C29415C0E846008AE0C4 /* NoPL_Runtime.1 */; };
 		A261C29D15C0E878008AE0C4 /* NoPLRuntime.c in Sources */ = {isa = PBXBuildFile; fileRef = A261C29C15C0E878008AE0C4 /* NoPLRuntime.c */; };
+		A27FA7E31630A25900D686E9 /* NoPLValues.h in Headers */ = {isa = PBXBuildFile; fileRef = A261C2A315C0E8D6008AE0C4 /* NoPLValues.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A2807F3815D6ACD9003FDDCD /* NoPLStandardFunctions.c in Sources */ = {isa = PBXBuildFile; fileRef = A2807F3715D6ACD9003FDDCD /* NoPLStandardFunctions.c */; };
 /* End PBXBuildFile section */
 
@@ -27,7 +32,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		A261C28E15C0E845008AE0C4 /* NoPL_Runtime */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = NoPL_Runtime; sourceTree = BUILT_PRODUCTS_DIR; };
+		A24F59E6163098DB00FC9181 /* libNoPLRuntime.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libNoPLRuntime.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		A261C28E15C0E845008AE0C4 /* NoPL_Runtime */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; name = NoPL_Runtime; path = NoPL_Runtime_testing; sourceTree = BUILT_PRODUCTS_DIR; };
 		A261C29215C0E846008AE0C4 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
 		A261C29415C0E846008AE0C4 /* NoPL_Runtime.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = NoPL_Runtime.1; sourceTree = "<group>"; };
 		A261C29C15C0E878008AE0C4 /* NoPLRuntime.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = NoPLRuntime.c; sourceTree = "<group>"; };
@@ -38,6 +44,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		A24F59E3163098DB00FC9181 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		A261C28B15C0E845008AE0C4 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -60,6 +73,7 @@
 			isa = PBXGroup;
 			children = (
 				A261C28E15C0E845008AE0C4 /* NoPL_Runtime */,
+				A24F59E6163098DB00FC9181 /* libNoPLRuntime.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -88,10 +102,40 @@
 		};
 /* End PBXGroup section */
 
+/* Begin PBXHeadersBuildPhase section */
+		A24F59E4163098DB00FC9181 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A24F59ED1630990200FC9181 /* NoPLStandardFunctions.h in Headers */,
+				A24F59EC163098F900FC9181 /* NoPLRuntime.h in Headers */,
+				A27FA7E31630A25900D686E9 /* NoPLValues.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
 /* Begin PBXNativeTarget section */
-		A261C28D15C0E845008AE0C4 /* NoPL_Runtime */ = {
+		A24F59E5163098DB00FC9181 /* NoPLRuntime */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = A261C29815C0E846008AE0C4 /* Build configuration list for PBXNativeTarget "NoPL_Runtime" */;
+			buildConfigurationList = A24F59E7163098DB00FC9181 /* Build configuration list for PBXNativeTarget "NoPLRuntime" */;
+			buildPhases = (
+				A24F59E2163098DB00FC9181 /* Sources */,
+				A24F59E3163098DB00FC9181 /* Frameworks */,
+				A24F59E4163098DB00FC9181 /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = NoPLRuntime;
+			productName = NoPLRuntime;
+			productReference = A24F59E6163098DB00FC9181 /* libNoPLRuntime.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+		A261C28D15C0E845008AE0C4 /* NoPL_Runtime_testing */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A261C29815C0E846008AE0C4 /* Build configuration list for PBXNativeTarget "NoPL_Runtime_testing" */;
 			buildPhases = (
 				A261C28A15C0E845008AE0C4 /* Sources */,
 				A261C28B15C0E845008AE0C4 /* Frameworks */,
@@ -101,7 +145,7 @@
 			);
 			dependencies = (
 			);
-			name = NoPL_Runtime;
+			name = NoPL_Runtime_testing;
 			productName = NoPL_Runtime;
 			productReference = A261C28E15C0E845008AE0C4 /* NoPL_Runtime */;
 			productType = "com.apple.product-type.tool";
@@ -127,12 +171,22 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				A261C28D15C0E845008AE0C4 /* NoPL_Runtime */,
+				A261C28D15C0E845008AE0C4 /* NoPL_Runtime_testing */,
+				A24F59E5163098DB00FC9181 /* NoPLRuntime */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXSourcesBuildPhase section */
+		A24F59E2163098DB00FC9181 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A24F59EB163098F100FC9181 /* NoPLStandardFunctions.c in Sources */,
+				A24F59EA163098ED00FC9181 /* NoPLRuntime.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		A261C28A15C0E845008AE0C4 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -146,6 +200,26 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
+		A24F59E8163098DB00FC9181 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN_EMPTY_BODY = YES;
+				EXECUTABLE_PREFIX = lib;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		A24F59E9163098DB00FC9181 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN_EMPTY_BODY = YES;
+				EXECUTABLE_PREFIX = lib;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
 		A261C29615C0E846008AE0C4 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -214,6 +288,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		A24F59E7163098DB00FC9181 /* Build configuration list for PBXNativeTarget "NoPLRuntime" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A24F59E8163098DB00FC9181 /* Debug */,
+				A24F59E9163098DB00FC9181 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		A261C28815C0E845008AE0C4 /* Build configuration list for PBXProject "NoPL_Runtime" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -223,7 +306,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		A261C29815C0E846008AE0C4 /* Build configuration list for PBXNativeTarget "NoPL_Runtime" */ = {
+		A261C29815C0E846008AE0C4 /* Build configuration list for PBXNativeTarget "NoPL_Runtime_testing" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				A261C29915C0E846008AE0C4 /* Debug */,
