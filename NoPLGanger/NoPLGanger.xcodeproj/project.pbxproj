@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A24F59B9162F2A5900FC9181 /* FileSystemNode.m in Sources */ = {isa = PBXBuildFile; fileRef = A24F59B8162F2A5900FC9181 /* FileSystemNode.m */; };
+		A24F59BA162F2A5900FC9181 /* FileSystemNode.m in Sources */ = {isa = PBXBuildFile; fileRef = A24F59B8162F2A5900FC9181 /* FileSystemNode.m */; };
+		A24F59BE162F579B00FC9181 /* DataListController.m in Sources */ = {isa = PBXBuildFile; fileRef = A24F59BD162F579B00FC9181 /* DataListController.m */; };
+		A24F59BF162F579B00FC9181 /* DataListController.m in Sources */ = {isa = PBXBuildFile; fileRef = A24F59BD162F579B00FC9181 /* DataListController.m */; };
+		A27219C4162210FF004350AC /* FileBrowserController.m in Sources */ = {isa = PBXBuildFile; fileRef = A27219C3162210FF004350AC /* FileBrowserController.m */; };
 		A2BAAB37160F912500160FCE /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A2BAAB36160F912500160FCE /* Cocoa.framework */; };
 		A2BAAB41160F912500160FCE /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = A2BAAB3F160F912500160FCE /* InfoPlist.strings */; };
 		A2BAAB43160F912500160FCE /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = A2BAAB42160F912500160FCE /* main.m */; };
@@ -31,6 +36,12 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		A24F59B7162F2A5900FC9181 /* FileSystemNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FileSystemNode.h; path = FileBrowser/FileSystemNode.h; sourceTree = "<group>"; };
+		A24F59B8162F2A5900FC9181 /* FileSystemNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = FileSystemNode.m; path = FileBrowser/FileSystemNode.m; sourceTree = "<group>"; };
+		A24F59BC162F579B00FC9181 /* DataListController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DataListController.h; path = DataList/DataListController.h; sourceTree = "<group>"; };
+		A24F59BD162F579B00FC9181 /* DataListController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DataListController.m; path = DataList/DataListController.m; sourceTree = "<group>"; };
+		A27219C2162210FF004350AC /* FileBrowserController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FileBrowserController.h; path = FileBrowser/FileBrowserController.h; sourceTree = "<group>"; };
+		A27219C3162210FF004350AC /* FileBrowserController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = FileBrowserController.m; path = FileBrowser/FileBrowserController.m; sourceTree = "<group>"; };
 		A2BAAB32160F912500160FCE /* NoPLGanger.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NoPLGanger.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A2BAAB36160F912500160FCE /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		A2BAAB39160F912500160FCE /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -74,6 +85,26 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		A24F59BB162F575E00FC9181 /* DataList */ = {
+			isa = PBXGroup;
+			children = (
+				A24F59BC162F579B00FC9181 /* DataListController.h */,
+				A24F59BD162F579B00FC9181 /* DataListController.m */,
+			);
+			name = DataList;
+			sourceTree = "<group>";
+		};
+		A27219C0162210CA004350AC /* FileBrowser */ = {
+			isa = PBXGroup;
+			children = (
+				A27219C2162210FF004350AC /* FileBrowserController.h */,
+				A27219C3162210FF004350AC /* FileBrowserController.m */,
+				A24F59B7162F2A5900FC9181 /* FileSystemNode.h */,
+				A24F59B8162F2A5900FC9181 /* FileSystemNode.m */,
+			);
+			name = FileBrowser;
+			sourceTree = "<group>";
+		};
 		A2BAAB27160F912500160FCE = {
 			isa = PBXGroup;
 			children = (
@@ -116,6 +147,8 @@
 		A2BAAB3C160F912500160FCE /* NoPLGanger */ = {
 			isa = PBXGroup;
 			children = (
+				A24F59BB162F575E00FC9181 /* DataList */,
+				A27219C0162210CA004350AC /* FileBrowser */,
 				A2BAAB48160F912500160FCE /* Document.h */,
 				A2BAAB49160F912500160FCE /* Document.m */,
 				A2BAAB4B160F912500160FCE /* Document.xib */,
@@ -267,6 +300,9 @@
 			files = (
 				A2BAAB43160F912500160FCE /* main.m in Sources */,
 				A2BAAB4A160F912500160FCE /* Document.m in Sources */,
+				A27219C4162210FF004350AC /* FileBrowserController.m in Sources */,
+				A24F59B9162F2A5900FC9181 /* FileSystemNode.m in Sources */,
+				A24F59BE162F579B00FC9181 /* DataListController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -275,6 +311,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				A2BAAB64160F912500160FCE /* NoPLGangerTests.m in Sources */,
+				A24F59BA162F2A5900FC9181 /* FileSystemNode.m in Sources */,
+				A24F59BF162F579B00FC9181 /* DataListController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -388,6 +426,7 @@
 		A2BAAB68160F912500160FCE /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "NoPLGanger/NoPLGanger-Prefix.pch";
@@ -400,6 +439,7 @@
 		A2BAAB69160F912500160FCE /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "NoPLGanger/NoPLGanger-Prefix.pch";
