@@ -672,6 +672,10 @@ void nopl_appendContext(const NoPL_CompileContext* fromContext, NoPL_CompileCont
 
 void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* options, NoPL_CompileContext* context)
 {
+	//avoid bad acesses
+	if(!tree)
+		return;
+	
 	if(tree->isNilNode(tree))
 	{
 		//this is a nil node, most likely the root node, traverse all children

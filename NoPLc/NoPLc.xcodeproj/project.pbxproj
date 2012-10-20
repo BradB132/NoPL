@@ -7,6 +7,35 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A27FA8001632466D00D686E9 /* antlr3baserecognizer.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB8185153B42F20080E9FB /* antlr3baserecognizer.c */; };
+		A27FA8011632466D00D686E9 /* antlr3basetree.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB8186153B42F20080E9FB /* antlr3basetree.c */; };
+		A27FA8021632466D00D686E9 /* antlr3basetreeadaptor.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB8187153B42F20080E9FB /* antlr3basetreeadaptor.c */; };
+		A27FA8031632466D00D686E9 /* antlr3bitset.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB8188153B42F20080E9FB /* antlr3bitset.c */; };
+		A27FA8041632466D00D686E9 /* antlr3collections.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB8189153B42F20080E9FB /* antlr3collections.c */; };
+		A27FA8051632466D00D686E9 /* antlr3commontoken.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB818A153B42F20080E9FB /* antlr3commontoken.c */; };
+		A27FA8061632466D00D686E9 /* antlr3commontree.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB818B153B42F20080E9FB /* antlr3commontree.c */; };
+		A27FA8071632466D00D686E9 /* antlr3commontreeadaptor.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB818C153B42F20080E9FB /* antlr3commontreeadaptor.c */; };
+		A27FA8081632466D00D686E9 /* antlr3commontreenodestream.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB818D153B42F20080E9FB /* antlr3commontreenodestream.c */; };
+		A27FA8091632466D00D686E9 /* antlr3convertutf.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB818E153B42F20080E9FB /* antlr3convertutf.c */; };
+		A27FA80A1632466D00D686E9 /* antlr3cyclicdfa.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB818F153B42F20080E9FB /* antlr3cyclicdfa.c */; };
+		A27FA80B1632466D00D686E9 /* antlr3debughandlers.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB8190153B42F20080E9FB /* antlr3debughandlers.c */; };
+		A27FA80C1632466D00D686E9 /* antlr3encodings.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB8191153B42F20080E9FB /* antlr3encodings.c */; };
+		A27FA80D1632466D00D686E9 /* antlr3exception.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB8192153B42F20080E9FB /* antlr3exception.c */; };
+		A27FA80E1632466D00D686E9 /* antlr3filestream.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB8193153B42F20080E9FB /* antlr3filestream.c */; };
+		A27FA80F1632466D00D686E9 /* antlr3inputstream.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB8194153B42F20080E9FB /* antlr3inputstream.c */; };
+		A27FA8101632466D00D686E9 /* antlr3intstream.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB8195153B42F20080E9FB /* antlr3intstream.c */; };
+		A27FA8111632466D00D686E9 /* antlr3lexer.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB8196153B42F20080E9FB /* antlr3lexer.c */; };
+		A27FA8121632466D00D686E9 /* antlr3parser.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB8197153B42F20080E9FB /* antlr3parser.c */; };
+		A27FA8131632466D00D686E9 /* antlr3rewritestreams.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB8198153B42F20080E9FB /* antlr3rewritestreams.c */; };
+		A27FA8141632466D00D686E9 /* antlr3string.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB8199153B42F20080E9FB /* antlr3string.c */; };
+		A27FA8151632466D00D686E9 /* antlr3stringstream.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB819A153B42F20080E9FB /* antlr3stringstream.c */; };
+		A27FA8161632466D00D686E9 /* antlr3tokenstream.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB819B153B42F20080E9FB /* antlr3tokenstream.c */; };
+		A27FA8171632466D00D686E9 /* antlr3treeparser.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB819C153B42F20080E9FB /* antlr3treeparser.c */; };
+		A27FA8181632466D00D686E9 /* antlr3ucs2inputstream.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB819D153B42F20080E9FB /* antlr3ucs2inputstream.c */; };
+		A27FA8191632468900D686E9 /* NoPLc.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB81C0153B715A0080E9FB /* NoPLc.c */; };
+		A27FA81A1632468900D686E9 /* NoPLLexer.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB819E153B42F20080E9FB /* NoPLLexer.c */; };
+		A27FA81B1632468900D686E9 /* NoPLParser.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB81A0153B42F20080E9FB /* NoPLParser.c */; };
+		A27FA81C1632473700D686E9 /* NoPLc.h in Headers */ = {isa = PBXBuildFile; fileRef = A2AB81BD153B71280080E9FB /* NoPLc.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A2AB8159153B42B60080E9FB /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB8158153B42B60080E9FB /* main.c */; };
 		A2AB815B153B42B60080E9FB /* NoPLc.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = A2AB815A153B42B60080E9FB /* NoPLc.1 */; };
 		A2AB81A2153B42F20080E9FB /* antlr3baserecognizer.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB8185153B42F20080E9FB /* antlr3baserecognizer.c */; };
@@ -53,8 +82,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		A29783E6154A467300903BDD /* NoPLValues.h */ = {isa = PBXFileReference; fileEncoding = 4; path = NoPLValues.h; sourceTree = "<group>"; };
-		A2AB8154153B42B60080E9FB /* NoPLc */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = NoPLc; sourceTree = BUILT_PRODUCTS_DIR; };
+		A27FA7FC1632464700D686E9 /* libNoPLc.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libNoPLc.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		A29783E6154A467300903BDD /* NoPLValues.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NoPLValues.h; sourceTree = "<group>"; };
+		A2AB8154153B42B60080E9FB /* NoPLc */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; name = NoPLc; path = NoPLc_testing; sourceTree = BUILT_PRODUCTS_DIR; };
 		A2AB8158153B42B60080E9FB /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
 		A2AB815A153B42B60080E9FB /* NoPLc.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = NoPLc.1; sourceTree = "<group>"; };
 		A2AB8163153B42F20080E9FB /* antlr3config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = antlr3config.h; sourceTree = "<group>"; };
@@ -123,6 +153,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		A27FA7F91632464700D686E9 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		A2AB8151153B42B60080E9FB /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -145,6 +182,7 @@
 			isa = PBXGroup;
 			children = (
 				A2AB8154153B42B60080E9FB /* NoPLc */,
+				A27FA7FC1632464700D686E9 /* libNoPLc.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -256,10 +294,38 @@
 		};
 /* End PBXGroup section */
 
+/* Begin PBXHeadersBuildPhase section */
+		A27FA7FA1632464700D686E9 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A27FA81C1632473700D686E9 /* NoPLc.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
 /* Begin PBXNativeTarget section */
-		A2AB8153153B42B60080E9FB /* NoPLc */ = {
+		A27FA7FB1632464700D686E9 /* NoPLc */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = A2AB815E153B42B60080E9FB /* Build configuration list for PBXNativeTarget "NoPLc" */;
+			buildConfigurationList = A27FA7FD1632464700D686E9 /* Build configuration list for PBXNativeTarget "NoPLc" */;
+			buildPhases = (
+				A27FA7F81632464700D686E9 /* Sources */,
+				A27FA7F91632464700D686E9 /* Frameworks */,
+				A27FA7FA1632464700D686E9 /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = NoPLc;
+			productName = NoPLc;
+			productReference = A27FA7FC1632464700D686E9 /* libNoPLc.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+		A2AB8153153B42B60080E9FB /* NoPLc_testing */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A2AB815E153B42B60080E9FB /* Build configuration list for PBXNativeTarget "NoPLc_testing" */;
 			buildPhases = (
 				A2AB8150153B42B60080E9FB /* Sources */,
 				A2AB8151153B42B60080E9FB /* Frameworks */,
@@ -269,7 +335,7 @@
 			);
 			dependencies = (
 			);
-			name = NoPLc;
+			name = NoPLc_testing;
 			productName = NoPLc;
 			productReference = A2AB8154153B42B60080E9FB /* NoPLc */;
 			productType = "com.apple.product-type.tool";
@@ -280,7 +346,7 @@
 		A2AB814B153B42B60080E9FB /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0430;
+				LastUpgradeCheck = 0450;
 				ORGANIZATIONNAME = "Small Planet Digital";
 			};
 			buildConfigurationList = A2AB814E153B42B60080E9FB /* Build configuration list for PBXProject "NoPLc" */;
@@ -295,12 +361,48 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				A2AB8153153B42B60080E9FB /* NoPLc */,
+				A2AB8153153B42B60080E9FB /* NoPLc_testing */,
+				A27FA7FB1632464700D686E9 /* NoPLc */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXSourcesBuildPhase section */
+		A27FA7F81632464700D686E9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A27FA8191632468900D686E9 /* NoPLc.c in Sources */,
+				A27FA81A1632468900D686E9 /* NoPLLexer.c in Sources */,
+				A27FA81B1632468900D686E9 /* NoPLParser.c in Sources */,
+				A27FA8001632466D00D686E9 /* antlr3baserecognizer.c in Sources */,
+				A27FA8011632466D00D686E9 /* antlr3basetree.c in Sources */,
+				A27FA8021632466D00D686E9 /* antlr3basetreeadaptor.c in Sources */,
+				A27FA8031632466D00D686E9 /* antlr3bitset.c in Sources */,
+				A27FA8041632466D00D686E9 /* antlr3collections.c in Sources */,
+				A27FA8051632466D00D686E9 /* antlr3commontoken.c in Sources */,
+				A27FA8061632466D00D686E9 /* antlr3commontree.c in Sources */,
+				A27FA8071632466D00D686E9 /* antlr3commontreeadaptor.c in Sources */,
+				A27FA8081632466D00D686E9 /* antlr3commontreenodestream.c in Sources */,
+				A27FA8091632466D00D686E9 /* antlr3convertutf.c in Sources */,
+				A27FA80A1632466D00D686E9 /* antlr3cyclicdfa.c in Sources */,
+				A27FA80B1632466D00D686E9 /* antlr3debughandlers.c in Sources */,
+				A27FA80C1632466D00D686E9 /* antlr3encodings.c in Sources */,
+				A27FA80D1632466D00D686E9 /* antlr3exception.c in Sources */,
+				A27FA80E1632466D00D686E9 /* antlr3filestream.c in Sources */,
+				A27FA80F1632466D00D686E9 /* antlr3inputstream.c in Sources */,
+				A27FA8101632466D00D686E9 /* antlr3intstream.c in Sources */,
+				A27FA8111632466D00D686E9 /* antlr3lexer.c in Sources */,
+				A27FA8121632466D00D686E9 /* antlr3parser.c in Sources */,
+				A27FA8131632466D00D686E9 /* antlr3rewritestreams.c in Sources */,
+				A27FA8141632466D00D686E9 /* antlr3string.c in Sources */,
+				A27FA8151632466D00D686E9 /* antlr3stringstream.c in Sources */,
+				A27FA8161632466D00D686E9 /* antlr3tokenstream.c in Sources */,
+				A27FA8171632466D00D686E9 /* antlr3treeparser.c in Sources */,
+				A27FA8181632466D00D686E9 /* antlr3ucs2inputstream.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		A2AB8150153B42B60080E9FB /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -340,6 +442,36 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
+		A27FA7FE1632464700D686E9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COMBINE_HIDPI_IMAGES = YES;
+				EXECUTABLE_PREFIX = lib;
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		A27FA7FF1632464700D686E9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COMBINE_HIDPI_IMAGES = YES;
+				EXECUTABLE_PREFIX = lib;
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
 		A2AB815C153B42B60080E9FB /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -404,6 +536,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		A27FA7FD1632464700D686E9 /* Build configuration list for PBXNativeTarget "NoPLc" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A27FA7FE1632464700D686E9 /* Debug */,
+				A27FA7FF1632464700D686E9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		A2AB814E153B42B60080E9FB /* Build configuration list for PBXProject "NoPLc" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -413,7 +554,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		A2AB815E153B42B60080E9FB /* Build configuration list for PBXNativeTarget "NoPLc" */ = {
+		A2AB815E153B42B60080E9FB /* Build configuration list for PBXNativeTarget "NoPLc_testing" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				A2AB815F153B42B60080E9FB /* Debug */,

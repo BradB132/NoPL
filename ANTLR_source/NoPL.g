@@ -5,7 +5,7 @@ options
 	backtrack=true;
 	memoize=true;
 	output=AST;
-/*
+//*
 	language = C;
 	ASTLabelType=pANTLR3_BASE_TREE;
 //*/
@@ -21,7 +21,7 @@ tokens
 
 //PARSER
 program
-	:	(statement|variableScope)+ EOF!
+	:	(statement|variableScope)* EOF!
 	;
 
 variableScope

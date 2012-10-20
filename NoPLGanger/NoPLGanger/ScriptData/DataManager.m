@@ -10,6 +10,7 @@
 #import "XMLScriptData.h"
 #import "PlistScriptData.h"
 #import "FileBrowserController.h"
+#import "NoPLStandardFunctions.h"
 
 #define kDataManager_FileListKey @"DataManagerFileList"
 
@@ -42,7 +43,7 @@ NoPL_FunctionValue evalFunction(void* calledOnObject, const char* functionName, 
 	}
 	
 	//we failed to find anything, return a dummy value
-	return NoPL_FunctionValue();
+	return nopl_standardFunctions(calledOnObject, functionName, argv, argc);
 }
 
 NoPL_FunctionValue evalSubscript(void* calledOnObject, NoPL_FunctionValue index)
@@ -71,7 +72,7 @@ NoPL_FunctionValue evalSubscript(void* calledOnObject, NoPL_FunctionValue index)
 	return NoPL_FunctionValue();
 }
 
-void testStrings(const char* string, NoPL_StringFeedbackType type)
+void printString(const char* string, NoPL_StringFeedbackType type)
 {
 	NSString* printedString = NULL;
 	switch (type) {
@@ -110,7 +111,7 @@ void testStrings(const char* string, NoPL_StringFeedbackType type)
 	NoPL_Callbacks callbacks;
 	callbacks.evaluateFunction = &evalFunction;
 	callbacks.subscript = &evalSubscript;
-	callbacks.stringFeedback = &testStrings;
+	callbacks.stringFeedback = &printString;
 	
 	return callbacks;
 }
