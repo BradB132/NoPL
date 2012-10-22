@@ -28,6 +28,8 @@ typedef struct
 	NoPL_Index* numberTableSize;
 	NoPL_Index* booleanTableSize;
 	NoPL_Index* stringTableSize;
+	ANTLR3_MARKER tokenStart;
+	unsigned int tokenArrayLengths[NoPL_TokenRangeType_count];
 	void* parentContext;
 }NoPL_CompileContextPrivate;
 
@@ -94,6 +96,7 @@ void nopl_appendControlFlowMove(NoPL_CompileContext* context, NoPL_Index moveFro
 void nopl_findEndLineForNode(const pANTLR3_BASE_TREE tree, int* line);
 void nopl_appendErrorString(NoPL_CompileContext* context, int startLine, int endLine, const char* errString);
 void nopl_findEndPositionForNode(const pANTLR3_BASE_TREE tree, int* line);
+void nopl_addTokenRange(NoPL_CompileContext* context, pANTLR3_COMMON_TOKEN token, NoPL_TokenRangeType type);
 static void nopl_displayRecognitionError(pANTLR3_BASE_RECOGNIZER recognizer, pANTLR3_UINT8* tokenNames);
 
 #pragma mark -
@@ -185,6 +188,42 @@ void nopl_error(const pANTLR3_BASE_TREE tree, const char* desc, NoPL_CompileCont
 #pragma mark -
 #pragma mark Compilation
 
+void nopl_addTokenRange(NoPL_CompileContext* context, pANTLR3_COMMON_TOKEN token, NoPL_TokenRangeType type)
+{
+	//get the ranges struct
+	while(pContext->parentContext)
+		context = pContext->parentContext;
+	NoPL_TokenRanges* ranges = context->tokenRanges;
+	
+	//make sure our array is big enough
+	if(!pContext->tokenArrayLengths[type])
+	{
+		pContext->tokenArrayLengths[type] = 64;
+		ranges->ranges[type] = malloc(sizeof(NoPL_TokenRange)*pContext->tokenArrayLengths[type]);
+	}
+	else if(ranges->counts[type]+1 > pContext->tokenArrayLengths[type])
+	{
+		//double the size of the buffer
+		NoPL_TokenRange* oldBuffer = ranges->ranges[type];
+		unsigned int newByteLength = sizeof(NoPL_TokenRange)*(pContext->tokenArrayLengths[type]*2);
+		ranges->ranges[type] = malloc(newByteLength);
+		
+		//copy over and clean up the old buffer
+		memcpy(ranges->ranges[type], oldBuffer, sizeof(NoPL_TokenRange)*ranges->counts[type]);
+		pContext->tokenArrayLengths[type] = newByteLength;
+		free(oldBuffer);
+	}
+	
+	//set the start and end indices for this token
+	NoPL_TokenRange* range = ranges->ranges[type];
+	range += ranges->counts[type];
+	range->startIndex = token->getStartIndex(token)-pContext->tokenStart;
+	range->endIndex = (token->getStopIndex(token)+1)-pContext->tokenStart;
+	
+	//increment the count for how many ranges we have for this type
+	ranges->counts[type]++;
+}
+
 void nopl_addBytesToContext(const void* bytes, int byteCount, NoPL_CompileContext* context)
 {
 	//check if the buffer size needs to be increased
@@ -197,7 +236,7 @@ void nopl_addBytesToContext(const void* bytes, int byteCount, NoPL_CompileContex
 	{
 		//double the size of the buffer
 		NoPL_Instruction* oldBuffer = context->compiledData;
-		int newByteLength = sizeof(NoPL_Instruction)*(pContext->arrayLength*2+byteCount);
+		unsigned int newByteLength = sizeof(NoPL_Instruction)*(pContext->arrayLength*2+byteCount);
 		context->compiledData = malloc(newByteLength);
 		
 		//copy over and clean up the old buffer
@@ -333,6 +372,7 @@ NoPL_CompileContext nopl_newInnerCompileContext(NoPL_CompileContext* context, in
 	newContext.privateAttributes = malloc(sizeof(NoPL_CompileContextPrivate));
 	newContext.compiledData = NULL;
 	newContext.errDescriptions = NULL;
+	newContext.tokenRanges = NULL;
 	newContext.dataLength = 0;
 	private(newContext)->parentContext = context;
 	private(newContext)->arrayLength = 0;
@@ -348,6 +388,7 @@ NoPL_CompileContext nopl_newInnerCompileContext(NoPL_CompileContext* context, in
 	private(newContext)->stringTableSize = pContext->stringTableSize;
 	private(newContext)->allowsBreakStatements = (allowBreak || pContext->allowsBreakStatements);
 	private(newContext)->allowsContinueStatements = (allowContinue || pContext->allowsContinueStatements);
+	private(newContext)->tokenStart = 0;
 	
 	if(private(newContext)->allowsBreakStatements)
 		private(newContext)->breakStatements = antlr3VectorNew(NoPL_VectorSizeHint);
@@ -1350,6 +1391,16 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				break;
 			case ID:
 			{
+				//check if we wanted token ranges
+				if(options->createTokenRanges)
+				{
+					//this is a context-sensitive distiction that cannot be made without AST traversal
+					if(nopl_variableExistsInContext(tree->getText(tree), context))
+						nopl_addTokenRange(context, tree->getToken(tree), NoPL_TokenRangeType_variables);
+					else
+						nopl_addTokenRange(context, tree->getToken(tree), NoPL_TokenRangeType_functions);
+				}
+				
 				//check the type of the ID
 				switch(nopl_dataTypeForTree(tree, context))
 				{
@@ -2464,6 +2515,99 @@ void nopl_compileWithInputStream(pANTLR3_INPUT_STREAM stream, const NoPL_Compile
 	int errCount = recognizer->getNumberOfSyntaxErrors(recognizer);
 	if(errCount == 0)
 	{
+		//get the offset position for the first token
+		pANTLR3_VECTOR tokens = tokenStream->getTokens(tokenStream);
+		if(tokens->size(tokens) > 0)
+		{
+			pANTLR3_COMMON_TOKEN tok = tokens->get(tokens, 0);
+			pContext->tokenStart = tok->getStartIndex(tok);
+		}
+		
+		//check if we want tokens
+		if(options->createTokenRanges)
+		{
+			for(int i = 0; i < tokens->size(tokens); i++)
+			{
+				//handle all tokens except for 'ID', which is context sensitive
+				pANTLR3_COMMON_TOKEN tok = tokens->get(tokens, i);
+				switch(tok->getType(tok))
+				{
+					case NUMBER:
+						nopl_addTokenRange(context, tok, NoPL_TokenRangeType_numericLiteral);
+						break;
+					case STRING:
+						nopl_addTokenRange(context, tok, NoPL_TokenRangeType_stringLiterals);
+						break;
+					case LITERAL_TRUE:
+					case LITERAL_FALSE:
+						nopl_addTokenRange(context, tok, NoPL_TokenRangeType_booleanLiterals);
+						break;
+					case LITERAL_NULL:
+						nopl_addTokenRange(context, tok, NoPL_TokenRangeType_pointerLiterals);
+						break;
+					case LOOP_WHILE:
+					case LOOP_FOR:
+					case LOOP_DO:
+					case CONDITIONAL:
+					case CONDITIONAL_ELSE:
+					case SWITCH:
+					case SWITCH_CASE:
+					case SWITCH_DELIMITER:
+					case SWITCH_DEFAULT:
+					case BREAK:
+					case CONTINUE:
+					case EXIT:
+						nopl_addTokenRange(context, tok, NoPL_TokenRangeType_controlFlowKeywords);
+						break;
+					case DECL_NUMBER:
+					case DECL_BOOL:
+					case DECL_STRING:
+					case DECL_OBJ:
+						nopl_addTokenRange(context, tok, NoPL_TokenRangeType_typeKeywords);
+						break;
+					case LOGICAL_EQUALITY:
+					case LOGICAL_INEQUALITY:
+					case LOGICAL_AND:
+					case LOGICAL_OR:
+					case LOGICAL_NEGATION:
+					case LESS_THAN:
+					case LESS_THAN_EQUAL:
+					case GREATER_THAN:
+					case GREATER_THAN_EQUAL:
+					case ADD:
+					case ADD_ASSIGN:
+					case SUBTRACT:
+					case SUBTRACT_ASSIGN:
+					case DIVIDE:
+					case DIVIDE_ASSIGN:
+					case MULTIPLY:
+					case MULTIPLY_ASSIGN:
+					case EXPONENT:
+					case EXPONENT_ASSIGN:
+					case MOD:
+					case MOD_ASSIGN:
+					case INCREMENT:
+					case DECREMENT:
+					case ABS_VALUE:
+					case ASSIGN:
+					case PRINT_VALUE:
+						nopl_addTokenRange(context, tok, NoPL_TokenRangeType_operators);
+						break;
+					case OBJECT_TO_MEMBER:
+					case ARG_DELIMITER:
+					case SUBSCRIPT_OPEN:
+					case SUBSCRIPT_CLOSE:
+					case PAREN_OPEN:
+					case PAREN_CLOSE:
+					case SCOPE_OPEN:
+					case SCOPE_CLOSE:
+					case STATEMENT_DELIMITER:
+						nopl_addTokenRange(context, tok, NoPL_TokenRangeType_syntax);
+						break;
+				}
+			}
+		}
+		
 		//set up counts for symbol table
 		NoPL_Index objectTableSize = 0;
 		NoPL_Index numberTableSize = 0;
@@ -2551,6 +2695,7 @@ NoPL_CompileContext newNoPL_CompileContext()
 	context.compiledData = NULL;
 	context.dataLength = 0;
 	context.errDescriptions = NULL;
+	context.tokenRanges = NULL;
 	context.privateAttributes = malloc(sizeof(NoPL_CompileContextPrivate));
 	private(context)->parentContext = NULL;
 	private(context)->arrayLength = 0;
@@ -2564,6 +2709,11 @@ NoPL_CompileContext newNoPL_CompileContext()
 	private(context)->allowsBreakStatements = 0;
 	private(context)->allowsContinueStatements = 0;
 	private(context)->debugLine = -1;
+	private(context)->tokenStart = 0;
+	memset(private(context)->tokenArrayLengths, 0, sizeof(unsigned int)*NoPL_TokenRangeType_count);
+	context.tokenRanges = malloc(sizeof(NoPL_TokenRanges));
+	memset(context.tokenRanges->ranges, 0, sizeof(NoPL_TokenRange*)*NoPL_TokenRangeType_count);
+	memset(context.tokenRanges->counts, 0, sizeof(unsigned int)*NoPL_TokenRangeType_count);
 	nopl_pushScope(&context);
 	return context;
 }
@@ -2579,6 +2729,16 @@ void freeNoPL_CompileContext(NoPL_CompileContext* context)
 	{
 		free(context->errDescriptions);
 		context->errDescriptions = NULL;
+	}
+	if(context->tokenRanges)
+	{
+		//free all ranges inside this struct
+		for(int i = 0; i < NoPL_TokenRangeType_count; i++)
+			if(context->tokenRanges->ranges[i])
+				free(context->tokenRanges->ranges[i]);
+		
+		free(context->tokenRanges);
+		context->tokenRanges = NULL;
 	}
 	context->dataLength = 0;
 	

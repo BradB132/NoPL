@@ -23,6 +23,7 @@ int main(int argc, const char * argv[])
 	
 	//set up the compile options
 	NoPL_CompileOptions compileOpt = NoPL_CompileOptions();
+	compileOpt.createTokenRanges = 1;
 	
 	//compile the context
 	compileContextWithFilePath(argv[1], &compileOpt, &compileCtx);
@@ -35,6 +36,22 @@ int main(int argc, const char * argv[])
 	}
 	else
 	{
+		//print token ranges if we have them
+		for(int i = 0; i < NoPL_TokenRangeType_count; i++)
+		{
+			if(compileCtx.tokenRanges->counts[i] > 0)
+			{
+				printf("Type: %d: ", i);
+				
+				for(int j = 0; j < compileCtx.tokenRanges->counts[i]; j++)
+				{
+					printf("%ld-%ld, ", compileCtx.tokenRanges->ranges[i][j].startIndex, compileCtx.tokenRanges->ranges[i][j].endIndex);
+				}
+				
+				printf("\n");
+			}
+		}
+		
 		//no errors, save the output to file
 		FILE* file = fopen(argv[2], "wb");
 		fwrite(compileCtx.compiledData, 1, compileCtx.dataLength, file);
