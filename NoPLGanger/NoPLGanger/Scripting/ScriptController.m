@@ -66,7 +66,32 @@
 
 -(void)processDebugCommand:(NSString*)stringCommand
 {
-	NSLog(@"Run command: '%@'", stringCommand);
+	//format the command to always print the expression
+	stringCommand = [stringCommand stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+	stringCommand = [NSString stringWithFormat:@"#%@;", stringCommand];
+	
+	//debug commands should be interpreted as script, attempt to compile
+	NoPL_CompileContext ctx = newNoPL_CompileContext();
+	NoPL_CompileOptions options = NoPL_CompileOptions();
+	compileContextWithString([stringCommand UTF8String], &options, &ctx);
+	
+	//check if the compile succeded
+	if(!ctx.errDescriptions)
+	{
+		//TODO: add current script as data if there is one
+		
+		//run the script
+		NoPL_Callbacks callbacks = [DataManager callbacks];
+		runScript(ctx.compiledData, ctx.dataLength, &callbacks);
+	}
+	else
+	{
+		//show the compile error in the console
+		[self appendToConsole:@"Invalid debug statement."];
+	}
+	
+	//cleanup
+	freeNoPL_CompileContext(&ctx);
 }
 
 -(void)clearConsole
@@ -176,8 +201,13 @@
 {
 	//compile the script and get the path
 	NSString* outputPath = [self compileScript];
+	if(!outputPath)
+	{
+		[self appendToConsole:@"Script Was not run because it did not compile successfully."];
+		return;
+	}
 	
-	//get the compiled script from file
+	//run the compiled script from file
 	NSData* compiledData = [NSData dataWithContentsOfFile:outputPath];
 	NoPL_Callbacks callbacks = [DataManager callbacks];
 	runScript([compiledData bytes], (unsigned int)[compiledData length], &callbacks);
@@ -208,14 +238,19 @@
 	if(sender != debugInputView)
 		return;
 	
-	//run the command
+	//get the string that the user entered
 	NSString* command = [debugInputView stringValue];
-	[self processDebugCommand:command];
+	if([command isEqualToString:@""])
+		return;
 	
 	//remove the command from the input view
 	[debugInputView setStringValue:@""];
 	
+	//append the command to the console
 	[self appendToConsole:command];
+	
+	//run the command
+	[self processDebugCommand:command];
 }
 
 -(void)textDidChange:(NSNotification *)notification

@@ -537,13 +537,7 @@
 																					<integer value="1" key="NSUnderline"/>
 																				</dictionary>
 																				<nil key="NSDefaultParagraphStyle"/>
-																				<object class="NSTextFinder" key="NSTextFinder">
-																					<reference key="NSTextFinderClient" ref="153296210"/>
-																					<reference key="NSFindBarContainer" ref="689372451"/>
-																					<int key="NSTextFinderStyle">2</int>
-																					<bool key="NSIncrementalSearchingEnabled">NO</bool>
-																					<bool key="NSIncrementalSearchingShouldDimContentView">YES</bool>
-																				</object>
+																				<nil key="NSTextFinder"/>
 																				<int key="NSPreferredTextFinderStyle">2</int>
 																			</object>
 																			<int key="NSTVFlags">6</int>

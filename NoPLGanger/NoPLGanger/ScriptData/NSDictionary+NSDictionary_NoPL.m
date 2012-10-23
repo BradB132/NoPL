@@ -20,31 +20,19 @@
 		id val = [self objectForKey:name];
 		if(val)
 			return [DataManager objectToFunctionValue:val];
-		
-		if([name isEqualToString:@"count"])
-		{
-			NoPL_FunctionValue returnVal;
-			returnVal.numberValue = (float)[self count];
-			returnVal.type = NoPL_DataType_Number;
-			return returnVal;
-		}
 	}
 	return NoPL_FunctionValue();
 }
 
 -(NoPL_FunctionValue)getSubscript:(void*)calledOnObject index:(NoPL_FunctionValue)index
 {
-	//only respond if the called object is self
-	if((!calledOnObject || calledOnObject == (__bridge void *)(self))
-	   && index.type == NoPL_DataType_String)
-	{
-		//attempt to retreive the value and convert to function result
-		NSString* stringKey = [NSString stringWithUTF8String:index.stringValue];
-		id val = [self objectForKey:stringKey];
-		if(val)
-			return [DataManager objectToFunctionValue:val];
-	}
-	return NoPL_FunctionValue();
+	//bail if the index is not a string
+	if(index.type != NoPL_DataType_String)
+		return NoPL_FunctionValue();
+	
+	//return the index in the same way that a function would
+	NSString* stringKey = [NSString stringWithUTF8String:index.stringValue];
+	return [self callFunction:calledOnObject functionName:stringKey args:NULL argCount:0];
 }
 
 @end

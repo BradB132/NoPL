@@ -28,7 +28,9 @@ NoPL_FunctionValue evalFunction(void* calledOnObject, const char* functionName, 
 	if([obj respondsToSelector:functionSEL])
 	{
 		//the object does respond, call the function
-		return [(id<DataContainer>)obj callFunction:calledOnObject functionName:stringFunctionName args:argv argCount:argc];
+		NoPL_FunctionValue val = [(id<DataContainer>)obj callFunction:calledOnObject functionName:stringFunctionName args:argv argCount:argc];
+		if(val.type != NoPL_DataType_Void)
+			return val;
 	}
 	
 	//we're calling a global, start at any potential root objects
@@ -40,10 +42,59 @@ NoPL_FunctionValue evalFunction(void* calledOnObject, const char* functionName, 
 			if(val.type != NoPL_DataType_Void)
 				return val;
 		}
+		
+		//we failed to find anything, check the standard functions
+		NoPL_FunctionValue val = nopl_standardFunctions(calledOnObject, functionName, argv, argc);
+		if(val.type != NoPL_DataType_Void)
+			return val;
 	}
 	
-	//we failed to find anything, return a dummy value
-	return nopl_standardFunctions(calledOnObject, functionName, argv, argc);
+	if(obj)
+	{
+		SEL checkSel = NSSelectorFromString(stringFunctionName);
+		NSMethodSignature* sig = [[obj class] instanceMethodSignatureForSelector:checkSel];
+		NSInvocation* invocation = [NSInvocation invocationWithMethodSignature:sig];
+		[invocation setSelector:checkSel];
+		[invocation setTarget:obj];
+		[invocation invoke];
+		void* buffer = (void *)malloc([sig methodReturnLength]);
+		[invocation getReturnValue:buffer];
+		const char* returnType = [sig methodReturnType];
+		if(!strcmp(returnType, "@"))
+		{
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
+			id value = [obj performSelector:checkSel];
+#pragma clang diagnostic pop
+			return [DataManager objectToFunctionValue:value];
+		}
+		else if(!strcmp(returnType, "c"))
+		{
+			//this is a bool
+			NoPL_FunctionValue returnVal;
+			returnVal.booleanValue = *((BOOL*)buffer);
+			returnVal.type = NoPL_DataType_Boolean;
+			return returnVal;
+		}
+		else if(!strcmp(returnType, "f"))
+		{
+			//this is a number
+			NoPL_FunctionValue returnVal;
+			returnVal.numberValue = *((float*)buffer);
+			returnVal.type = NoPL_DataType_Number;
+			return returnVal;
+		}
+		else if(!strcmp(returnType, "Q"))
+		{
+			NSUInteger intVal = *((NSUInteger*)buffer);
+			NoPL_FunctionValue returnVal;
+			returnVal.numberValue = (float)intVal;
+			returnVal.type = NoPL_DataType_Number;
+			return returnVal;
+		}
+	}
+	
+	return NoPL_FunctionValue();
 }
 
 NoPL_FunctionValue evalSubscript(void* calledOnObject, NoPL_FunctionValue index)

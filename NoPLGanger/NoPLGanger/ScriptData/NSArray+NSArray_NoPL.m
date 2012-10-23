@@ -13,17 +13,6 @@
 
 -(NoPL_FunctionValue)callFunction:(void*)calledOnObject functionName:(NSString*)name args:(const NoPL_FunctionValue*)args argCount:(unsigned int)count
 {
-	//only respond if the called object is self
-	if(!calledOnObject || calledOnObject == (__bridge void *)(self))
-	{
-		if([name isEqualToString:@"count"])
-		{
-			NoPL_FunctionValue returnVal;
-			returnVal.numberValue = (float)[self count];
-			returnVal.type = NoPL_DataType_Number;
-			return returnVal;
-		}
-	}
 	return NoPL_FunctionValue();
 }
 
@@ -35,9 +24,12 @@
 	{
 		//attempt to retreive the value and convert to function result
 		NSUInteger arrIndex = (NSUInteger)index.numberValue;
-		id val = [self objectAtIndex:arrIndex];
-		if(val)
-			return [DataManager objectToFunctionValue:val];
+		if(arrIndex < [self count])
+		{
+			id val = [self objectAtIndex:arrIndex];
+			if(val)
+				return [DataManager objectToFunctionValue:val];
+		}
 	}
 	return NoPL_FunctionValue();
 }
