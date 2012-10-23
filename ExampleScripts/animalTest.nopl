@@ -1,0 +1,12 @@
+#"Let's test some animals";
+
+Pointer anim = Animals;
+
+#"What sound does a human make?";
+#anim.human.sound;
+
+#"What type of an animal is a beaver?";
+#anim.beaver.type;
+
+#"How big is a lion?";
+#anim.lion.size;

@@ -557,6 +557,9 @@ void nopl_appendNodeWithRequiredType(const pANTLR3_BASE_TREE tree, const NoPL_Da
 
 void nopl_appendFunctionCall(const pANTLR3_BASE_TREE objExpression, const pANTLR3_BASE_TREE funcName, const pANTLR3_BASE_TREE args, const NoPL_CompileOptions* options, NoPL_CompileContext* context)
 {
+	if(options->createTokenRanges)
+		nopl_addTokenRange(context, funcName->getToken(funcName), NoPL_TokenRangeType_functions);
+	
 	//add the function operator
 	nopl_addOperator(NoPL_BYTE_FUNCTION_CALL, context);
 	
@@ -1046,6 +1049,9 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				pANTLR3_BASE_TREE declaredVar = treeIndex(tree,0);
 				pANTLR3_STRING declaredName = declaredVar->getText(declaredVar);
 				
+				if(options->createTokenRanges)
+					nopl_addTokenRange(context, declaredVar->getToken(declaredVar), NoPL_TokenRangeType_variables);
+				
 				//we need to evaluate the initial expression before declaring the variable
 				NoPL_CompileContext initCtx = nopl_newInnerCompileContext(context, 0, 0);
 				
@@ -1095,6 +1101,9 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				//get the name of the declared variable
 				pANTLR3_BASE_TREE declaredVar = treeIndex(tree,0);
 				pANTLR3_STRING declaredName = declaredVar->getText(declaredVar);
+				
+				if(options->createTokenRanges)
+					nopl_addTokenRange(context, declaredVar->getToken(declaredVar), NoPL_TokenRangeType_variables);
 				
 				//we need to evaluate the initial expression before declaring the variable
 				NoPL_CompileContext initCtx = nopl_newInnerCompileContext(context, 0, 0);
@@ -1148,6 +1157,9 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				pANTLR3_BASE_TREE declaredVar = treeIndex(tree,0);
 				pANTLR3_STRING declaredName = declaredVar->getText(declaredVar);
 				
+				if(options->createTokenRanges)
+					nopl_addTokenRange(context, declaredVar->getToken(declaredVar), NoPL_TokenRangeType_variables);
+				
 				//we need to evaluate the initial expression before declaring the variable
 				NoPL_CompileContext initCtx = nopl_newInnerCompileContext(context, 0, 0);
 				
@@ -1197,6 +1209,9 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				//get the name of the declared variable
 				pANTLR3_BASE_TREE declaredVar = treeIndex(tree,0);
 				pANTLR3_STRING declaredName = declaredVar->getText(declaredVar);
+				
+				if(options->createTokenRanges)
+					nopl_addTokenRange(context, declaredVar->getToken(declaredVar), NoPL_TokenRangeType_variables);
 				
 				//we need to evaluate the initial expression before declaring the variable
 				NoPL_CompileContext initCtx = nopl_newInnerCompileContext(context, 0, 0);

@@ -20,6 +20,7 @@
 		A24F59CF163057F700FC9181 /* ScriptData.m in Sources */ = {isa = PBXBuildFile; fileRef = A24F59CE163057F700FC9181 /* ScriptData.m */; };
 		A24F59D0163057F700FC9181 /* ScriptData.m in Sources */ = {isa = PBXBuildFile; fileRef = A24F59CE163057F700FC9181 /* ScriptData.m */; };
 		A27219C4162210FF004350AC /* FileBrowserController.m in Sources */ = {isa = PBXBuildFile; fileRef = A27219C3162210FF004350AC /* FileBrowserController.m */; };
+		A27C5CCD1635FF760040F81F /* EditorData.plist in Resources */ = {isa = PBXBuildFile; fileRef = A27C5CCC1635FF760040F81F /* EditorData.plist */; };
 		A27FA7DD1630A0DF00D686E9 /* libNoPLRuntime.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A27FA7DC1630A0DF00D686E9 /* libNoPLRuntime.a */; };
 		A27FA7E71630A81C00D686E9 /* NSDictionary+NSDictionary_NoPL.m in Sources */ = {isa = PBXBuildFile; fileRef = A27FA7E61630A81C00D686E9 /* NSDictionary+NSDictionary_NoPL.m */; };
 		A27FA7EA1630B5F900D686E9 /* NSArray+NSArray_NoPL.m in Sources */ = {isa = PBXBuildFile; fileRef = A27FA7E91630B5F900D686E9 /* NSArray+NSArray_NoPL.m */; };
@@ -63,6 +64,7 @@
 		A24F59CE163057F700FC9181 /* ScriptData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ScriptData.m; sourceTree = "<group>"; };
 		A27219C2162210FF004350AC /* FileBrowserController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FileBrowserController.h; path = FileBrowser/FileBrowserController.h; sourceTree = "<group>"; };
 		A27219C3162210FF004350AC /* FileBrowserController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = FileBrowserController.m; path = FileBrowser/FileBrowserController.m; sourceTree = "<group>"; };
+		A27C5CCC1635FF760040F81F /* EditorData.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = EditorData.plist; sourceTree = "<group>"; };
 		A27FA7DC1630A0DF00D686E9 /* libNoPLRuntime.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libNoPLRuntime.a; path = ../CompiledLibs/runtime/libNoPLRuntime.a; sourceTree = "<group>"; };
 		A27FA7E51630A81C00D686E9 /* NSDictionary+NSDictionary_NoPL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSDictionary+NSDictionary_NoPL.h"; sourceTree = "<group>"; };
 		A27FA7E61630A81C00D686E9 /* NSDictionary+NSDictionary_NoPL.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSDictionary+NSDictionary_NoPL.m"; sourceTree = "<group>"; };
@@ -216,6 +218,7 @@
 				A2BAAB49160F912500160FCE /* Document.m */,
 				A2BAAB4B160F912500160FCE /* Document.xib */,
 				A2BAAB4E160F912500160FCE /* MainMenu.xib */,
+				A27C5CCC1635FF760040F81F /* EditorData.plist */,
 				A2BAAB3D160F912500160FCE /* Supporting Files */,
 			);
 			path = NoPLGanger;
@@ -327,6 +330,7 @@
 				A2BAAB47160F912500160FCE /* Credits.rtf in Resources */,
 				A2BAAB4D160F912500160FCE /* Document.xib in Resources */,
 				A2BAAB50160F912500160FCE /* MainMenu.xib in Resources */,
+				A27C5CCD1635FF760040F81F /* EditorData.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

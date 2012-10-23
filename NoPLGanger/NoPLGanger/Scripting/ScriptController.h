@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
-@interface ScriptController : NSObject
+@interface ScriptController : NSObject <NSTextViewDelegate>
 {
 	IBOutlet NSTextView* scriptView;
 	IBOutlet NSTextView* consoleView;
@@ -18,6 +18,10 @@
 	IBOutlet NSButton* continueBtn;
 	IBOutlet NSButton* stepBtn;
 	IBOutlet NSButton* stopBtn;
+	
+	NSArray* colors;
+	
+	NSTimer* recompileTimer;
 	
 	NSString* currentFilePath;
 }
