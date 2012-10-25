@@ -1,11 +1,11 @@
 #"Let's test some animals";
 
+//this method makes it hard to actually retrieve the names of the animals,
+//but can be used to iterate over the contents of a dictionary
 Pointer anims = Animals;
-Pointer allKeys = anims.allKeys;
 
-for(int i = 0; i < allKeys.count; i++)
+for(int i = 0; i < anims.count; i++)
 {
-	String name = allKeys[i];
-	Pointer animal = anims[name];
-	#format("Animal #% is a % which is % and says '%'", i, name, (String)animal.size, (String)animal.sound);
+	Pointer animal = anims[i];
+	#format("Animal #% is a % which is % and says '%'", i, (String)animal.type, (String)animal.size, (String)animal.sound);
 }

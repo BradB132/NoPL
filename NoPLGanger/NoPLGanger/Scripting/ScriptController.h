@@ -7,6 +7,14 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "NoPLScriptData.h"
+
+typedef enum
+{
+	DebuggerState_NotRunning,
+	DebuggerState_Running,
+	DebuggerState_Paused,
+}DebuggerState;
 
 @interface ScriptController : NSObject <NSTextViewDelegate>
 {
@@ -24,5 +32,12 @@
 	NSTimer* recompileTimer;
 	
 	NSString* currentFilePath;
+	
+	DebuggerState debugState;
+	NoPL_DebugHandle debugHandle;
+	NoPL_Callbacks callbacks;
+	int prevExecutionLine;
+	NSMutableArray* breakpoints;
+	NoPLScriptData* scriptVarData;
 }
 @end

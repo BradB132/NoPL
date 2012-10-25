@@ -29,7 +29,7 @@ NoPL_FunctionValue evalFunction(void* calledOnObject, const char* functionName, 
 	{
 		//the object does respond, call the function
 		NoPL_FunctionValue val = [(id<DataContainer>)obj callFunction:calledOnObject functionName:stringFunctionName args:argv argCount:argc];
-		if(val.type != NoPL_DataType_Void)
+		if(val.type != NoPL_DataType_Uninitialized)
 			return val;
 	}
 	
@@ -39,16 +39,17 @@ NoPL_FunctionValue evalFunction(void* calledOnObject, const char* functionName, 
 		for(id<DataContainer> container in [instance dataContainers])
 		{
 			NoPL_FunctionValue val = [container callFunction:calledOnObject functionName:stringFunctionName args:argv argCount:argc];
-			if(val.type != NoPL_DataType_Void)
+			if(val.type != NoPL_DataType_Uninitialized)
 				return val;
 		}
 		
 		//we failed to find anything, check the standard functions
 		NoPL_FunctionValue val = nopl_standardFunctions(calledOnObject, functionName, argv, argc);
-		if(val.type != NoPL_DataType_Void)
+		if(val.type != NoPL_DataType_Uninitialized)
 			return val;
 	}
 	
+	/* //opening up reflection this much is actually really dangerous
 	if(obj)
 	{
 		SEL checkSel = NSSelectorFromString(stringFunctionName);
@@ -92,7 +93,7 @@ NoPL_FunctionValue evalFunction(void* calledOnObject, const char* functionName, 
 			returnVal.type = NoPL_DataType_Number;
 			return returnVal;
 		}
-	}
+	}*/
 	
 	return NoPL_FunctionValue();
 }
@@ -114,7 +115,7 @@ NoPL_FunctionValue evalSubscript(void* calledOnObject, NoPL_FunctionValue index)
 		for(id<DataContainer> container in [instance dataContainers])
 		{
 			NoPL_FunctionValue val = [container getSubscript:calledOnObject index:index];
-			if(val.type != NoPL_DataType_Void)
+			if(val.type != NoPL_DataType_Uninitialized)
 				return val;
 		}
 	}
@@ -262,6 +263,19 @@ void printString(const char* string, NoPL_StringFeedbackType type)
 	NSMutableArray* containerPaths = [[[NSUserDefaults standardUserDefaults] arrayForKey:kDataManager_FileListKey] mutableCopy];
 	[containerPaths removeObject:path];
 	[[NSUserDefaults standardUserDefaults] setObject:containerPaths forKey:kDataManager_FileListKey];
+}
+
+-(void)addDataObject:(id<DataContainer>)dataContainer
+{
+	if([dataContainers containsObject:dataContainer])
+		return;
+	
+	[dataContainers addObject:dataContainer];
+}
+
+-(void)removeDataObject:(id<DataContainer>)dataContainer
+{
+	[dataContainers removeObject:dataContainer];
 }
 
 +(NoPL_FunctionValue)objectToFunctionValue:(id)val

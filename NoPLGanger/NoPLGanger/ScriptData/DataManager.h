@@ -33,7 +33,9 @@
 -(NSArray*)dataContainers;
 
 -(void)addDataFromPath:(NSString*)path;
+-(void)addDataObject:(id<DataContainer>)dataContainer;
 -(void)removeDataForPath:(NSString*)path;
+-(void)removeDataObject:(id<DataContainer>)dataContainer;
 
 -(void)refreshAllContainers;
 

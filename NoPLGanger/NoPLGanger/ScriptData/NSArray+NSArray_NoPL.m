@@ -13,6 +13,19 @@
 
 -(NoPL_FunctionValue)callFunction:(void*)calledOnObject functionName:(NSString*)name args:(const NoPL_FunctionValue*)args argCount:(unsigned int)count
 {
+	if(count == 1 && args[0].type == NoPL_DataType_Number
+	   && ([name isEqualToString:@"get"] || [name isEqualToString:@"objectAtIndex"]))
+	{
+		return [self getSubscript:calledOnObject index:args[0]];
+	}
+	else if(count == 0 && ([name isEqualToString:@"size"] || [name isEqualToString:@"count"]))
+	{
+		NoPL_FunctionValue val;
+		val.numberValue = [self count];
+		val.type = NoPL_DataType_Number;
+		return val;
+	}
+	
 	return NoPL_FunctionValue();
 }
 
@@ -23,8 +36,8 @@
 	   && index.type == NoPL_DataType_Number)
 	{
 		//attempt to retreive the value and convert to function result
-		NSUInteger arrIndex = (NSUInteger)index.numberValue;
-		if(arrIndex < [self count])
+		int arrIndex = (int)index.numberValue;
+		if(arrIndex < [self count] && arrIndex >= 0)
 		{
 			id val = [self objectAtIndex:arrIndex];
 			if(val)

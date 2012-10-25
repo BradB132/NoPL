@@ -16,6 +16,52 @@
 
 @implementation ScriptController
 
+-(void)setDebugState:(DebuggerState)newState
+{
+	//disable all buttons
+	[buildRunBtn setEnabled:NO];
+	[buildBtn setEnabled:NO];
+	[continueBtn setEnabled:NO];
+	[stepBtn setEnabled:NO];
+	[stopBtn setEnabled:NO];
+	
+	switch(newState)
+	{
+		case DebuggerState_NotRunning:
+			
+			[buildRunBtn setEnabled:YES];
+			[buildBtn setEnabled:YES];
+			
+			//remove the script data
+			if(scriptVarData)
+			{
+				[[DataManager sharedInstance] removeDataObject:scriptVarData];
+				scriptVarData = NULL;
+			}
+			
+			break;
+		case DebuggerState_Running:
+			
+			//set up a script data
+			if(!scriptVarData)
+			{
+				scriptVarData = [[NoPLScriptData alloc] initWithPath:currentFilePath andHandle:debugHandle];
+				[[DataManager sharedInstance] addDataObject:scriptVarData];
+			}
+			
+			break;
+		case DebuggerState_Paused:
+			
+			[continueBtn setEnabled:YES];
+			[stepBtn setEnabled:YES];
+			[stopBtn setEnabled:YES];
+			
+			break;
+	}
+	
+	debugState = newState;
+}
+
 +(NSColor*)colorWithHexColorString:(NSString*)inColorString
 {
     NSColor* result = nil;
@@ -43,6 +89,12 @@
 {
 	[scriptView setDelegate:self];
 	
+	//set up the debugger
+	[self setDebugState:DebuggerState_NotRunning];
+	breakpoints = [NSMutableArray array];
+	debugHandle = NULL;
+	callbacks = [DataManager callbacks];
+	
 	//create a list of colors from plist
 	NSString* dataPath = [[NSBundle mainBundle] pathForResource:@"EditorData" ofType:@"plist"];
 	NSArray* stringColors = [[NSDictionary dictionaryWithContentsOfFile:dataPath] objectForKey:@"TextColors"];
@@ -64,6 +116,61 @@
 
 #pragma mark - Script logic
 
+-(void)appendToConsole:(NSString*)output
+{
+	//apend the string to the console
+	output = [NSString stringWithFormat:@"%@\n", output];
+	NSAttributedString* attrCommand = [[NSAttributedString alloc] initWithString:output];
+	NSTextStorage *storage = [consoleView textStorage];
+	
+	[storage beginEditing];
+	[storage appendAttributedString:attrCommand];
+	[storage endEditing];
+}
+
+-(void)endExecution
+{
+	if(debugHandle)
+	{
+		//clean up the script
+		freeNoPL_DebugHandle(debugHandle);
+		debugHandle = NULL;
+		
+		//switch state back to normal
+		[self setDebugState:DebuggerState_NotRunning];
+		
+		//show some feedback
+		[self appendToConsole:@"Script execution finished."];
+	}
+}
+
+-(void)stepScript:(BOOL)continueToEnd
+{
+	if(!debugHandle)
+		return;
+	
+	//set a running state for the debugger
+	[self setDebugState:DebuggerState_Running];
+	
+	//step the script
+	int okToContinue = 1;
+	while(okToContinue && debugState == DebuggerState_Running)
+	{
+		okToContinue = debugStep(debugHandle);
+		if(!continueToEnd)
+		{
+			[self setDebugState:DebuggerState_Paused];
+			break;
+		}
+	}
+	
+	//cleanup if we actually finished the script
+	if(!okToContinue)
+	{
+		[self endExecution];
+	}
+}
+
 -(void)processDebugCommand:(NSString*)stringCommand
 {
 	//format the command to always print the expression
@@ -78,8 +185,6 @@
 	//check if the compile succeded
 	if(!ctx.errDescriptions)
 	{
-		//TODO: add current script as data if there is one
-		
 		//run the script
 		NoPL_Callbacks callbacks = [DataManager callbacks];
 		runScript(ctx.compiledData, ctx.dataLength, &callbacks);
@@ -87,7 +192,9 @@
 	else
 	{
 		//show the compile error in the console
-		[self appendToConsole:@"Invalid debug statement."];
+		NSString* error = [NSString stringWithUTF8String:ctx.errDescriptions];
+		error = [error stringByReplacingOccurrencesOfString:@" (line 1)" withString:@""];
+		[self appendToConsole:error];
 	}
 	
 	//cleanup
@@ -97,18 +204,6 @@
 -(void)clearConsole
 {
 	[[consoleView textStorage] deleteCharactersInRange:NSMakeRange(0, [[consoleView textStorage] length])];
-}
-
--(void)appendToConsole:(NSString*)output
-{
-	//apend the string to the console
-	output = [NSString stringWithFormat:@"%@\n", output];
-	NSAttributedString* attrCommand = [[NSAttributedString alloc] initWithString:output];
-	NSTextStorage *storage = [consoleView textStorage];
-	
-	[storage beginEditing];
-	[storage appendAttributedString:attrCommand];
-	[storage endEditing];
 }
 
 -(NSString*)compileScript
@@ -123,6 +218,7 @@
 	NoPL_CompileContext ctx = newNoPL_CompileContext();
 	NoPL_CompileOptions options = NoPL_CompileOptions();
 	options.createTokenRanges = 1;
+	options.debugSymbols = 1;
 	
 	//compile the script
 	compileContextWithString([script UTF8String], &options, &ctx);
@@ -151,6 +247,7 @@
 				}
 			}
 		}
+		[self appendToConsole:@"Build Succeeded"];
 	}
 	else
 	{
@@ -163,7 +260,78 @@
 	return outputPath;
 }
 
-- (void)compileScriptFromTimer
+-(void)handleDebugOutput:(NSString*)debugString
+{
+	//break all args into strings
+	NSRange range = [debugString rangeOfString:@":"];
+	NSArray* stringArgs = [[debugString substringFromIndex:range.location+1] componentsSeparatedByString:@","];
+	NSMutableDictionary* debugArgs = [NSMutableDictionary dictionary];
+	for(NSString* argString in stringArgs)
+	{
+		NSArray* pair = [argString componentsSeparatedByString:@"="];
+		if([pair count] != 2)
+			continue;
+		[debugArgs setObject:[pair objectAtIndex:1] forKey:[pair objectAtIndex:0]];
+	}
+	
+	//check the type of debug output
+	if([debugString hasPrefix:@"Line:"])
+	{
+		//get the line number that we're executing
+		int lineNum = [[debugArgs objectForKey:@"line"] intValue];
+		
+		//check if there is a breakpoint on this line
+		for(NSNumber* num in breakpoints)
+		{
+			int intVal = [num intValue];
+			if(intVal > prevExecutionLine && intVal <= lineNum)
+			{
+				[self appendToConsole:[NSString stringWithFormat:@"Stopped at breakpoint on line %d", lineNum]];
+				[self setDebugState:DebuggerState_Paused];
+			}
+		}
+		
+		//store the last line
+		prevExecutionLine = lineNum;
+	}
+	
+	//check if the script has a data object (should have one if it's running)
+	if(scriptVarData)
+	{
+		int index = -1;
+		NSString* name = nil;
+		NoPL_DataType type;
+		if([debugString hasPrefix:@"Pointer:"])
+		{
+			index = [[debugArgs objectForKey:@"index"] intValue];
+			name = [debugArgs objectForKey:@"name"];
+			type = NoPL_DataType_Pointer;
+		}
+		else if([debugString hasPrefix:@"Boolean:"])
+		{
+			index = [[debugArgs objectForKey:@"index"] intValue];
+			name = [debugArgs objectForKey:@"name"];
+			type = NoPL_DataType_Boolean;
+		}
+		else if([debugString hasPrefix:@"Number:"])
+		{
+			index = [[debugArgs objectForKey:@"index"] intValue];
+			name = [debugArgs objectForKey:@"name"];
+			type = NoPL_DataType_Number;
+		}
+		else if([debugString hasPrefix:@"String:"])
+		{
+			index = [[debugArgs objectForKey:@"index"] intValue];
+			name = [debugArgs objectForKey:@"name"];
+			type = NoPL_DataType_String;
+		}
+		
+		if(index >= 0 || name)
+			[scriptVarData addVariable:type name:name index:index];
+	}
+}
+
+-(void)compileScriptFromTimer
 {
 	recompileTimer = NULL;
 	
@@ -192,7 +360,17 @@
 -(void)scriptDidOutput:(NSNotification*)note
 {
 	NSString* appendedStr = [[note userInfo] objectForKey:kNoPL_ConsoleOutputKey];
-	[self appendToConsole:appendedStr];
+	
+	NSString* debugPrefix = @"NoPL Debug: ";
+	if([appendedStr hasPrefix:debugPrefix])
+	{
+		appendedStr = [appendedStr substringFromIndex:[debugPrefix length]];
+		[self handleDebugOutput:appendedStr];
+	}
+	else
+	{
+		[self appendToConsole:appendedStr];
+	}
 }
 
 #pragma mark - IB functions
@@ -207,10 +385,15 @@
 		return;
 	}
 	
-	//run the compiled script from file
+	//reset script line
+	prevExecutionLine = -1;
+	
+	//set up the debug handle for debugging the script
 	NSData* compiledData = [NSData dataWithContentsOfFile:outputPath];
-	NoPL_Callbacks callbacks = [DataManager callbacks];
-	runScript([compiledData bytes], (unsigned int)[compiledData length], &callbacks);
+	debugHandle = createNoPL_DebugHandle([compiledData bytes], (unsigned int)[compiledData length], &callbacks);
+	
+	//debug the script
+	[self stepScript:YES];
 }
 
 - (IBAction)buildClicked:(id)sender
@@ -220,17 +403,23 @@
 
 - (IBAction)continueClicked:(id)sender
 {
-	
+	[self stepScript:YES];
 }
 
 - (IBAction)stepClicked:(id)sender
 {
+	[self stepScript:NO];
 	
+	//say where the script execution is if it's still not finished
+	if(debugState)
+	{
+		[self appendToConsole:[NSString stringWithFormat:@"Stepped to line %d", prevExecutionLine]];
+	}
 }
 
 - (IBAction)stopClicked:(id)sender
 {
-	
+	[self endExecution];
 }
 
 - (IBAction)debugCommandEntered:(id)sender

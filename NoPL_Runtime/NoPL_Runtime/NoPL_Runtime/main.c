@@ -100,10 +100,19 @@ int main(int argc, const char * argv[])
 	callbacks.stringFeedback = &testStrings;
 	
 	//run the script
-	runScript((NoPL_Instruction*)scriptBuffer, (unsigned int)fileLength, &callbacks);
+	//runScript((NoPL_Instruction*)scriptBuffer, (unsigned int)fileLength, &callbacks);
+	
+	//try stepping through the script
+	NoPL_DebugHandle handle = createNoPL_DebugHandle((NoPL_Instruction*)scriptBuffer, (unsigned int)fileLength, &callbacks);
 	
 	//delete the used script data
 	free(scriptBuffer);
+	
+	int keepGoing = 1;
+	while(keepGoing)
+		keepGoing = debugStep(handle);
+	
+	freeNoPL_DebugHandle(handle);
 	
     return 0;
 }

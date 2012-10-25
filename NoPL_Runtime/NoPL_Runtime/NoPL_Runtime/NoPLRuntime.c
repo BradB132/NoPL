@@ -14,6 +14,8 @@
 
 //TODO: test every feature of this language to make sure it works
 
+#pragma mark - Internal Structs
+
 typedef struct
 {
 	char* stringValue;
@@ -26,17 +28,19 @@ typedef struct
 	const NoPL_Instruction* scriptBuffer;
 	unsigned int bufferLength;
 	unsigned int evaluationPosition;
-	NoPL_Index objectTableSize;
+	NoPL_Index pointerTableSize;
 	NoPL_Index numberTableSize;
 	NoPL_Index booleanTableSize;
 	NoPL_Index stringTableSize;
-	void** objectTable;
+	void** pointerTable;
 	float* numberTable;
 	int* booleanTable;
 	NoPL_String* stringTable;
 }NoPL_Evaluation;
 
 #define NoPL_String() ((NoPL_String){0,0})
+
+#pragma mark - Function Declarations
 
 //internal functions
 void freeNoPL_String(NoPL_String* string);
@@ -48,9 +52,9 @@ void* evaluatePointer(NoPL_Evaluation* eval);
 void evaluateFunction(NoPL_Evaluation* eval, NoPL_FunctionValue* returnVal);
 void boolToString(int boolVal, NoPL_String* outStr);
 void numberToString(float number, NoPL_String* outStr);
+void setUpScript(NoPL_Evaluation* eval, const NoPL_Instruction* scriptBuffer, unsigned int bufferLength, const NoPL_Callbacks* callbacks);
 
-#pragma mark -
-#pragma mark String memory management
+#pragma mark - String management
 
 void freeNoPL_String(NoPL_String* string)
 {
@@ -63,9 +67,6 @@ void freeNoPL_String(NoPL_String* string)
 		string->stringValue = NULL;
 	}
 }
-
-#pragma mark -
-#pragma mark String casting
 
 void boolToString(int boolVal, NoPL_String* outStr)
 {
@@ -89,8 +90,7 @@ void numberToString(float number, NoPL_String* outStr)
 	outStr->isAllocated = 1;
 }
 
-#pragma mark -
-#pragma mark Script evaluation
+#pragma mark - Script evaluation
 
 int evaluateStatement(NoPL_Evaluation* eval)
 {
@@ -295,7 +295,7 @@ int evaluateStatement(NoPL_Evaluation* eval)
 			void* ptrVal = evaluatePointer(eval);
 			
 			//assign the variable at that index
-			eval->objectTable[*varIndex] = ptrVal;
+			eval->pointerTable[*varIndex] = ptrVal;
 		}
 			break;
 		case NoPL_BYTE_FUNCTION_CALL:
@@ -397,7 +397,7 @@ int evaluateStatement(NoPL_Evaluation* eval)
 			
 			//format a string to send to the callback function
 			char str[32];
-			sprintf(str, "Line:%d", (int)(*lineNum));
+			sprintf(str, "Line:line=%d", (int)(*lineNum));
 			
 			//call the callback function
 			if(eval->callbacks->stringFeedback)
@@ -406,8 +406,8 @@ int evaluateStatement(NoPL_Evaluation* eval)
 			break;
 		case NoPL_BYTE_DEBUG_VALUE_BOOLEAN:
 		{
-			//get the line number
-			NoPL_Index* lineNum = (NoPL_Index*)(eval->scriptBuffer+eval->evaluationPosition);
+			//get the variable index
+			NoPL_Index* varIndex = (NoPL_Index*)(eval->scriptBuffer+eval->evaluationPosition);
 			eval->evaluationPosition += sizeof(NoPL_Index);
 			
 			//get the variable name
@@ -415,8 +415,8 @@ int evaluateStatement(NoPL_Evaluation* eval)
 			int varNameLength = (int)strlen(varName);
 			eval->evaluationPosition += (varNameLength+1);
 			
-			char str[32+varNameLength];
-			sprintf(str, "Boolean:%d=%s", (int)(*lineNum), varName);
+			char str[100+varNameLength];
+			sprintf(str, "Boolean:index=%d,name=%s", (int)(*varIndex), varName);
 			
 			//call the callback function
 			if(eval->callbacks->stringFeedback)
@@ -425,8 +425,8 @@ int evaluateStatement(NoPL_Evaluation* eval)
 			break;
 		case NoPL_BYTE_DEBUG_VALUE_NUMBER:
 		{
-			//get the line number
-			NoPL_Index* lineNum = (NoPL_Index*)(eval->scriptBuffer+eval->evaluationPosition);
+			//get the variable index
+			NoPL_Index* varIndex = (NoPL_Index*)(eval->scriptBuffer+eval->evaluationPosition);
 			eval->evaluationPosition += sizeof(NoPL_Index);
 			
 			//get the variable name
@@ -434,8 +434,8 @@ int evaluateStatement(NoPL_Evaluation* eval)
 			int varNameLength = (int)strlen(varName);
 			eval->evaluationPosition += (varNameLength+1);
 			
-			char str[32+varNameLength];
-			sprintf(str, "Number:%d=%s", (int)(*lineNum), varName);
+			char str[100+varNameLength];
+			sprintf(str, "Number:index=%d,name=%s", (int)(*varIndex), varName);
 			
 			//call the callback function
 			if(eval->callbacks->stringFeedback)
@@ -444,8 +444,8 @@ int evaluateStatement(NoPL_Evaluation* eval)
 			break;
 		case NoPL_BYTE_DEBUG_VALUE_OBJECT:
 		{
-			//get the line number
-			NoPL_Index* lineNum = (NoPL_Index*)(eval->scriptBuffer+eval->evaluationPosition);
+			//get the variable index
+			NoPL_Index* varIndex = (NoPL_Index*)(eval->scriptBuffer+eval->evaluationPosition);
 			eval->evaluationPosition += sizeof(NoPL_Index);
 			
 			//get the variable name
@@ -453,8 +453,8 @@ int evaluateStatement(NoPL_Evaluation* eval)
 			int varNameLength = (int)strlen(varName);
 			eval->evaluationPosition += (varNameLength+1);
 			
-			char str[32+varNameLength];
-			sprintf(str, "Pointer:%d=%s", (int)(*lineNum), varName);
+			char str[100+varNameLength];
+			sprintf(str, "Pointer:index=%d,name=%s", (int)(*varIndex), varName);
 			
 			//call the callback function
 			if(eval->callbacks->stringFeedback)
@@ -463,8 +463,8 @@ int evaluateStatement(NoPL_Evaluation* eval)
 			break;
 		case NoPL_BYTE_DEBUG_VALUE_STRING:
 		{
-			//get the line number
-			NoPL_Index* lineNum = (NoPL_Index*)(eval->scriptBuffer+eval->evaluationPosition);
+			//get the variable index
+			NoPL_Index* varIndex = (NoPL_Index*)(eval->scriptBuffer+eval->evaluationPosition);
 			eval->evaluationPosition += sizeof(NoPL_Index);
 			
 			//get the variable name
@@ -472,8 +472,8 @@ int evaluateStatement(NoPL_Evaluation* eval)
 			int varNameLength = (int)strlen(varName);
 			eval->evaluationPosition += (varNameLength+1);
 			
-			char str[32+varNameLength];
-			sprintf(str, "String:%d=%s", (int)(*lineNum), varName);
+			char str[100+varNameLength];
+			sprintf(str, "String:index=%d,name=%s", (int)(*varIndex), varName);
 			
 			//call the callback function
 			if(eval->callbacks->stringFeedback)
@@ -791,7 +791,7 @@ void* evaluatePointer(NoPL_Evaluation* eval)
 			eval->evaluationPosition += sizeof(NoPL_Index);
 			
 			//return that index from the variable table
-			return eval->objectTable[*varIndex];
+			return eval->pointerTable[*varIndex];
 		}
 		case NoPL_BYTE_RESOLVE_RESULT_TO_OBJECT:
 		{
@@ -892,6 +892,7 @@ void evaluateFunction(NoPL_Evaluation* eval, NoPL_FunctionValue* returnVal)
 			
 			//call the function
 			*returnVal = eval->callbacks->evaluateFunction(ptr, funcName, argv, (unsigned int)(*argCount));
+			//TODO: print an error if the value is uninitialized
 			
 			//release any strings that were allocated
 			for(int i = 0; i < releaseStringCount; i++)
@@ -937,72 +938,223 @@ void evaluateFunction(NoPL_Evaluation* eval, NoPL_FunctionValue* returnVal)
 	}
 }
 
-void runScript(const NoPL_Instruction* scriptBuffer, unsigned int bufferLength, const NoPL_Callbacks* callbacks)
+void setUpScript(NoPL_Evaluation* eval, const NoPL_Instruction* scriptBuffer, unsigned int bufferLength, const NoPL_Callbacks* callbacks)
 {
 	//set up an evaluation struct
-	NoPL_Evaluation eval;
-	eval.callbacks = callbacks;
-	eval.scriptBuffer = scriptBuffer;
-	eval.bufferLength = bufferLength;
-	eval.evaluationPosition = 0;
+	eval->callbacks = callbacks;
+	eval->scriptBuffer = scriptBuffer;
+	eval->bufferLength = bufferLength;
+	eval->evaluationPosition = 0;
 	
 	//get the sizes of the variable tables
-	eval.objectTableSize = 0;
-	eval.numberTableSize = 0;
-	eval.booleanTableSize = 0;
-	eval.stringTableSize = 0;
+	eval->pointerTableSize = 0;
+	eval->numberTableSize = 0;
+	eval->booleanTableSize = 0;
+	eval->stringTableSize = 0;
 	for(int i = 0; i < 4; i++)
 	{
-		NoPL_Instruction instr = eval.scriptBuffer[eval.evaluationPosition];
+		NoPL_Instruction instr = eval->scriptBuffer[eval->evaluationPosition];
 		if(instr == NoPL_BYTE_BOOLEAN_TABLE_SIZE)
 		{
-			eval.evaluationPosition += sizeof(NoPL_Instruction);
-			NoPL_Index* sizePtr = (NoPL_Index*)(eval.scriptBuffer+eval.evaluationPosition);
-			eval.booleanTableSize = *sizePtr;
+			eval->evaluationPosition += sizeof(NoPL_Instruction);
+			NoPL_Index* sizePtr = (NoPL_Index*)(eval->scriptBuffer+eval->evaluationPosition);
+			eval->booleanTableSize = *sizePtr;
 		}
 		else if(instr == NoPL_BYTE_NUMERIC_TABLE_SIZE)
 		{
-			eval.evaluationPosition += sizeof(NoPL_Instruction);
-			NoPL_Index* sizePtr = (NoPL_Index*)(eval.scriptBuffer+eval.evaluationPosition);
-			eval.numberTableSize = *sizePtr;
+			eval->evaluationPosition += sizeof(NoPL_Instruction);
+			NoPL_Index* sizePtr = (NoPL_Index*)(eval->scriptBuffer+eval->evaluationPosition);
+			eval->numberTableSize = *sizePtr;
 		}
 		else if(instr == NoPL_BYTE_OBJECT_TABLE_SIZE)
 		{
-			eval.evaluationPosition += sizeof(NoPL_Instruction);
-			NoPL_Index* sizePtr = (NoPL_Index*)(eval.scriptBuffer+eval.evaluationPosition);
-			eval.objectTableSize = *sizePtr;
+			eval->evaluationPosition += sizeof(NoPL_Instruction);
+			NoPL_Index* sizePtr = (NoPL_Index*)(eval->scriptBuffer+eval->evaluationPosition);
+			eval->pointerTableSize = *sizePtr;
 		}
 		else if(instr == NoPL_BYTE_STRING_TABLE_SIZE)
 		{
-			eval.evaluationPosition += sizeof(NoPL_Instruction);
-			NoPL_Index* sizePtr = (NoPL_Index*)(eval.scriptBuffer+eval.evaluationPosition);
-			eval.stringTableSize = *sizePtr;
+			eval->evaluationPosition += sizeof(NoPL_Instruction);
+			NoPL_Index* sizePtr = (NoPL_Index*)(eval->scriptBuffer+eval->evaluationPosition);
+			eval->stringTableSize = *sizePtr;
 		}
 		else
 			break;
 		
 		//advance to the next position in the buffer
-		eval.evaluationPosition += sizeof(NoPL_Index);
+		eval->evaluationPosition += sizeof(NoPL_Index);
 	}
 	
 	//create tables for variables
-	int booleanTable[eval.booleanTableSize];
-	float numberTable[eval.numberTableSize];
-	void* objectTable[eval.objectTableSize];
-	NoPL_String stringTable[eval.stringTableSize];
-	eval.booleanTable = booleanTable;
-	eval.numberTable = numberTable;
-	eval.objectTable = objectTable;
-	eval.stringTable = stringTable;
-	memset(stringTable, 0, sizeof(NoPL_String)*eval.stringTableSize);
+	if(eval->booleanTableSize)
+		eval->booleanTable = malloc(sizeof(int)*eval->booleanTableSize);
+	else
+		eval->booleanTable  = NULL;
+	
+	if(eval->numberTableSize)
+		eval->numberTable = malloc(sizeof(float)*eval->numberTableSize);
+	else
+		eval->numberTable  = NULL;
+	
+	if(eval->pointerTableSize)
+		eval->pointerTable = malloc(sizeof(void*)*eval->pointerTableSize);
+	else
+		eval->pointerTable  = NULL;
+	
+	if(eval->stringTableSize)
+	{
+		eval->stringTable = malloc(sizeof(NoPL_String)*eval->stringTableSize);
+		
+		//null all entries in the string table
+		memset(eval->stringTable, 0, sizeof(NoPL_String)*eval->stringTableSize);
+	}
+	else
+		eval->stringTable  = NULL;
+}
+
+#pragma mark - Script API
+
+void runScript(const NoPL_Instruction* scriptBuffer, unsigned int bufferLength, const NoPL_Callbacks* callbacks)
+{
+	//set up the evaluation struct
+	NoPL_Evaluation eval;
+	setUpScript(&eval, scriptBuffer, bufferLength, callbacks);
 	
 	//evaluate all statements in the script
 	int evaluateOK = 1;
 	while(evaluateOK && eval.evaluationPosition < eval.bufferLength)
 		evaluateOK = evaluateStatement(&eval);
 	
-	//free any strings that were allocated
-	for(int i = 0; i < eval.stringTableSize; i++)
-		if(stringTable[i].isAllocated && stringTable[i].stringValue)
-			free(stringTable[i].stringValue);
+	//null the buffer (it was not re-allocated from this function)
+	eval.scriptBuffer = NULL;
+	
+	//free any stuff that was allocated in the evaluation struct
+	freeNoPL_DebugHandle(&eval);
+}
+
+#pragma mark - Debug API
+
+NoPL_DebugHandle createNoPL_DebugHandle(const NoPL_Instruction* scriptBuffer, unsigned int bufferLength, const NoPL_Callbacks* callbacks)
+{
+	//we'll need a struct for script evaluation
+	NoPL_Evaluation* eval = (NoPL_Evaluation*)malloc(sizeof(NoPL_Evaluation));
+	
+	//copy the buffer so we can guarantee the user doesn't delete it
+	NoPL_Instruction* copiedBuffer = malloc(bufferLength);
+	memcpy(copiedBuffer, scriptBuffer, bufferLength);
+	
+	//set up the eval struct
+	setUpScript(eval, copiedBuffer, bufferLength, callbacks);
+	
+	//use a reference to the eval stuct as the debug handle
+	return eval;
+}
+
+int debugStep(NoPL_DebugHandle handle)
+{
+	NoPL_Evaluation* eval = (NoPL_Evaluation*)handle;
+	
+	//bail if we've hit the end
+	if(eval->evaluationPosition >= eval->bufferLength)
+		return 0;
+	
+	//evaluate one statement
+	int evaluateOK = evaluateStatement(eval);
+	
+	//return bool for completion
+	return (evaluateOK && eval->evaluationPosition < eval->bufferLength);
+}
+
+void freeNoPL_DebugHandle(NoPL_DebugHandle handle)
+{
+	NoPL_Evaluation* eval = (NoPL_Evaluation*)handle;
+	
+	//free symbol tables
+	if(eval->booleanTable)
+	{
+		free(eval->booleanTable);
+		eval->booleanTable = NULL;
+	}
+	if(eval->numberTable)
+	{
+		free(eval->numberTable);
+		eval->numberTable = NULL;
+	}
+	if(eval->pointerTable)
+	{
+		free(eval->pointerTable);
+		eval->pointerTable = NULL;
+	}
+	if(eval->stringTable)
+	{
+		//free any strings that were allocated
+		for(int i = 0; i < eval->stringTableSize; i++)
+			if(eval->stringTable[i].isAllocated && eval->stringTable[i].stringValue)
+				free(eval->stringTable[i].stringValue);
+		
+		free(eval->stringTable);
+		eval->stringTable = NULL;
+	}
+	if(eval->scriptBuffer)
+	{
+		free(eval->scriptBuffer);
+		eval->scriptBuffer = NULL;
+	}
+}
+
+NoPL_FunctionValue queryValue(NoPL_DebugHandle handle, NoPL_DataType type, NoPL_Index index)
+{
+	NoPL_Evaluation* eval = (NoPL_Evaluation*)handle;
+	
+	//assign the return value based on the type of the variable
+	switch(type)
+	{
+		case NoPL_DataType_Boolean:
+		{
+			if(index >= eval->booleanTableSize)
+				break;
+			
+			NoPL_FunctionValue val;
+			val.type = type;
+			val.booleanValue = eval->booleanTable[index];
+			return val;
+		}
+			break;
+		case NoPL_DataType_Number:
+		{
+			if(index >= eval->numberTableSize)
+				break;
+			
+			NoPL_FunctionValue val;
+			val.type = type;
+			val.numberValue = eval->numberTable[index];
+			return val;
+		}
+			break;
+		case NoPL_DataType_Pointer:
+		{
+			if(index >= eval->pointerTableSize)
+				break;
+			
+			NoPL_FunctionValue val;
+			val.type = type;
+			val.pointerValue = eval->pointerTable[index];
+			return val;
+		}
+			break;
+		case NoPL_DataType_String:
+		{
+			if(index >= eval->stringTableSize)
+				break;
+			
+			NoPL_FunctionValue val;
+			val.type = type;
+			val.stringValue = eval->stringTable[index].stringValue;
+			return val;
+		}
+			break;
+		default:
+			break;
+	}
+	return NoPL_FunctionValue();
 }
