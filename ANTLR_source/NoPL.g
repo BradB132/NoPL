@@ -5,7 +5,7 @@ options
 	backtrack=true;
 	memoize=true;
 	output=AST;
-//*
+/*
 	language = C;
 	ASTLabelType=pANTLR3_BASE_TREE;
 //*/
@@ -17,6 +17,9 @@ tokens
 	NUMERIC_NEGATION;
 	ARGUMENTS;
 	FUNCTION_CALL;
+	FOR_LOOP_DECL;
+	FOR_LOOP_COND;
+	FOR_LOOP_ITER;
 }
 
 //PARSER
@@ -173,7 +176,8 @@ whileLoop
 	;
 
 forLoop
-	:	LOOP_FOR^ PAREN_OPEN! nonControlStatement STATEMENT_DELIMITER! expression STATEMENT_DELIMITER! nonControlStatement PAREN_CLOSE! loopBody
+	:	LOOP_FOR PAREN_OPEN decl=nonControlStatement? STATEMENT_DELIMITER cond=expression? STATEMENT_DELIMITER iter=nonControlStatement? PAREN_CLOSE loopBody
+		-> ^(LOOP_FOR ^(FOR_LOOP_DECL $decl)? ^(FOR_LOOP_COND $cond)? ^(FOR_LOOP_ITER $iter)? loopBody)
 	;
 
 doWhileLoop

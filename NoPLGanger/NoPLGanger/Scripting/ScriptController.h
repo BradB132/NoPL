@@ -27,7 +27,7 @@ typedef enum
 	IBOutlet NSButton* stepBtn;
 	IBOutlet NSButton* stopBtn;
 	
-	NSArray* colors;
+	NSMutableDictionary* colors;
 	
 	NSTimer* recompileTimer;
 	

@@ -107,9 +107,9 @@ void nopl_appendErrorString(NoPL_CompileContext* context, int startLine, int end
 	int length = (int)strlen(errString)+50;
 	char formattedString[length];
 	if(startLine == endLine)
-		snprintf(formattedString, length, "%s (line %d)", errString, startLine);
+		snprintf(formattedString, length, "%s (line %d)\n", errString, startLine);
 	else
-		snprintf(formattedString, length, "%s (lines %d-%d)", errString, startLine, endLine);
+		snprintf(formattedString, length, "%s (lines %d-%d)\n", errString, startLine, endLine);
 	
 	//get the root context
 	while(pContext->parentContext)
@@ -828,6 +828,10 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				pANTLR3_BASE_TREE assignTo = treeIndex(tree,0);
 				pANTLR3_BASE_TREE incrementVal = treeIndex(tree,1);
 				
+				//variables need to be explicitly tagged, check if we wanted token ranges
+				if(options->createTokenRanges)
+					nopl_addTokenRange(context, assignTo->getToken(assignTo), NoPL_TokenRangeType_variables);
+				
 				//check the object on the left-hand side to make sure that it is the correct type
 				NoPL_DataType assignToType = nopl_dataTypeForTree(assignTo, context);
 				if(assignToType == NoPL_type_Number)
@@ -868,6 +872,10 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				//this is an assignment operator
 				pANTLR3_BASE_TREE assignTo = treeIndex(tree,0);
 				pANTLR3_BASE_TREE expression = treeIndex(tree,1);
+				
+				//variables need to be explicitly tagged, check if we wanted token ranges
+				if(options->createTokenRanges)
+					nopl_addTokenRange(context, assignTo->getToken(assignTo), NoPL_TokenRangeType_variables);
 				
 				//check the object on the left-hand side to what type should be assigned
 				NoPL_DataType assignToType = nopl_dataTypeForTree(assignTo, context);
@@ -1049,6 +1057,7 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				pANTLR3_BASE_TREE declaredVar = treeIndex(tree,0);
 				pANTLR3_STRING declaredName = declaredVar->getText(declaredVar);
 				
+				//variables need to be explicitly tagged, check if we wanted token ranges
 				if(options->createTokenRanges)
 					nopl_addTokenRange(context, declaredVar->getToken(declaredVar), NoPL_TokenRangeType_variables);
 				
@@ -1102,6 +1111,7 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				pANTLR3_BASE_TREE declaredVar = treeIndex(tree,0);
 				pANTLR3_STRING declaredName = declaredVar->getText(declaredVar);
 				
+				//variables need to be explicitly tagged, check if we wanted token ranges
 				if(options->createTokenRanges)
 					nopl_addTokenRange(context, declaredVar->getToken(declaredVar), NoPL_TokenRangeType_variables);
 				
@@ -1157,6 +1167,7 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				pANTLR3_BASE_TREE declaredVar = treeIndex(tree,0);
 				pANTLR3_STRING declaredName = declaredVar->getText(declaredVar);
 				
+				//variables need to be explicitly tagged, check if we wanted token ranges
 				if(options->createTokenRanges)
 					nopl_addTokenRange(context, declaredVar->getToken(declaredVar), NoPL_TokenRangeType_variables);
 				
@@ -1210,6 +1221,7 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				pANTLR3_BASE_TREE declaredVar = treeIndex(tree,0);
 				pANTLR3_STRING declaredName = declaredVar->getText(declaredVar);
 				
+				//variables need to be explicitly tagged, check if we wanted token ranges
 				if(options->createTokenRanges)
 					nopl_addTokenRange(context, declaredVar->getToken(declaredVar), NoPL_TokenRangeType_variables);
 				
@@ -1267,6 +1279,10 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				//get the variable being changed
 				pANTLR3_BASE_TREE var = treeIndex(tree,0);
 				
+				//variables need to be explicitly tagged, check if we wanted token ranges
+				if(options->createTokenRanges)
+					nopl_addTokenRange(context, var->getToken(var), NoPL_TokenRangeType_variables);
+				
 				//check the data type of the variable
 				if(nopl_dataTypeForTree(var, context) != NoPL_type_Number)
 					nopl_error(var, NoPL_ErrStr_CannotIncrement, context);
@@ -1295,6 +1311,10 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				//this is an assignment operator
 				pANTLR3_BASE_TREE assignTo = treeIndex(tree,0);
 				pANTLR3_BASE_TREE incrementVal = treeIndex(tree,1);
+				
+				//variables need to be explicitly tagged, check if we wanted token ranges
+				if(options->createTokenRanges)
+					nopl_addTokenRange(context, assignTo->getToken(assignTo), NoPL_TokenRangeType_variables);
 				
 				//check the object on the left-hand side to make sure that it is the correct type
 				NoPL_DataType assignToType = nopl_dataTypeForTree(assignTo, context);
@@ -1341,6 +1361,10 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				//this is an assignment operator
 				pANTLR3_BASE_TREE assignTo = treeIndex(tree,0);
 				pANTLR3_BASE_TREE incrementVal = treeIndex(tree,1);
+				
+				//variables need to be explicitly tagged, check if we wanted token ranges
+				if(options->createTokenRanges)
+					nopl_addTokenRange(context, assignTo->getToken(assignTo), NoPL_TokenRangeType_variables);
 				
 				//check the object on the left-hand side to make sure that it is the correct type
 				NoPL_DataType assignToType = nopl_dataTypeForTree(assignTo, context);
@@ -1406,15 +1430,9 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				break;
 			case ID:
 			{
-				//check if we wanted token ranges
-				if(options->createTokenRanges)
-				{
-					//this is a context-sensitive distiction that cannot be made without AST traversal
-					if(nopl_variableExistsInContext(tree->getText(tree), context))
-						nopl_addTokenRange(context, tree->getToken(tree), NoPL_TokenRangeType_variables);
-					else
-						nopl_addTokenRange(context, tree->getToken(tree), NoPL_TokenRangeType_functions);
-				}
+				//variables need to be explicitly tagged, check if we wanted token ranges
+				if(options->createTokenRanges && nopl_variableExistsInContext(tree->getText(tree), context))
+					nopl_addTokenRange(context, tree->getToken(tree), NoPL_TokenRangeType_variables);
 				
 				//check the type of the ID
 				switch(nopl_dataTypeForTree(tree, context))
@@ -1475,6 +1493,10 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				
 				//get the variable being changed
 				pANTLR3_BASE_TREE var = treeIndex(tree,0);
+				
+				//variables need to be explicitly tagged, check if we wanted token ranges
+				if(options->createTokenRanges)
+					nopl_addTokenRange(context, var->getToken(var), NoPL_TokenRangeType_variables);
 				
 				//check the data type of the variable
 				if(nopl_dataTypeForTree(var, context) != NoPL_type_Number)
@@ -1724,22 +1746,65 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				//push a scope for the statements in the top of the loop
 				nopl_pushScope(context);
 				
+				//we need to search the children for statements in the top of the loop
+				NoPL_Index childCount = 0;
+				if(tree->children)
+					childCount = (NoPL_Index)tree->children->size(tree->children);
+				ANTLR3_UINT32 i = 0;
+				pANTLR3_BASE_TREE childArg;
+				
 				//get nodes for statements in the top of the loop
-				pANTLR3_BASE_TREE declaration = treeIndex(tree,0);
-				pANTLR3_BASE_TREE conditional = treeIndex(tree,1);
-				pANTLR3_BASE_TREE increment = treeIndex(tree,2);
+				pANTLR3_BASE_TREE declaration = NULL;
+				pANTLR3_BASE_TREE conditional = NULL;
+				pANTLR3_BASE_TREE increment = NULL;
+				
+				//attempt to get declaration
+				if(i < childCount)
+				{
+					childArg = treeIndex(tree, i);
+					if(childArg->getType(childArg) == FOR_LOOP_DECL)
+					{
+						declaration = treeIndex(childArg, 0);
+						i++;
+					}
+				}
+				
+				//attempt to get conditional
+				if(i < childCount)
+				{
+					childArg = treeIndex(tree, i);
+					if(childArg->getType(childArg) == FOR_LOOP_COND)
+					{
+						conditional = treeIndex(childArg, 0);
+						i++;
+					}
+				}
+				
+				//attempt to get increment
+				if(i < childCount)
+				{
+					childArg = treeIndex(tree, i);
+					if(childArg->getType(childArg) == FOR_LOOP_ITER)
+					{
+						increment = treeIndex(childArg, 0);
+						i++;
+					}
+				}
 				
 				//append the declaration
-				nopl_traverseAST(declaration, options, context);
+				if(declaration)
+					nopl_traverseAST(declaration, options, context);
 				
 				//get a byte buffer for everything at the top of this loop
 				NoPL_CompileContext outerLoopCtx = nopl_newInnerCompileContext(context, 0, 0);
 				
 				//a loop gets compiled as a repeating conditional
-				nopl_addOperator(NoPL_BYTE_CONDITIONAL, &outerLoopCtx);
-				
-				//append the boolean expression for the conditional
-				nopl_appendNodeWithRequiredType(conditional, NoPL_type_Boolean, &outerLoopCtx, options);
+				if(conditional)
+				{
+					//append the boolean expression for the conditional
+					nopl_addOperator(NoPL_BYTE_CONDITIONAL, &outerLoopCtx);
+					nopl_appendNodeWithRequiredType(conditional, NoPL_type_Boolean, &outerLoopCtx, options);
+				}
 				
 				//get another byte buffer for everything inside this loop
 				NoPL_CompileContext innerLoopCtx = nopl_newInnerCompileContext(&outerLoopCtx, 1, 1);
@@ -1748,14 +1813,9 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				nopl_pushScope(&innerLoopCtx);
 				
 				//add all of the statements inside the loop
-				NoPL_Index childCount = 0;
-				if(tree->children)
-					childCount = (NoPL_Index)tree->children->size(tree->children);
-				ANTLR3_UINT32 i;
-				pANTLR3_BASE_TREE childArg;
-				for(i = 3; i < childCount; i++)
+				for(; i < childCount; i++)
 				{
-					childArg = (pANTLR3_BASE_TREE)(tree->children->get(tree->children, i));
+					childArg = treeIndex(tree, i);
 					nopl_traverseAST(childArg, options, &innerLoopCtx);
 				}
 				
@@ -1763,19 +1823,25 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				NoPL_Index continueIndex = innerLoopCtx.dataLength;
 				
 				//append the increment at the end of the loop
-				nopl_traverseAST(increment, options, &innerLoopCtx);
+				if(increment)
+					nopl_traverseAST(increment, options, &innerLoopCtx);
 				
 				//pop a scope for the loop
 				nopl_popScope(&innerLoopCtx);
 				
 				//go back to the beginning of the loop
 				nopl_addOperator(NoPL_BYTE_BUFFER_MOVE_BACKWARD, &innerLoopCtx);
-				NoPL_Index repeatMove = (NoPL_Index)(outerLoopCtx.dataLength+innerLoopCtx.dataLength+(2*sizeof(NoPL_Index)));
+				NoPL_Index repeatMove = (NoPL_Index)(outerLoopCtx.dataLength+innerLoopCtx.dataLength+(sizeof(NoPL_Index)));
+				if(conditional)
+					repeatMove += sizeof(NoPL_Index);
 				nopl_addBytesToContext(&repeatMove, sizeof(NoPL_Index), &innerLoopCtx);
 				
 				//add the number of bytes to skip when the conditional fails
-				NoPL_Index condMove = (NoPL_Index)innerLoopCtx.dataLength;
-				nopl_addBytesToContext(&condMove, sizeof(NoPL_Index), &outerLoopCtx);
+				if(conditional)
+				{
+					NoPL_Index condMove = (NoPL_Index)innerLoopCtx.dataLength;
+					nopl_addBytesToContext(&condMove, sizeof(NoPL_Index), &outerLoopCtx);
+				}
 				
 				//append the inner loop to the outer loop
 				continueIndex += outerLoopCtx.dataLength;
@@ -1869,6 +1935,10 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				pANTLR3_BASE_TREE assignTo = treeIndex(tree,0);
 				pANTLR3_BASE_TREE incrementVal = treeIndex(tree,1);
 				
+				//variables need to be explicitly tagged, check if we wanted token ranges
+				if(options->createTokenRanges)
+					nopl_addTokenRange(context, assignTo->getToken(assignTo), NoPL_TokenRangeType_variables);
+				
 				//check the object on the left-hand side to make sure that it is the correct type
 				NoPL_DataType assignToType = nopl_dataTypeForTree(assignTo, context);
 				if(assignToType == NoPL_type_Number)
@@ -1911,6 +1981,10 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				//this is an assignment operator
 				pANTLR3_BASE_TREE assignTo = treeIndex(tree,0);
 				pANTLR3_BASE_TREE incrementVal = treeIndex(tree,1);
+				
+				//variables need to be explicitly tagged, check if we wanted token ranges
+				if(options->createTokenRanges)
+					nopl_addTokenRange(context, assignTo->getToken(assignTo), NoPL_TokenRangeType_variables);
 				
 				//check the object on the left-hand side to make sure that it is the correct type
 				NoPL_DataType assignToType = nopl_dataTypeForTree(assignTo, context);
@@ -2113,6 +2187,10 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				//this is an assignment operator
 				pANTLR3_BASE_TREE assignTo = treeIndex(tree,0);
 				pANTLR3_BASE_TREE incrementVal = treeIndex(tree,1);
+				
+				//variables need to be explicitly tagged, check if we wanted token ranges
+				if(options->createTokenRanges)
+					nopl_addTokenRange(context, assignTo->getToken(assignTo), NoPL_TokenRangeType_variables);
 				
 				//check the object on the left-hand side to make sure that it is the correct type
 				NoPL_DataType assignToType = nopl_dataTypeForTree(assignTo, context);
@@ -2548,7 +2626,7 @@ void nopl_compileWithInputStream(pANTLR3_INPUT_STREAM stream, const NoPL_Compile
 				switch(tok->getType(tok))
 				{
 					case NUMBER:
-						nopl_addTokenRange(context, tok, NoPL_TokenRangeType_numericLiteral);
+						nopl_addTokenRange(context, tok, NoPL_TokenRangeType_numericLiterals);
 						break;
 					case STRING:
 						nopl_addTokenRange(context, tok, NoPL_TokenRangeType_stringLiterals);
@@ -2618,6 +2696,9 @@ void nopl_compileWithInputStream(pANTLR3_INPUT_STREAM stream, const NoPL_Compile
 					case SCOPE_CLOSE:
 					case STATEMENT_DELIMITER:
 						nopl_addTokenRange(context, tok, NoPL_TokenRangeType_syntax);
+						break;
+					case COMMENT:
+						nopl_addTokenRange(context, tok, NoPL_TokenRangeType_comments);
 						break;
 				}
 			}

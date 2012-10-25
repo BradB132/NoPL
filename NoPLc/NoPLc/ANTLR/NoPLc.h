@@ -21,7 +21,7 @@ typedef struct
 
 typedef enum
 {
-	NoPL_TokenRangeType_numericLiteral = 0,
+	NoPL_TokenRangeType_numericLiterals = 0,
 	NoPL_TokenRangeType_stringLiterals = 1,
 	NoPL_TokenRangeType_booleanLiterals = 2,
 	NoPL_TokenRangeType_pointerLiterals = 3,
@@ -31,7 +31,8 @@ typedef enum
 	NoPL_TokenRangeType_variables = 7,
 	NoPL_TokenRangeType_functions = 8,
 	NoPL_TokenRangeType_syntax = 9,
-	NoPL_TokenRangeType_count = 10,
+	NoPL_TokenRangeType_comments = 10,
+	NoPL_TokenRangeType_count = 11,
 } NoPL_TokenRangeType;
 
 typedef struct

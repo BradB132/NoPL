@@ -24,7 +24,7 @@
 		if(val)
 			return [DataManager objectToFunctionValue:val];
 		
-		if([name isEqualToString:@"size"] || [name isEqualToString:@"count"])
+		if([name isEqualToString:@"size"] || [name isEqualToString:@"count"] || [name isEqualToString:@"length"])
 		{
 			NoPL_FunctionValue val;
 			val.numberValue = [self count];

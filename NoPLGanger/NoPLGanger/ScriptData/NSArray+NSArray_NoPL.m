@@ -18,7 +18,7 @@
 	{
 		return [self getSubscript:calledOnObject index:args[0]];
 	}
-	else if(count == 0 && ([name isEqualToString:@"size"] || [name isEqualToString:@"count"]))
+	else if(count == 0 && ([name isEqualToString:@"size"] || [name isEqualToString:@"count"] || [name isEqualToString:@"length"]))
 	{
 		NoPL_FunctionValue val;
 		val.numberValue = [self count];

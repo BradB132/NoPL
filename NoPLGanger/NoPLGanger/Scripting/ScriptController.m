@@ -12,7 +12,40 @@
 #import "NoPLRuntime.h"
 #import "NoPLc.h"
 
-#define kScriptController_CompileDelay 0.5
+#define kScriptController_CompileDelay 0.3
+
+#pragma mark - Enum conversion
+
+NSString* tokenRangeTypeToString(NoPL_TokenRangeType type)
+{
+	switch(type)
+	{
+		case NoPL_TokenRangeType_numericLiterals:
+			return @"numericLiterals";
+		case NoPL_TokenRangeType_stringLiterals:
+			return @"stringLiterals";
+		case NoPL_TokenRangeType_booleanLiterals:
+			return @"booleanLiterals";
+		case NoPL_TokenRangeType_pointerLiterals:
+			return @"pointerLiterals";
+		case NoPL_TokenRangeType_controlFlowKeywords:
+			return @"controlFlowKeywords";
+		case NoPL_TokenRangeType_typeKeywords:
+			return @"typeKeywords";
+		case NoPL_TokenRangeType_operators:
+			return @"operators";
+		case NoPL_TokenRangeType_variables:
+			return @"variables";
+		case NoPL_TokenRangeType_functions:
+			return @"functions";
+		case NoPL_TokenRangeType_syntax:
+			return @"syntax";
+		case NoPL_TokenRangeType_comments:
+			return @"comments";
+		default:
+			return nil;
+	}
+}
 
 @implementation ScriptController
 
@@ -89,6 +122,12 @@
 {
 	[scriptView setDelegate:self];
 	
+	//set fixed width font for all coding text views
+	NSFont* codeFont = [NSFont fontWithName:@"Menlo" size:11];
+	[scriptView setFont:codeFont];
+	[consoleView setFont:codeFont];
+	[debugInputView setFont:codeFont];
+	
 	//set up the debugger
 	[self setDebugState:DebuggerState_NotRunning];
 	breakpoints = [NSMutableArray array];
@@ -96,14 +135,14 @@
 	callbacks = [DataManager callbacks];
 	
 	//create a list of colors from plist
-	NSString* dataPath = [[NSBundle mainBundle] pathForResource:@"EditorData" ofType:@"plist"];
-	NSArray* stringColors = [[NSDictionary dictionaryWithContentsOfFile:dataPath] objectForKey:@"TextColors"];
-	NSMutableArray* newColors = [NSMutableArray arrayWithCapacity:[stringColors count]];
-	for(NSString* strColor in stringColors)
+	NSString* dataPath = [[NSBundle mainBundle] pathForResource:@"EditorColors" ofType:@"plist"];
+	NSDictionary* stringColors = [NSDictionary dictionaryWithContentsOfFile:dataPath];
+	colors = [NSMutableDictionary dictionaryWithCapacity:[stringColors count]];
+	for(NSString* key in [stringColors allKeys])
 	{
-		[newColors addObject:[ScriptController colorWithHexColorString:strColor]];
+		NSString* stringColor = [stringColors objectForKey:key];
+		[colors setObject:[ScriptController colorWithHexColorString:stringColor] forKey:key];
 	}
-	colors = newColors;
 	
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(scriptFileWasAdded:) name:kFileBroswer_SelectedScript object:NULL];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(scriptDidOutput:) name:kNoPL_ConsoleOutputNotification object:NULL];
@@ -173,20 +212,47 @@
 
 -(void)processDebugCommand:(NSString*)stringCommand
 {
-	//format the command to always print the expression
+	//trim the string
 	stringCommand = [stringCommand stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+	
+	//check for breakpoint command
+	if([stringCommand hasPrefix:@"breakpoint "] ||
+	   [stringCommand hasPrefix:@"break "] ||
+	   [stringCommand hasPrefix:@"b "])
+	{
+		//parse the line argument
+		NSRange spaceRange = [stringCommand rangeOfString:@" "];
+		int lineArg = [[stringCommand substringFromIndex:spaceRange.location] intValue];
+		
+		//check if this line is already in breakpoints list
+		NSNumber* lineNum = [NSNumber numberWithInt:lineArg];
+		if([breakpoints containsObject:lineNum])
+		{
+			[breakpoints removeObject:lineNum];
+			[self appendToConsole:[NSString stringWithFormat:@"Breakpoint at line %d was removed.", lineArg]];
+		}
+		else
+		{
+			[breakpoints addObject:lineNum];
+			[self appendToConsole:[NSString stringWithFormat:@"Breakpoint was added at line %d.", lineArg]];
+		}
+		
+		return;
+	}
+	
+	//format the string as a new script to query the current script
 	stringCommand = [NSString stringWithFormat:@"#%@;", stringCommand];
 	
 	//debug commands should be interpreted as script, attempt to compile
 	NoPL_CompileContext ctx = newNoPL_CompileContext();
 	NoPL_CompileOptions options = NoPL_CompileOptions();
+	options.optimizeForRuntime = 0;
 	compileContextWithString([stringCommand UTF8String], &options, &ctx);
 	
 	//check if the compile succeded
 	if(!ctx.errDescriptions)
 	{
 		//run the script
-		NoPL_Callbacks callbacks = [DataManager callbacks];
 		runScript(ctx.compiledData, ctx.dataLength, &callbacks);
 	}
 	else
@@ -219,6 +285,7 @@
 	NoPL_CompileOptions options = NoPL_CompileOptions();
 	options.createTokenRanges = 1;
 	options.debugSymbols = 1;
+	options.optimizeForRuntime = 0;
 	
 	//compile the script
 	compileContextWithString([script UTF8String], &options, &ctx);
@@ -234,16 +301,27 @@
 		NSData* compiledData = [NSData dataWithBytes:ctx.compiledData length:ctx.dataLength];
 		[compiledData writeToFile:outputPath atomically:YES];
 		
+		//set text color for background
+		NSColor* bgColor = [colors objectForKey:@"background"];
+		[scriptView setBackgroundColor:bgColor];
+		NSColor* oppositeColor = [NSColor colorWithCalibratedRed:1-bgColor.redComponent green:1-bgColor.greenComponent blue:1-bgColor.blueComponent alpha:1];
+		[scriptView setTextColor:oppositeColor];
+		
 		//evaluate colors for highlighting the sript
-		[scriptView setTextColor:[NSColor blackColor]];
 		for(int i = 0; i < NoPL_TokenRangeType_count; i++)
 		{
+			//get the next color
+			NSColor* highlightColor = [colors objectForKey:tokenRangeTypeToString(i)];
+			if(!highlightColor)
+				continue;
+			
+			//highlight each range
 			if(ctx.tokenRanges->counts[i] > 0)
 			{
 				for(int j = 0; j < ctx.tokenRanges->counts[i]; j++)
 				{
 					NoPL_TokenRange range = ctx.tokenRanges->ranges[i][j];
-					[scriptView setTextColor:[colors objectAtIndex:i] range:NSMakeRange(range.startIndex, (range.endIndex-range.startIndex))];
+					[scriptView setTextColor:highlightColor range:NSMakeRange(range.startIndex, (range.endIndex-range.startIndex))];
 				}
 			}
 		}
@@ -408,7 +486,9 @@
 
 - (IBAction)stepClicked:(id)sender
 {
-	[self stepScript:NO];
+	int stepStartLine = prevExecutionLine;
+	while (stepStartLine == prevExecutionLine)
+		[self stepScript:NO];
 	
 	//say where the script execution is if it's still not finished
 	if(debugState)
@@ -444,9 +524,18 @@
 
 -(void)textDidChange:(NSNotification *)notification
 {
-	if(recompileTimer)
-		[recompileTimer invalidate];
-	recompileTimer = [NSTimer scheduledTimerWithTimeInterval:kScriptController_CompileDelay target:self selector:@selector(compileScriptFromTimer) userInfo:NULL repeats:NO];
+	//can't edit the script while it's running, stop the execution if we're changing it
+	if(debugState != DebuggerState_NotRunning)
+	{
+		[self setDebugState:DebuggerState_NotRunning];
+		[self appendToConsole:@"Debugging was stopped due to changes to script."];
+	}
+	else
+	{
+		if(recompileTimer)
+			[recompileTimer invalidate];
+		recompileTimer = [NSTimer scheduledTimerWithTimeInterval:kScriptController_CompileDelay target:self selector:@selector(compileScriptFromTimer) userInfo:NULL repeats:NO];
+	}
 }
 
 @end
