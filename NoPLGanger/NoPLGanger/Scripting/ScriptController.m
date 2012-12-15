@@ -237,7 +237,7 @@ NSString* tokenRangeTypeToString(NoPL_TokenRangeType type)
 	{
 		//parse the line argument
 		NSRange spaceRange = [stringCommand rangeOfString:@" "];
-		int lineArg = [[stringCommand substringFromIndex:spaceRange.location] intValue];
+		int lineArg = [[stringCommand substringFromIndex:spaceRange.location+1] intValue];
 		
 		//check if this line is already in breakpoints list
 		NSNumber* lineNum = [NSNumber numberWithInt:lineArg];
@@ -262,7 +262,7 @@ NSString* tokenRangeTypeToString(NoPL_TokenRangeType type)
 	   [stringCommand hasPrefix:@"p "])
 	{
 		NSRange spaceRange = [stringCommand rangeOfString:@" "];
-		stringCommand = [stringCommand substringFromIndex:spaceRange.location];
+		stringCommand = [stringCommand substringFromIndex:spaceRange.location+1];
 	}
 	
 	//format the string as a new script to query the current script

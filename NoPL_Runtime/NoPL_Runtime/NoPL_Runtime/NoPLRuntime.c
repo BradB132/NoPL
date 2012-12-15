@@ -52,6 +52,7 @@ void* evaluatePointer(NoPL_Evaluation* eval);
 void evaluateFunction(NoPL_Evaluation* eval, NoPL_FunctionValue* returnVal);
 void boolToString(int boolVal, NoPL_String* outStr);
 void numberToString(float number, NoPL_String* outStr);
+void objectToString(void* object, NoPL_String* outStr);
 void setUpScript(NoPL_Evaluation* eval, const NoPL_Instruction* scriptBuffer, unsigned int bufferLength, const NoPL_Callbacks* callbacks);
 
 #pragma mark - String management
@@ -87,6 +88,14 @@ void numberToString(float number, NoPL_String* outStr)
 {
 	outStr->stringValue = malloc(16);
 	snprintf(outStr->stringValue, 16, "%g", number);
+	outStr->isAllocated = 1;
+}
+
+void objectToString(void* object, NoPL_String* outStr)
+{
+	unsigned long size = sizeof(void*)*2+2;
+	outStr->stringValue = malloc(size+1);
+	snprintf(outStr->stringValue, size, "0x%X", (unsigned int)object);
 	outStr->isAllocated = 1;
 }
 
@@ -617,23 +626,26 @@ void evaluateString(NoPL_Evaluation* eval, NoPL_String* outStr)
 			//attempt to resolve this function result to a string value
 			NoPL_FunctionValue val = NoPL_FunctionValue();
 			evaluateFunction(eval, &val);
-			if(val.type == NoPL_DataType_String)
+			
+			switch(val.type)
 			{
-				outStr->stringValue = val.stringValue;
-				outStr->isAllocated = 1;
-			}
-			else if(val.type == NoPL_DataType_Number)
-			{
-				numberToString(val.numberValue, outStr);
-			}
-			else if(val.type == NoPL_DataType_Boolean)
-			{
-				boolToString(val.booleanValue, outStr);
-			}
-			else
-			{
-				outStr->stringValue = NULL;
-				outStr->isAllocated = 0;
+				case NoPL_DataType_String:
+					outStr->stringValue = val.stringValue;
+					outStr->isAllocated = 1;
+					break;
+				case NoPL_DataType_Number:
+					numberToString(val.numberValue, outStr);
+					break;
+				case NoPL_DataType_Boolean:
+					boolToString(val.booleanValue, outStr);
+					break;
+				case NoPL_DataType_Pointer:
+					objectToString(val.pointerValue, outStr);
+					break;
+				default:
+					outStr->stringValue = NULL;
+					outStr->isAllocated = 0;
+					break;
 			}
 			return;
 		}
@@ -642,6 +654,9 @@ void evaluateString(NoPL_Evaluation* eval, NoPL_String* outStr)
 			return;
 		case NoPL_BYTE_CAST_BOOLEAN_TO_STRING:
 			boolToString(evaluateBoolean(eval), outStr);
+			return;
+		case NoPL_BYTE_CAST_OBJECT_TO_STRING:
+			objectToString(evaluatePointer(eval), outStr);
 			return;
 		default:
 			printf("String Error: instruction #%d doesn't make sense here\n", (int)instr);
