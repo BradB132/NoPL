@@ -13,6 +13,8 @@
 #import "NoPLc.h"
 
 #define kScriptController_CompileDelay 0.3
+#define kScriptController_CodeFont @"Menlo"
+#define kScriptController_CodeSize 11
 
 #pragma mark - Enum conversion
 
@@ -123,7 +125,7 @@ NSString* tokenRangeTypeToString(NoPL_TokenRangeType type)
 	[scriptView setDelegate:self];
 	
 	//set fixed width font for all coding text views
-	NSFont* codeFont = [NSFont fontWithName:@"Menlo" size:11];
+	NSFont* codeFont = [NSFont fontWithName:kScriptController_CodeFont size:kScriptController_CodeSize];
 	[scriptView setFont:codeFont];
 	[consoleView setFont:codeFont];
 	[debugInputView setFont:codeFont];
@@ -237,6 +239,8 @@ NSString* tokenRangeTypeToString(NoPL_TokenRangeType type)
 			[self appendToConsole:[NSString stringWithFormat:@"Breakpoint was added at line %d.", lineArg]];
 		}
 		
+		[self updateScriptHighlights];
+		
 		return;
 	}
 	
@@ -270,6 +274,64 @@ NSString* tokenRangeTypeToString(NoPL_TokenRangeType type)
 -(void)clearConsole
 {
 	[[consoleView textStorage] deleteCharactersInRange:NSMakeRange(0, [[consoleView textStorage] length])];
+}
+
+#pragma mark - Text formatting
+
+-(NSRange)rangeForLine:(int)lineNum
+{
+	//go line by line to get the range
+	NSString* scriptStr = [scriptView string];
+	NSRange searchRange = NSMakeRange(0, [scriptStr length]);
+	NSRange searchResult;
+	NSRange highlightRange;
+	for(int i = 0; i < lineNum; i++)
+	{
+		searchResult = [scriptStr rangeOfString:@"\n" options:NSLiteralSearch range:searchRange];
+		
+		//we don't have that many lines
+		if(searchResult.location == NSNotFound)
+			return searchResult;
+		
+		//get the range for this line
+		highlightRange.location = searchRange.location;
+		highlightRange.length = searchResult.location-searchRange.location;
+		
+		//narrow the search
+		searchRange.location = searchResult.location+1;
+		searchRange.length = [scriptStr length]-searchRange.location;
+	}
+	
+	return highlightRange;
+}
+
+-(void)updateScriptHighlights
+{
+	//clear any previous highlights
+	NSLayoutManager* layoutManager = [scriptView layoutManager];
+	NSRange allTextRange = NSMakeRange(0, [[scriptView string] length]);
+	[layoutManager removeTemporaryAttribute:NSBackgroundColorAttributeName forCharacterRange:allTextRange];
+	
+	//set up the attributes for highlighting the background
+	NSDictionary* breakpointAttributes = [NSDictionary dictionaryWithObjectsAndKeys:
+										  [colors objectForKey:@"breakpoints"], NSBackgroundColorAttributeName,
+										  nil];
+	//set up the attributes for highlighting the background
+	NSFont* boldedFont = [NSFont fontWithName:[NSString stringWithFormat:@"%@-Bold", kScriptController_CodeFont] size:kScriptController_CodeSize+5];
+	NSDictionary* currentLineAttributes = [NSDictionary dictionaryWithObjectsAndKeys:
+										  boldedFont, NSFontAttributeName,
+										   [colors objectForKey:@"errors"], NSBackgroundColorAttributeName,
+										  nil];
+	
+	//highlight each breakpoint
+	for(NSNumber* num in breakpoints)
+	{
+		int lineNum = [num intValue];
+		[layoutManager setTemporaryAttributes:breakpointAttributes forCharacterRange:[self rangeForLine:lineNum]];
+	}
+	
+	if(prevExecutionLine >= 0)
+		[layoutManager setTemporaryAttributes:currentLineAttributes forCharacterRange:[self rangeForLine:prevExecutionLine]];
 }
 
 -(NSString*)compileScript
@@ -482,6 +544,8 @@ NSString* tokenRangeTypeToString(NoPL_TokenRangeType type)
 - (IBAction)continueClicked:(id)sender
 {
 	[self stepScript:YES];
+	
+	[self updateScriptHighlights];
 }
 
 - (IBAction)stepClicked:(id)sender
@@ -495,6 +559,8 @@ NSString* tokenRangeTypeToString(NoPL_TokenRangeType type)
 	{
 		[self appendToConsole:[NSString stringWithFormat:@"Stepped to line %d", prevExecutionLine]];
 	}
+	
+	[self updateScriptHighlights];
 }
 
 - (IBAction)stopClicked:(id)sender
