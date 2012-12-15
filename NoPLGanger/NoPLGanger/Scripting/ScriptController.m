@@ -135,6 +135,7 @@ NSString* tokenRangeTypeToString(NoPL_TokenRangeType type)
 	breakpoints = [NSMutableArray array];
 	debugHandle = NULL;
 	callbacks = [DataManager callbacks];
+	prevExecutionLine = -1;
 	
 	//create a list of colors from plist
 	NSString* dataPath = [[NSBundle mainBundle] pathForResource:@"EditorColors" ofType:@"plist"];
@@ -177,6 +178,9 @@ NSString* tokenRangeTypeToString(NoPL_TokenRangeType type)
 		freeNoPL_DebugHandle(debugHandle);
 		debugHandle = NULL;
 		
+		//reset current line
+		prevExecutionLine = -1;
+		
 		//switch state back to normal
 		[self setDebugState:DebuggerState_NotRunning];
 		
@@ -210,6 +214,9 @@ NSString* tokenRangeTypeToString(NoPL_TokenRangeType type)
 	{
 		[self endExecution];
 	}
+	
+	//update highlights on the script view
+	[self updateScriptHighlights];
 }
 
 -(void)processDebugCommand:(NSString*)stringCommand
@@ -242,6 +249,14 @@ NSString* tokenRangeTypeToString(NoPL_TokenRangeType type)
 		[self updateScriptHighlights];
 		
 		return;
+	}
+	
+	//Xcode debugging has left me with the habbit of prefixing everything with 'p ', remove this if it's there
+	if([stringCommand hasPrefix:@"po "] ||
+	   [stringCommand hasPrefix:@"p "])
+	{
+		NSRange spaceRange = [stringCommand rangeOfString:@" "];
+		stringCommand = [stringCommand substringFromIndex:spaceRange.location];
 	}
 	
 	//format the string as a new script to query the current script
@@ -317,17 +332,18 @@ NSString* tokenRangeTypeToString(NoPL_TokenRangeType type)
 										  [colors objectForKey:@"breakpoints"], NSBackgroundColorAttributeName,
 										  nil];
 	//set up the attributes for highlighting the background
-	NSFont* boldedFont = [NSFont fontWithName:[NSString stringWithFormat:@"%@-Bold", kScriptController_CodeFont] size:kScriptController_CodeSize+5];
+//	NSFont* boldedFont = [NSFont fontWithName:[NSString stringWithFormat:@"%@-Bold", kScriptController_CodeFont] size:kScriptController_CodeSize+5];
 	NSDictionary* currentLineAttributes = [NSDictionary dictionaryWithObjectsAndKeys:
-										  boldedFont, NSFontAttributeName,
-										   [colors objectForKey:@"errors"], NSBackgroundColorAttributeName,
+//										  boldedFont, NSFontAttributeName,
+										   [colors objectForKey:@"scriptExecution"], NSBackgroundColorAttributeName,
 										  nil];
 	
 	//highlight each breakpoint
 	for(NSNumber* num in breakpoints)
 	{
 		int lineNum = [num intValue];
-		[layoutManager setTemporaryAttributes:breakpointAttributes forCharacterRange:[self rangeForLine:lineNum]];
+		if(lineNum != prevExecutionLine)
+			[layoutManager setTemporaryAttributes:breakpointAttributes forCharacterRange:[self rangeForLine:lineNum]];
 	}
 	
 	if(prevExecutionLine >= 0)
@@ -544,14 +560,12 @@ NSString* tokenRangeTypeToString(NoPL_TokenRangeType type)
 - (IBAction)continueClicked:(id)sender
 {
 	[self stepScript:YES];
-	
-	[self updateScriptHighlights];
 }
 
 - (IBAction)stepClicked:(id)sender
 {
 	int stepStartLine = prevExecutionLine;
-	while (stepStartLine == prevExecutionLine)
+	while(debugHandle && stepStartLine == prevExecutionLine)
 		[self stepScript:NO];
 	
 	//say where the script execution is if it's still not finished
@@ -559,13 +573,12 @@ NSString* tokenRangeTypeToString(NoPL_TokenRangeType type)
 	{
 		[self appendToConsole:[NSString stringWithFormat:@"Stepped to line %d", prevExecutionLine]];
 	}
-	
-	[self updateScriptHighlights];
 }
 
 - (IBAction)stopClicked:(id)sender
 {
 	[self endExecution];
+	[self updateScriptHighlights];
 }
 
 - (IBAction)debugCommandEntered:(id)sender
