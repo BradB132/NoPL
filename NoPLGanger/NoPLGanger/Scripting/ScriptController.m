@@ -156,6 +156,12 @@ NSString* tokenRangeTypeToString(NoPL_TokenRangeType type)
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
+-(void)saveCurrentScript
+{
+	if(currentFilePath)
+		[[scriptView string] writeToFile:currentFilePath atomically:NO encoding:NSUTF8StringEncoding error:nil];
+}
+
 #pragma mark - Script logic
 
 -(void)appendToConsole:(NSString*)output
@@ -498,7 +504,8 @@ NSString* tokenRangeTypeToString(NoPL_TokenRangeType type)
 
 -(void)scriptFileWasAdded:(NSNotification*)note
 {
-	//TODO: save the old file
+	//save the old file
+	[self saveCurrentScript];
 	
 	//open the new file
 	NSString* path = [[note userInfo] objectForKey:kFileBroswer_SelectedPathKey];
@@ -506,6 +513,7 @@ NSString* tokenRangeTypeToString(NoPL_TokenRangeType type)
 	NSString* pathContents = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:&err];
 	if(!err)
 	{
+		//set up the script in the editor
 		currentFilePath = path;
 		[scriptView setString:pathContents];
 	}
@@ -535,7 +543,12 @@ NSString* tokenRangeTypeToString(NoPL_TokenRangeType type)
 {
 	//compile the script and get the path
 	NSString* outputPath = [self compileScript];
-	if(!outputPath)
+	if(outputPath)
+	{
+		//save if the script compiled successfully
+		[self saveCurrentScript];
+	}
+	else
 	{
 		[self appendToConsole:@"Script Was not run because it did not compile successfully."];
 		return;
@@ -554,7 +567,9 @@ NSString* tokenRangeTypeToString(NoPL_TokenRangeType type)
 
 - (IBAction)buildClicked:(id)sender
 {
-	[self compileScript];
+	//compile the script, save if compile was successful
+	if([self compileScript])
+		[self saveCurrentScript];
 }
 
 - (IBAction)continueClicked:(id)sender

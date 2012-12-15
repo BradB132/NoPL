@@ -1306,7 +1306,7 @@
 				<int key="NSWindowBacking">2</int>
 				<string key="NSWindowRect">{{141, 136}, {941, 497}}</string>
 				<int key="NSWTFlags">1886912512</int>
-				<string key="NSWindowTitle">Window</string>
+				<string key="NSWindowTitle">NoPLGanger</string>
 				<string key="NSWindowClass">NSWindow</string>
 				<string key="NSViewClass">View</string>
 				<nil key="NSUserInterfaceItemIdentifier"/>
