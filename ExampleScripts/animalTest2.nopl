@@ -1,3 +1,5 @@
+//Remember to use the 'Animals.plist' in the ExampleData directory
+
 #"Let's test some animals";
 
 //this method makes it hard to actually retrieve the names of the animals,
