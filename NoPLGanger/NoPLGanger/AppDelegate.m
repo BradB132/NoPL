@@ -14,6 +14,9 @@
 {
 	// Insert code here to initialize your application
 	[self.window makeKeyAndOrderFront:self];
+	
+	//this app can use fullscreen
+	[self.window setCollectionBehavior:NSWindowCollectionBehaviorFullScreenPrimary];
 }
 
 @end
