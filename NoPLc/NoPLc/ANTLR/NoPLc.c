@@ -50,8 +50,7 @@ const char* NoPL_ErrStr_VariableAlreadyDeclared = "A variable with this name was
 const char* NoPL_ErrStr_VariableNotDeclared = "A variable with this name was never declared";
 const char* NoPL_ErrStr_CannotIncrement = "Cannot use this increment operator on a variable of this type";
 const char* NoPL_ErrStr_CouldNotDetermineType = "Could not determine the type of this expression";
-const char* NoPL_ErrStr_CannotImplicitCastObject = "Cannot implicitly cast an object to another type of primitive";
-const char* NoPL_ErrStr_CannotCastObjectToPrimitive = "Cannot cast an object to another type of primitive";
+const char* NoPL_ErrStr_CannotCastObjectToPrimitive = "Cannot cast a pointer to any non-string primitive type";
 const char* NoPL_ErrStr_EqualityExpressionsAbiguous = "The type of both expressions being compared is ambiguous, at least one expression must be explicitly cast";
 const char* NoPL_ErrStr_EqualityDifferentType = "Both expressions compared by this equality operator must evaluate to the same type";
 const char* NoPL_ErrStr_CannotControlFlow = "Cannot use this control flow statement in this context";
@@ -798,7 +797,7 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 					else if(childType1 == NoPL_type_FunctionResult)
 						nopl_addOperator(NoPL_BYTE_RESOLVE_RESULT_TO_STRING, context);
 					else if(childType1 == NoPL_type_Object)
-						nopl_error(child1, NoPL_ErrStr_CannotImplicitCastObject, context);
+						nopl_addOperator(NoPL_BYTE_CAST_OBJECT_TO_STRING, context);
 					
 					//add the first child
 					nopl_traverseAST(child1, options, context);
@@ -811,7 +810,7 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 					else if(childType2 == NoPL_type_FunctionResult)
 						nopl_addOperator(NoPL_BYTE_RESOLVE_RESULT_TO_STRING, context);
 					else if(childType2 == NoPL_type_Object)
-						nopl_error(child2, NoPL_ErrStr_CannotImplicitCastObject, context);
+						nopl_addOperator(NoPL_BYTE_CAST_OBJECT_TO_STRING, context);
 					
 					//add the second child
 					nopl_traverseAST(child2, options, context);
@@ -2084,7 +2083,7 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 					case NoPL_type_String:
 						break;
 					case NoPL_type_Object:
-						nopl_error(child1, NoPL_ErrStr_CannotImplicitCastObject, context);
+						nopl_addOperator(NoPL_BYTE_CAST_OBJECT_TO_STRING, context);
 						break;
 					default:
 						nopl_error(child1, NoPL_ErrStr_CouldNotDetermineType, context);
@@ -2548,7 +2547,7 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 							break;
 						case NoPL_type_String:
 							
-							//cast to number
+							//cast to string
 							if(expressionType == NoPL_type_FunctionResult)
 								nopl_addOperator(NoPL_BYTE_RESOLVE_RESULT_TO_STRING, context);
 							else if(expressionType == NoPL_type_Boolean)
@@ -2556,7 +2555,7 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 							else if(expressionType == NoPL_type_Number)
 								nopl_addOperator(NoPL_BYTE_CAST_NUMBER_TO_STRING, context);
 							else if(expressionType == NoPL_type_Object)
-								nopl_error(expression, NoPL_ErrStr_CannotCastObjectToPrimitive, context);
+								nopl_addOperator(NoPL_BYTE_CAST_OBJECT_TO_STRING, context);
 							else
 								nopl_error(expression, NoPL_ErrStr_CouldNotDetermineType, context);
 							

@@ -13,6 +13,8 @@
 #import "NoPLc.h"
 
 #define kScriptController_CompileDelay 0.3
+#define kScriptController_CodeFont @"Menlo"
+#define kScriptController_CodeSize 11
 
 #pragma mark - Enum conversion
 
@@ -123,7 +125,7 @@ NSString* tokenRangeTypeToString(NoPL_TokenRangeType type)
 	[scriptView setDelegate:self];
 	
 	//set fixed width font for all coding text views
-	NSFont* codeFont = [NSFont fontWithName:@"Menlo" size:11];
+	NSFont* codeFont = [NSFont fontWithName:kScriptController_CodeFont size:kScriptController_CodeSize];
 	[scriptView setFont:codeFont];
 	[consoleView setFont:codeFont];
 	[debugInputView setFont:codeFont];
@@ -133,6 +135,7 @@ NSString* tokenRangeTypeToString(NoPL_TokenRangeType type)
 	breakpoints = [NSMutableArray array];
 	debugHandle = NULL;
 	callbacks = [DataManager callbacks];
+	prevExecutionLine = -1;
 	
 	//create a list of colors from plist
 	NSString* dataPath = [[NSBundle mainBundle] pathForResource:@"EditorColors" ofType:@"plist"];
@@ -151,6 +154,12 @@ NSString* tokenRangeTypeToString(NoPL_TokenRangeType type)
 -(void)dealloc
 {
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+-(void)saveCurrentScript
+{
+	if(currentFilePath)
+		[[scriptView string] writeToFile:currentFilePath atomically:NO encoding:NSUTF8StringEncoding error:nil];
 }
 
 #pragma mark - Script logic
@@ -174,6 +183,9 @@ NSString* tokenRangeTypeToString(NoPL_TokenRangeType type)
 		//clean up the script
 		freeNoPL_DebugHandle(debugHandle);
 		debugHandle = NULL;
+		
+		//reset current line
+		prevExecutionLine = -1;
 		
 		//switch state back to normal
 		[self setDebugState:DebuggerState_NotRunning];
@@ -208,6 +220,9 @@ NSString* tokenRangeTypeToString(NoPL_TokenRangeType type)
 	{
 		[self endExecution];
 	}
+	
+	//update highlights on the script view
+	[self updateScriptHighlights];
 }
 
 -(void)processDebugCommand:(NSString*)stringCommand
@@ -222,7 +237,7 @@ NSString* tokenRangeTypeToString(NoPL_TokenRangeType type)
 	{
 		//parse the line argument
 		NSRange spaceRange = [stringCommand rangeOfString:@" "];
-		int lineArg = [[stringCommand substringFromIndex:spaceRange.location] intValue];
+		int lineArg = [[stringCommand substringFromIndex:spaceRange.location+1] intValue];
 		
 		//check if this line is already in breakpoints list
 		NSNumber* lineNum = [NSNumber numberWithInt:lineArg];
@@ -237,7 +252,17 @@ NSString* tokenRangeTypeToString(NoPL_TokenRangeType type)
 			[self appendToConsole:[NSString stringWithFormat:@"Breakpoint was added at line %d.", lineArg]];
 		}
 		
+		[self updateScriptHighlights];
+		
 		return;
+	}
+	
+	//Xcode debugging has left me with the habbit of prefixing everything with 'p ', remove this if it's there
+	if([stringCommand hasPrefix:@"po "] ||
+	   [stringCommand hasPrefix:@"p "])
+	{
+		NSRange spaceRange = [stringCommand rangeOfString:@" "];
+		stringCommand = [stringCommand substringFromIndex:spaceRange.location+1];
 	}
 	
 	//format the string as a new script to query the current script
@@ -270,6 +295,65 @@ NSString* tokenRangeTypeToString(NoPL_TokenRangeType type)
 -(void)clearConsole
 {
 	[[consoleView textStorage] deleteCharactersInRange:NSMakeRange(0, [[consoleView textStorage] length])];
+}
+
+#pragma mark - Text formatting
+
+-(NSRange)rangeForLine:(int)lineNum
+{
+	//go line by line to get the range
+	NSString* scriptStr = [scriptView string];
+	NSRange searchRange = NSMakeRange(0, [scriptStr length]);
+	NSRange searchResult;
+	NSRange highlightRange;
+	for(int i = 0; i < lineNum; i++)
+	{
+		searchResult = [scriptStr rangeOfString:@"\n" options:NSLiteralSearch range:searchRange];
+		
+		//we don't have that many lines
+		if(searchResult.location == NSNotFound)
+			return searchResult;
+		
+		//get the range for this line
+		highlightRange.location = searchRange.location;
+		highlightRange.length = searchResult.location-searchRange.location;
+		
+		//narrow the search
+		searchRange.location = searchResult.location+1;
+		searchRange.length = [scriptStr length]-searchRange.location;
+	}
+	
+	return highlightRange;
+}
+
+-(void)updateScriptHighlights
+{
+	//clear any previous highlights
+	NSLayoutManager* layoutManager = [scriptView layoutManager];
+	NSRange allTextRange = NSMakeRange(0, [[scriptView string] length]);
+	[layoutManager removeTemporaryAttribute:NSBackgroundColorAttributeName forCharacterRange:allTextRange];
+	
+	//set up the attributes for highlighting the background
+	NSDictionary* breakpointAttributes = [NSDictionary dictionaryWithObjectsAndKeys:
+										  [colors objectForKey:@"breakpoints"], NSBackgroundColorAttributeName,
+										  nil];
+	//set up the attributes for highlighting the background
+//	NSFont* boldedFont = [NSFont fontWithName:[NSString stringWithFormat:@"%@-Bold", kScriptController_CodeFont] size:kScriptController_CodeSize+5];
+	NSDictionary* currentLineAttributes = [NSDictionary dictionaryWithObjectsAndKeys:
+//										  boldedFont, NSFontAttributeName,
+										   [colors objectForKey:@"scriptExecution"], NSBackgroundColorAttributeName,
+										  nil];
+	
+	//highlight each breakpoint
+	for(NSNumber* num in breakpoints)
+	{
+		int lineNum = [num intValue];
+		if(lineNum != prevExecutionLine)
+			[layoutManager setTemporaryAttributes:breakpointAttributes forCharacterRange:[self rangeForLine:lineNum]];
+	}
+	
+	if(prevExecutionLine >= 0)
+		[layoutManager setTemporaryAttributes:currentLineAttributes forCharacterRange:[self rangeForLine:prevExecutionLine]];
 }
 
 -(NSString*)compileScript
@@ -420,7 +504,8 @@ NSString* tokenRangeTypeToString(NoPL_TokenRangeType type)
 
 -(void)scriptFileWasAdded:(NSNotification*)note
 {
-	//TODO: save the old file
+	//save the old file
+	[self saveCurrentScript];
 	
 	//open the new file
 	NSString* path = [[note userInfo] objectForKey:kFileBroswer_SelectedPathKey];
@@ -428,6 +513,7 @@ NSString* tokenRangeTypeToString(NoPL_TokenRangeType type)
 	NSString* pathContents = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:&err];
 	if(!err)
 	{
+		//set up the script in the editor
 		currentFilePath = path;
 		[scriptView setString:pathContents];
 	}
@@ -457,7 +543,12 @@ NSString* tokenRangeTypeToString(NoPL_TokenRangeType type)
 {
 	//compile the script and get the path
 	NSString* outputPath = [self compileScript];
-	if(!outputPath)
+	if(outputPath)
+	{
+		//save if the script compiled successfully
+		[self saveCurrentScript];
+	}
+	else
 	{
 		[self appendToConsole:@"Script Was not run because it did not compile successfully."];
 		return;
@@ -476,7 +567,9 @@ NSString* tokenRangeTypeToString(NoPL_TokenRangeType type)
 
 - (IBAction)buildClicked:(id)sender
 {
-	[self compileScript];
+	//compile the script, save if compile was successful
+	if([self compileScript])
+		[self saveCurrentScript];
 }
 
 - (IBAction)continueClicked:(id)sender
@@ -487,7 +580,7 @@ NSString* tokenRangeTypeToString(NoPL_TokenRangeType type)
 - (IBAction)stepClicked:(id)sender
 {
 	int stepStartLine = prevExecutionLine;
-	while (stepStartLine == prevExecutionLine)
+	while(debugHandle && stepStartLine == prevExecutionLine)
 		[self stepScript:NO];
 	
 	//say where the script execution is if it's still not finished
@@ -500,6 +593,7 @@ NSString* tokenRangeTypeToString(NoPL_TokenRangeType type)
 - (IBAction)stopClicked:(id)sender
 {
 	[self endExecution];
+	[self updateScriptHighlights];
 }
 
 - (IBAction)debugCommandEntered:(id)sender

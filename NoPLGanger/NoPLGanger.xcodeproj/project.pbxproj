@@ -7,255 +7,198 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		A21224F0163997E200A86354 /* EditorColors.plist in Resources */ = {isa = PBXBuildFile; fileRef = A21224EF163997E200A86354 /* EditorColors.plist */; };
-		A22253DE16382BFF00EED967 /* NoPLScriptData.m in Sources */ = {isa = PBXBuildFile; fileRef = A22253DD16382BFF00EED967 /* NoPLScriptData.m */; };
-		A24F59B9162F2A5900FC9181 /* FileSystemNode.m in Sources */ = {isa = PBXBuildFile; fileRef = A24F59B8162F2A5900FC9181 /* FileSystemNode.m */; };
-		A24F59BA162F2A5900FC9181 /* FileSystemNode.m in Sources */ = {isa = PBXBuildFile; fileRef = A24F59B8162F2A5900FC9181 /* FileSystemNode.m */; };
-		A24F59BE162F579B00FC9181 /* DataListController.m in Sources */ = {isa = PBXBuildFile; fileRef = A24F59BD162F579B00FC9181 /* DataListController.m */; };
-		A24F59BF162F579B00FC9181 /* DataListController.m in Sources */ = {isa = PBXBuildFile; fileRef = A24F59BD162F579B00FC9181 /* DataListController.m */; };
-		A24F59C3163053CF00FC9181 /* DataManager.m in Sources */ = {isa = PBXBuildFile; fileRef = A24F59C2163053CF00FC9181 /* DataManager.m */; };
-		A24F59C4163053CF00FC9181 /* DataManager.m in Sources */ = {isa = PBXBuildFile; fileRef = A24F59C2163053CF00FC9181 /* DataManager.m */; };
-		A24F59C71630560500FC9181 /* XMLScriptData.m in Sources */ = {isa = PBXBuildFile; fileRef = A24F59C61630560500FC9181 /* XMLScriptData.m */; };
-		A24F59C81630560500FC9181 /* XMLScriptData.m in Sources */ = {isa = PBXBuildFile; fileRef = A24F59C61630560500FC9181 /* XMLScriptData.m */; };
-		A24F59CB1630561400FC9181 /* PlistScriptData.m in Sources */ = {isa = PBXBuildFile; fileRef = A24F59CA1630561400FC9181 /* PlistScriptData.m */; };
-		A24F59CC1630561400FC9181 /* PlistScriptData.m in Sources */ = {isa = PBXBuildFile; fileRef = A24F59CA1630561400FC9181 /* PlistScriptData.m */; };
-		A24F59CF163057F700FC9181 /* ScriptData.m in Sources */ = {isa = PBXBuildFile; fileRef = A24F59CE163057F700FC9181 /* ScriptData.m */; };
-		A24F59D0163057F700FC9181 /* ScriptData.m in Sources */ = {isa = PBXBuildFile; fileRef = A24F59CE163057F700FC9181 /* ScriptData.m */; };
-		A27219C4162210FF004350AC /* FileBrowserController.m in Sources */ = {isa = PBXBuildFile; fileRef = A27219C3162210FF004350AC /* FileBrowserController.m */; };
-		A27FA7DD1630A0DF00D686E9 /* libNoPLRuntime.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A27FA7DC1630A0DF00D686E9 /* libNoPLRuntime.a */; };
-		A27FA7E71630A81C00D686E9 /* NSDictionary+NSDictionary_NoPL.m in Sources */ = {isa = PBXBuildFile; fileRef = A27FA7E61630A81C00D686E9 /* NSDictionary+NSDictionary_NoPL.m */; };
-		A27FA7EA1630B5F900D686E9 /* NSArray+NSArray_NoPL.m in Sources */ = {isa = PBXBuildFile; fileRef = A27FA7E91630B5F900D686E9 /* NSArray+NSArray_NoPL.m */; };
-		A27FA7F216320E5300D686E9 /* ScriptController.m in Sources */ = {isa = PBXBuildFile; fileRef = A27FA7F116320E5300D686E9 /* ScriptController.m */; };
-		A27FA8271632E9AC00D686E9 /* libNoPLc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A27FA8261632E9AC00D686E9 /* libNoPLc.a */; };
-		A2BAAB37160F912500160FCE /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A2BAAB36160F912500160FCE /* Cocoa.framework */; };
-		A2BAAB41160F912500160FCE /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = A2BAAB3F160F912500160FCE /* InfoPlist.strings */; };
-		A2BAAB43160F912500160FCE /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = A2BAAB42160F912500160FCE /* main.m */; };
-		A2BAAB47160F912500160FCE /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = A2BAAB45160F912500160FCE /* Credits.rtf */; };
-		A2BAAB4A160F912500160FCE /* Document.m in Sources */ = {isa = PBXBuildFile; fileRef = A2BAAB49160F912500160FCE /* Document.m */; };
-		A2BAAB4D160F912500160FCE /* Document.xib in Resources */ = {isa = PBXBuildFile; fileRef = A2BAAB4B160F912500160FCE /* Document.xib */; };
-		A2BAAB50160F912500160FCE /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = A2BAAB4E160F912500160FCE /* MainMenu.xib */; };
-		A2BAAB58160F912500160FCE /* SenTestingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A2BAAB57160F912500160FCE /* SenTestingKit.framework */; };
-		A2BAAB59160F912500160FCE /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A2BAAB36160F912500160FCE /* Cocoa.framework */; };
-		A2BAAB61160F912500160FCE /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = A2BAAB5F160F912500160FCE /* InfoPlist.strings */; };
-		A2BAAB64160F912500160FCE /* NoPLGangerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = A2BAAB63160F912500160FCE /* NoPLGangerTests.m */; };
+		A2C1F8DD167D0E0A0040E027 /* EditorColors.plist in Resources */ = {isa = PBXBuildFile; fileRef = A2C1F8DC167D0E0A0040E027 /* EditorColors.plist */; };
+		A2DE04C2167CF72100296706 /* NoPL.icns in Resources */ = {isa = PBXBuildFile; fileRef = A2DE04C1167CF72100296706 /* NoPL.icns */; };
+		A2DE04C4167CF77100296706 /* libNoPLc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A2DE04C3167CF77100296706 /* libNoPLc.a */; };
+		A2DE04C6167CF78000296706 /* libNoPLRuntime.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A2DE04C5167CF78000296706 /* libNoPLRuntime.a */; };
+		A2E831C9167CF4EC000F368C /* DataListController.m in Sources */ = {isa = PBXBuildFile; fileRef = A2E831B1167CF4EC000F368C /* DataListController.m */; };
+		A2E831CA167CF4EC000F368C /* FileBrowserController.m in Sources */ = {isa = PBXBuildFile; fileRef = A2E831B4167CF4EC000F368C /* FileBrowserController.m */; };
+		A2E831CB167CF4EC000F368C /* FileSystemNode.m in Sources */ = {isa = PBXBuildFile; fileRef = A2E831B6167CF4EC000F368C /* FileSystemNode.m */; };
+		A2E831CC167CF4EC000F368C /* DataManager.m in Sources */ = {isa = PBXBuildFile; fileRef = A2E831B9167CF4EC000F368C /* DataManager.m */; };
+		A2E831CD167CF4EC000F368C /* NoPLScriptData.m in Sources */ = {isa = PBXBuildFile; fileRef = A2E831BB167CF4EC000F368C /* NoPLScriptData.m */; };
+		A2E831CE167CF4EC000F368C /* NSArray+NSArray_NoPL.m in Sources */ = {isa = PBXBuildFile; fileRef = A2E831BD167CF4EC000F368C /* NSArray+NSArray_NoPL.m */; };
+		A2E831CF167CF4EC000F368C /* NSDictionary+NSDictionary_NoPL.m in Sources */ = {isa = PBXBuildFile; fileRef = A2E831BF167CF4EC000F368C /* NSDictionary+NSDictionary_NoPL.m */; };
+		A2E831D0167CF4EC000F368C /* PlistScriptData.m in Sources */ = {isa = PBXBuildFile; fileRef = A2E831C1167CF4EC000F368C /* PlistScriptData.m */; };
+		A2E831D1167CF4EC000F368C /* ScriptData.m in Sources */ = {isa = PBXBuildFile; fileRef = A2E831C3167CF4EC000F368C /* ScriptData.m */; };
+		A2E831D2167CF4EC000F368C /* XMLScriptData.m in Sources */ = {isa = PBXBuildFile; fileRef = A2E831C5167CF4EC000F368C /* XMLScriptData.m */; };
+		A2E831D3167CF4EC000F368C /* ScriptController.m in Sources */ = {isa = PBXBuildFile; fileRef = A2E831C8167CF4EC000F368C /* ScriptController.m */; };
+		A2FF5B99167CE5BD00E38B40 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A2FF5B98167CE5BD00E38B40 /* Cocoa.framework */; };
+		A2FF5BA3167CE5BD00E38B40 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = A2FF5BA1167CE5BD00E38B40 /* InfoPlist.strings */; };
+		A2FF5BA5167CE5BD00E38B40 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = A2FF5BA4167CE5BD00E38B40 /* main.m */; };
+		A2FF5BA9167CE5BD00E38B40 /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = A2FF5BA7167CE5BD00E38B40 /* Credits.rtf */; };
+		A2FF5BAC167CE5BD00E38B40 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = A2FF5BAB167CE5BD00E38B40 /* AppDelegate.m */; };
+		A2FF5BAF167CE5BE00E38B40 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = A2FF5BAD167CE5BE00E38B40 /* MainMenu.xib */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXContainerItemProxy section */
-		A2BAAB5A160F912500160FCE /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = A2BAAB29160F912500160FCE /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = A2BAAB31160F912500160FCE;
-			remoteInfo = NoPLGanger;
-		};
-/* End PBXContainerItemProxy section */
-
 /* Begin PBXFileReference section */
-		A21224EF163997E200A86354 /* EditorColors.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = EditorColors.plist; sourceTree = "<group>"; };
-		A22253DC16382BFF00EED967 /* NoPLScriptData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NoPLScriptData.h; sourceTree = "<group>"; };
-		A22253DD16382BFF00EED967 /* NoPLScriptData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NoPLScriptData.m; sourceTree = "<group>"; };
-		A24F59B7162F2A5900FC9181 /* FileSystemNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FileSystemNode.h; path = FileBrowser/FileSystemNode.h; sourceTree = "<group>"; };
-		A24F59B8162F2A5900FC9181 /* FileSystemNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = FileSystemNode.m; path = FileBrowser/FileSystemNode.m; sourceTree = "<group>"; };
-		A24F59BC162F579B00FC9181 /* DataListController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DataListController.h; path = DataList/DataListController.h; sourceTree = "<group>"; };
-		A24F59BD162F579B00FC9181 /* DataListController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DataListController.m; path = DataList/DataListController.m; sourceTree = "<group>"; };
-		A24F59C1163053CF00FC9181 /* DataManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DataManager.h; sourceTree = "<group>"; };
-		A24F59C2163053CF00FC9181 /* DataManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DataManager.m; sourceTree = "<group>"; };
-		A24F59C51630560500FC9181 /* XMLScriptData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMLScriptData.h; sourceTree = "<group>"; };
-		A24F59C61630560500FC9181 /* XMLScriptData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMLScriptData.m; sourceTree = "<group>"; };
-		A24F59C91630561400FC9181 /* PlistScriptData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlistScriptData.h; sourceTree = "<group>"; };
-		A24F59CA1630561400FC9181 /* PlistScriptData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PlistScriptData.m; sourceTree = "<group>"; };
-		A24F59CD163057F700FC9181 /* ScriptData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScriptData.h; sourceTree = "<group>"; };
-		A24F59CE163057F700FC9181 /* ScriptData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ScriptData.m; sourceTree = "<group>"; };
-		A27219C2162210FF004350AC /* FileBrowserController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FileBrowserController.h; path = FileBrowser/FileBrowserController.h; sourceTree = "<group>"; };
-		A27219C3162210FF004350AC /* FileBrowserController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = FileBrowserController.m; path = FileBrowser/FileBrowserController.m; sourceTree = "<group>"; };
-		A27FA7DC1630A0DF00D686E9 /* libNoPLRuntime.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libNoPLRuntime.a; path = ../CompiledLibs/runtime/libNoPLRuntime.a; sourceTree = "<group>"; };
-		A27FA7E51630A81C00D686E9 /* NSDictionary+NSDictionary_NoPL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSDictionary+NSDictionary_NoPL.h"; sourceTree = "<group>"; };
-		A27FA7E61630A81C00D686E9 /* NSDictionary+NSDictionary_NoPL.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSDictionary+NSDictionary_NoPL.m"; sourceTree = "<group>"; };
-		A27FA7E81630B5F900D686E9 /* NSArray+NSArray_NoPL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSArray+NSArray_NoPL.h"; sourceTree = "<group>"; };
-		A27FA7E91630B5F900D686E9 /* NSArray+NSArray_NoPL.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSArray+NSArray_NoPL.m"; sourceTree = "<group>"; };
-		A27FA7F016320E5300D686E9 /* ScriptController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScriptController.h; sourceTree = "<group>"; };
-		A27FA7F116320E5300D686E9 /* ScriptController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ScriptController.m; sourceTree = "<group>"; };
-		A27FA8261632E9AC00D686E9 /* libNoPLc.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libNoPLc.a; path = ../CompiledLibs/compiler/libNoPLc.a; sourceTree = "<group>"; };
-		A2BAAB32160F912500160FCE /* NoPLGanger.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NoPLGanger.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		A2BAAB36160F912500160FCE /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
-		A2BAAB39160F912500160FCE /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
-		A2BAAB3A160F912500160FCE /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
-		A2BAAB3B160F912500160FCE /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
-		A2BAAB3E160F912500160FCE /* NoPLGanger-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "NoPLGanger-Info.plist"; sourceTree = "<group>"; };
-		A2BAAB40160F912500160FCE /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		A2BAAB42160F912500160FCE /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		A2BAAB44160F912500160FCE /* NoPLGanger-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NoPLGanger-Prefix.pch"; sourceTree = "<group>"; };
-		A2BAAB46160F912500160FCE /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = en.lproj/Credits.rtf; sourceTree = "<group>"; };
-		A2BAAB48160F912500160FCE /* Document.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Document.h; sourceTree = "<group>"; };
-		A2BAAB49160F912500160FCE /* Document.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Document.m; sourceTree = "<group>"; };
-		A2BAAB4C160F912500160FCE /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/Document.xib; sourceTree = "<group>"; };
-		A2BAAB4F160F912500160FCE /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
-		A2BAAB56160F912500160FCE /* NoPLGangerTests.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NoPLGangerTests.octest; sourceTree = BUILT_PRODUCTS_DIR; };
-		A2BAAB57160F912500160FCE /* SenTestingKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SenTestingKit.framework; path = Library/Frameworks/SenTestingKit.framework; sourceTree = DEVELOPER_DIR; };
-		A2BAAB5E160F912500160FCE /* NoPLGangerTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "NoPLGangerTests-Info.plist"; sourceTree = "<group>"; };
-		A2BAAB60160F912500160FCE /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		A2BAAB62160F912500160FCE /* NoPLGangerTests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NoPLGangerTests.h; sourceTree = "<group>"; };
-		A2BAAB63160F912500160FCE /* NoPLGangerTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NoPLGangerTests.m; sourceTree = "<group>"; };
+		A2C1F8DC167D0E0A0040E027 /* EditorColors.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = EditorColors.plist; sourceTree = "<group>"; };
+		A2DE04C1167CF72100296706 /* NoPL.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = NoPL.icns; sourceTree = "<group>"; };
+		A2DE04C3167CF77100296706 /* libNoPLc.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libNoPLc.a; path = ../CompiledLibs/compiler/libNoPLc.a; sourceTree = "<group>"; };
+		A2DE04C5167CF78000296706 /* libNoPLRuntime.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libNoPLRuntime.a; path = ../CompiledLibs/runtime/libNoPLRuntime.a; sourceTree = "<group>"; };
+		A2E831B0167CF4EC000F368C /* DataListController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DataListController.h; sourceTree = "<group>"; };
+		A2E831B1167CF4EC000F368C /* DataListController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DataListController.m; sourceTree = "<group>"; };
+		A2E831B3167CF4EC000F368C /* FileBrowserController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FileBrowserController.h; sourceTree = "<group>"; };
+		A2E831B4167CF4EC000F368C /* FileBrowserController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FileBrowserController.m; sourceTree = "<group>"; };
+		A2E831B5167CF4EC000F368C /* FileSystemNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FileSystemNode.h; sourceTree = "<group>"; };
+		A2E831B6167CF4EC000F368C /* FileSystemNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FileSystemNode.m; sourceTree = "<group>"; };
+		A2E831B8167CF4EC000F368C /* DataManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DataManager.h; sourceTree = "<group>"; };
+		A2E831B9167CF4EC000F368C /* DataManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DataManager.m; sourceTree = "<group>"; };
+		A2E831BA167CF4EC000F368C /* NoPLScriptData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NoPLScriptData.h; sourceTree = "<group>"; };
+		A2E831BB167CF4EC000F368C /* NoPLScriptData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NoPLScriptData.m; sourceTree = "<group>"; };
+		A2E831BC167CF4EC000F368C /* NSArray+NSArray_NoPL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSArray+NSArray_NoPL.h"; sourceTree = "<group>"; };
+		A2E831BD167CF4EC000F368C /* NSArray+NSArray_NoPL.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSArray+NSArray_NoPL.m"; sourceTree = "<group>"; };
+		A2E831BE167CF4EC000F368C /* NSDictionary+NSDictionary_NoPL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSDictionary+NSDictionary_NoPL.h"; sourceTree = "<group>"; };
+		A2E831BF167CF4EC000F368C /* NSDictionary+NSDictionary_NoPL.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSDictionary+NSDictionary_NoPL.m"; sourceTree = "<group>"; };
+		A2E831C0167CF4EC000F368C /* PlistScriptData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlistScriptData.h; sourceTree = "<group>"; };
+		A2E831C1167CF4EC000F368C /* PlistScriptData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PlistScriptData.m; sourceTree = "<group>"; };
+		A2E831C2167CF4EC000F368C /* ScriptData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScriptData.h; sourceTree = "<group>"; };
+		A2E831C3167CF4EC000F368C /* ScriptData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ScriptData.m; sourceTree = "<group>"; };
+		A2E831C4167CF4EC000F368C /* XMLScriptData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMLScriptData.h; sourceTree = "<group>"; };
+		A2E831C5167CF4EC000F368C /* XMLScriptData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMLScriptData.m; sourceTree = "<group>"; };
+		A2E831C7167CF4EC000F368C /* ScriptController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScriptController.h; sourceTree = "<group>"; };
+		A2E831C8167CF4EC000F368C /* ScriptController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ScriptController.m; sourceTree = "<group>"; };
+		A2FF5B94167CE5BD00E38B40 /* NoPLGanger.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NoPLGanger.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A2FF5B98167CE5BD00E38B40 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
+		A2FF5B9B167CE5BD00E38B40 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
+		A2FF5B9C167CE5BD00E38B40 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		A2FF5B9D167CE5BD00E38B40 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		A2FF5BA0167CE5BD00E38B40 /* NoPLGanger-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "NoPLGanger-Info.plist"; sourceTree = "<group>"; };
+		A2FF5BA2167CE5BD00E38B40 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		A2FF5BA4167CE5BD00E38B40 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		A2FF5BA6167CE5BD00E38B40 /* NoPLGanger-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NoPLGanger-Prefix.pch"; sourceTree = "<group>"; };
+		A2FF5BA8167CE5BD00E38B40 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = en.lproj/Credits.rtf; sourceTree = "<group>"; };
+		A2FF5BAA167CE5BD00E38B40 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		A2FF5BAB167CE5BD00E38B40 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		A2FF5BAE167CE5BE00E38B40 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		A2BAAB2F160F912500160FCE /* Frameworks */ = {
+		A2FF5B91167CE5BD00E38B40 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A2BAAB37160F912500160FCE /* Cocoa.framework in Frameworks */,
-				A27FA7DD1630A0DF00D686E9 /* libNoPLRuntime.a in Frameworks */,
-				A27FA8271632E9AC00D686E9 /* libNoPLc.a in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		A2BAAB52160F912500160FCE /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				A2BAAB58160F912500160FCE /* SenTestingKit.framework in Frameworks */,
-				A2BAAB59160F912500160FCE /* Cocoa.framework in Frameworks */,
+				A2FF5B99167CE5BD00E38B40 /* Cocoa.framework in Frameworks */,
+				A2DE04C4167CF77100296706 /* libNoPLc.a in Frameworks */,
+				A2DE04C6167CF78000296706 /* libNoPLRuntime.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		A24F59BB162F575E00FC9181 /* DataList */ = {
+		A2E831AF167CF4EC000F368C /* DataList */ = {
 			isa = PBXGroup;
 			children = (
-				A24F59BC162F579B00FC9181 /* DataListController.h */,
-				A24F59BD162F579B00FC9181 /* DataListController.m */,
+				A2E831B0167CF4EC000F368C /* DataListController.h */,
+				A2E831B1167CF4EC000F368C /* DataListController.m */,
 			);
-			name = DataList;
+			path = DataList;
 			sourceTree = "<group>";
 		};
-		A24F59C0163053C000FC9181 /* ScriptData */ = {
+		A2E831B2167CF4EC000F368C /* FileBrowser */ = {
 			isa = PBXGroup;
 			children = (
-				A24F59C1163053CF00FC9181 /* DataManager.h */,
-				A24F59C2163053CF00FC9181 /* DataManager.m */,
-				A24F59CD163057F700FC9181 /* ScriptData.h */,
-				A24F59CE163057F700FC9181 /* ScriptData.m */,
-				A24F59C51630560500FC9181 /* XMLScriptData.h */,
-				A24F59C61630560500FC9181 /* XMLScriptData.m */,
-				A24F59C91630561400FC9181 /* PlistScriptData.h */,
-				A24F59CA1630561400FC9181 /* PlistScriptData.m */,
-				A22253DC16382BFF00EED967 /* NoPLScriptData.h */,
-				A22253DD16382BFF00EED967 /* NoPLScriptData.m */,
-				A27FA7E51630A81C00D686E9 /* NSDictionary+NSDictionary_NoPL.h */,
-				A27FA7E61630A81C00D686E9 /* NSDictionary+NSDictionary_NoPL.m */,
-				A27FA7E81630B5F900D686E9 /* NSArray+NSArray_NoPL.h */,
-				A27FA7E91630B5F900D686E9 /* NSArray+NSArray_NoPL.m */,
+				A2E831B3167CF4EC000F368C /* FileBrowserController.h */,
+				A2E831B4167CF4EC000F368C /* FileBrowserController.m */,
+				A2E831B5167CF4EC000F368C /* FileSystemNode.h */,
+				A2E831B6167CF4EC000F368C /* FileSystemNode.m */,
+			);
+			path = FileBrowser;
+			sourceTree = "<group>";
+		};
+		A2E831B7167CF4EC000F368C /* ScriptData */ = {
+			isa = PBXGroup;
+			children = (
+				A2E831B8167CF4EC000F368C /* DataManager.h */,
+				A2E831B9167CF4EC000F368C /* DataManager.m */,
+				A2E831BA167CF4EC000F368C /* NoPLScriptData.h */,
+				A2E831BB167CF4EC000F368C /* NoPLScriptData.m */,
+				A2E831BC167CF4EC000F368C /* NSArray+NSArray_NoPL.h */,
+				A2E831BD167CF4EC000F368C /* NSArray+NSArray_NoPL.m */,
+				A2E831BE167CF4EC000F368C /* NSDictionary+NSDictionary_NoPL.h */,
+				A2E831BF167CF4EC000F368C /* NSDictionary+NSDictionary_NoPL.m */,
+				A2E831C0167CF4EC000F368C /* PlistScriptData.h */,
+				A2E831C1167CF4EC000F368C /* PlistScriptData.m */,
+				A2E831C2167CF4EC000F368C /* ScriptData.h */,
+				A2E831C3167CF4EC000F368C /* ScriptData.m */,
+				A2E831C4167CF4EC000F368C /* XMLScriptData.h */,
+				A2E831C5167CF4EC000F368C /* XMLScriptData.m */,
 			);
 			path = ScriptData;
 			sourceTree = "<group>";
 		};
-		A27219C0162210CA004350AC /* FileBrowser */ = {
+		A2E831C6167CF4EC000F368C /* Scripting */ = {
 			isa = PBXGroup;
 			children = (
-				A27219C2162210FF004350AC /* FileBrowserController.h */,
-				A27219C3162210FF004350AC /* FileBrowserController.m */,
-				A24F59B7162F2A5900FC9181 /* FileSystemNode.h */,
-				A24F59B8162F2A5900FC9181 /* FileSystemNode.m */,
-			);
-			name = FileBrowser;
-			sourceTree = "<group>";
-		};
-		A27FA7EF16320E4100D686E9 /* Scripting */ = {
-			isa = PBXGroup;
-			children = (
-				A27FA7F016320E5300D686E9 /* ScriptController.h */,
-				A27FA7F116320E5300D686E9 /* ScriptController.m */,
+				A2E831C7167CF4EC000F368C /* ScriptController.h */,
+				A2E831C8167CF4EC000F368C /* ScriptController.m */,
 			);
 			path = Scripting;
 			sourceTree = "<group>";
 		};
-		A2BAAB27160F912500160FCE = {
+		A2FF5B89167CE5BD00E38B40 = {
 			isa = PBXGroup;
 			children = (
-				A2BAAB3C160F912500160FCE /* NoPLGanger */,
-				A2BAAB5C160F912500160FCE /* NoPLGangerTests */,
-				A2BAAB35160F912500160FCE /* Frameworks */,
-				A2BAAB33160F912500160FCE /* Products */,
+				A2DE04C1167CF72100296706 /* NoPL.icns */,
+				A2FF5B9E167CE5BD00E38B40 /* NoPLGanger */,
+				A2FF5B97167CE5BD00E38B40 /* Frameworks */,
+				A2FF5B95167CE5BD00E38B40 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		A2BAAB33160F912500160FCE /* Products */ = {
+		A2FF5B95167CE5BD00E38B40 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				A2BAAB32160F912500160FCE /* NoPLGanger.app */,
-				A2BAAB56160F912500160FCE /* NoPLGangerTests.octest */,
+				A2FF5B94167CE5BD00E38B40 /* NoPLGanger.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		A2BAAB35160F912500160FCE /* Frameworks */ = {
+		A2FF5B97167CE5BD00E38B40 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				A27FA8261632E9AC00D686E9 /* libNoPLc.a */,
-				A27FA7DC1630A0DF00D686E9 /* libNoPLRuntime.a */,
-				A2BAAB36160F912500160FCE /* Cocoa.framework */,
-				A2BAAB57160F912500160FCE /* SenTestingKit.framework */,
-				A2BAAB38160F912500160FCE /* Other Frameworks */,
+				A2DE04C3167CF77100296706 /* libNoPLc.a */,
+				A2DE04C5167CF78000296706 /* libNoPLRuntime.a */,
+				A2FF5B98167CE5BD00E38B40 /* Cocoa.framework */,
+				A2FF5B9A167CE5BD00E38B40 /* Other Frameworks */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		A2BAAB38160F912500160FCE /* Other Frameworks */ = {
+		A2FF5B9A167CE5BD00E38B40 /* Other Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				A2BAAB39160F912500160FCE /* AppKit.framework */,
-				A2BAAB3A160F912500160FCE /* CoreData.framework */,
-				A2BAAB3B160F912500160FCE /* Foundation.framework */,
+				A2FF5B9B167CE5BD00E38B40 /* AppKit.framework */,
+				A2FF5B9C167CE5BD00E38B40 /* CoreData.framework */,
+				A2FF5B9D167CE5BD00E38B40 /* Foundation.framework */,
 			);
 			name = "Other Frameworks";
 			sourceTree = "<group>";
 		};
-		A2BAAB3C160F912500160FCE /* NoPLGanger */ = {
+		A2FF5B9E167CE5BD00E38B40 /* NoPLGanger */ = {
 			isa = PBXGroup;
 			children = (
-				A27FA7EF16320E4100D686E9 /* Scripting */,
-				A24F59C0163053C000FC9181 /* ScriptData */,
-				A24F59BB162F575E00FC9181 /* DataList */,
-				A27219C0162210CA004350AC /* FileBrowser */,
-				A2BAAB48160F912500160FCE /* Document.h */,
-				A2BAAB49160F912500160FCE /* Document.m */,
-				A2BAAB4B160F912500160FCE /* Document.xib */,
-				A2BAAB4E160F912500160FCE /* MainMenu.xib */,
-				A21224EF163997E200A86354 /* EditorColors.plist */,
-				A2BAAB3D160F912500160FCE /* Supporting Files */,
+				A2FF5BAA167CE5BD00E38B40 /* AppDelegate.h */,
+				A2FF5BAB167CE5BD00E38B40 /* AppDelegate.m */,
+				A2E831AF167CF4EC000F368C /* DataList */,
+				A2E831B2167CF4EC000F368C /* FileBrowser */,
+				A2E831B7167CF4EC000F368C /* ScriptData */,
+				A2E831C6167CF4EC000F368C /* Scripting */,
+				A2FF5BAD167CE5BE00E38B40 /* MainMenu.xib */,
+				A2C1F8DC167D0E0A0040E027 /* EditorColors.plist */,
+				A2FF5B9F167CE5BD00E38B40 /* Supporting Files */,
 			);
 			path = NoPLGanger;
 			sourceTree = "<group>";
 		};
-		A2BAAB3D160F912500160FCE /* Supporting Files */ = {
+		A2FF5B9F167CE5BD00E38B40 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				A2BAAB3E160F912500160FCE /* NoPLGanger-Info.plist */,
-				A2BAAB3F160F912500160FCE /* InfoPlist.strings */,
-				A2BAAB42160F912500160FCE /* main.m */,
-				A2BAAB44160F912500160FCE /* NoPLGanger-Prefix.pch */,
-				A2BAAB45160F912500160FCE /* Credits.rtf */,
-			);
-			name = "Supporting Files";
-			sourceTree = "<group>";
-		};
-		A2BAAB5C160F912500160FCE /* NoPLGangerTests */ = {
-			isa = PBXGroup;
-			children = (
-				A2BAAB62160F912500160FCE /* NoPLGangerTests.h */,
-				A2BAAB63160F912500160FCE /* NoPLGangerTests.m */,
-				A2BAAB5D160F912500160FCE /* Supporting Files */,
-			);
-			path = NoPLGangerTests;
-			sourceTree = "<group>";
-		};
-		A2BAAB5D160F912500160FCE /* Supporting Files */ = {
-			isa = PBXGroup;
-			children = (
-				A2BAAB5E160F912500160FCE /* NoPLGangerTests-Info.plist */,
-				A2BAAB5F160F912500160FCE /* InfoPlist.strings */,
+				A2FF5BA0167CE5BD00E38B40 /* NoPLGanger-Info.plist */,
+				A2FF5BA1167CE5BD00E38B40 /* InfoPlist.strings */,
+				A2FF5BA4167CE5BD00E38B40 /* main.m */,
+				A2FF5BA6167CE5BD00E38B40 /* NoPLGanger-Prefix.pch */,
+				A2FF5BA7167CE5BD00E38B40 /* Credits.rtf */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -263,13 +206,13 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		A2BAAB31160F912500160FCE /* NoPLGanger */ = {
+		A2FF5B93167CE5BD00E38B40 /* NoPLGanger */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = A2BAAB67160F912500160FCE /* Build configuration list for PBXNativeTarget "NoPLGanger" */;
+			buildConfigurationList = A2FF5BB2167CE5BE00E38B40 /* Build configuration list for PBXNativeTarget "NoPLGanger" */;
 			buildPhases = (
-				A2BAAB2E160F912500160FCE /* Sources */,
-				A2BAAB2F160F912500160FCE /* Frameworks */,
-				A2BAAB30160F912500160FCE /* Resources */,
+				A2FF5B90167CE5BD00E38B40 /* Sources */,
+				A2FF5B91167CE5BD00E38B40 /* Frameworks */,
+				A2FF5B92167CE5BD00E38B40 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -277,184 +220,102 @@
 			);
 			name = NoPLGanger;
 			productName = NoPLGanger;
-			productReference = A2BAAB32160F912500160FCE /* NoPLGanger.app */;
+			productReference = A2FF5B94167CE5BD00E38B40 /* NoPLGanger.app */;
 			productType = "com.apple.product-type.application";
-		};
-		A2BAAB55160F912500160FCE /* NoPLGangerTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = A2BAAB6A160F912500160FCE /* Build configuration list for PBXNativeTarget "NoPLGangerTests" */;
-			buildPhases = (
-				A2BAAB51160F912500160FCE /* Sources */,
-				A2BAAB52160F912500160FCE /* Frameworks */,
-				A2BAAB53160F912500160FCE /* Resources */,
-				A2BAAB54160F912500160FCE /* ShellScript */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				A2BAAB5B160F912500160FCE /* PBXTargetDependency */,
-			);
-			name = NoPLGangerTests;
-			productName = NoPLGangerTests;
-			productReference = A2BAAB56160F912500160FCE /* NoPLGangerTests.octest */;
-			productType = "com.apple.product-type.bundle";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		A2BAAB29160F912500160FCE /* Project object */ = {
+		A2FF5B8B167CE5BD00E38B40 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				LastUpgradeCheck = 0450;
 				ORGANIZATIONNAME = "Brad Bambara";
 			};
-			buildConfigurationList = A2BAAB2C160F912500160FCE /* Build configuration list for PBXProject "NoPLGanger" */;
+			buildConfigurationList = A2FF5B8E167CE5BD00E38B40 /* Build configuration list for PBXProject "NoPLGanger" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 			);
-			mainGroup = A2BAAB27160F912500160FCE;
-			productRefGroup = A2BAAB33160F912500160FCE /* Products */;
+			mainGroup = A2FF5B89167CE5BD00E38B40;
+			productRefGroup = A2FF5B95167CE5BD00E38B40 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				A2BAAB31160F912500160FCE /* NoPLGanger */,
-				A2BAAB55160F912500160FCE /* NoPLGangerTests */,
+				A2FF5B93167CE5BD00E38B40 /* NoPLGanger */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		A2BAAB30160F912500160FCE /* Resources */ = {
+		A2FF5B92167CE5BD00E38B40 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A2BAAB41160F912500160FCE /* InfoPlist.strings in Resources */,
-				A2BAAB47160F912500160FCE /* Credits.rtf in Resources */,
-				A2BAAB4D160F912500160FCE /* Document.xib in Resources */,
-				A2BAAB50160F912500160FCE /* MainMenu.xib in Resources */,
-				A21224F0163997E200A86354 /* EditorColors.plist in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		A2BAAB53160F912500160FCE /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				A2BAAB61160F912500160FCE /* InfoPlist.strings in Resources */,
+				A2FF5BA3167CE5BD00E38B40 /* InfoPlist.strings in Resources */,
+				A2FF5BA9167CE5BD00E38B40 /* Credits.rtf in Resources */,
+				A2FF5BAF167CE5BE00E38B40 /* MainMenu.xib in Resources */,
+				A2DE04C2167CF72100296706 /* NoPL.icns in Resources */,
+				A2C1F8DD167D0E0A0040E027 /* EditorColors.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
-/* Begin PBXShellScriptBuildPhase section */
-		A2BAAB54160F912500160FCE /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "# Run the unit tests in this test bundle.\n\"${SYSTEM_DEVELOPER_DIR}/Tools/RunUnitTests\"\n";
-		};
-/* End PBXShellScriptBuildPhase section */
-
 /* Begin PBXSourcesBuildPhase section */
-		A2BAAB2E160F912500160FCE /* Sources */ = {
+		A2FF5B90167CE5BD00E38B40 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A2BAAB43160F912500160FCE /* main.m in Sources */,
-				A2BAAB4A160F912500160FCE /* Document.m in Sources */,
-				A27219C4162210FF004350AC /* FileBrowserController.m in Sources */,
-				A24F59B9162F2A5900FC9181 /* FileSystemNode.m in Sources */,
-				A24F59BE162F579B00FC9181 /* DataListController.m in Sources */,
-				A24F59C3163053CF00FC9181 /* DataManager.m in Sources */,
-				A24F59C71630560500FC9181 /* XMLScriptData.m in Sources */,
-				A24F59CB1630561400FC9181 /* PlistScriptData.m in Sources */,
-				A24F59CF163057F700FC9181 /* ScriptData.m in Sources */,
-				A27FA7E71630A81C00D686E9 /* NSDictionary+NSDictionary_NoPL.m in Sources */,
-				A27FA7EA1630B5F900D686E9 /* NSArray+NSArray_NoPL.m in Sources */,
-				A27FA7F216320E5300D686E9 /* ScriptController.m in Sources */,
-				A22253DE16382BFF00EED967 /* NoPLScriptData.m in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		A2BAAB51160F912500160FCE /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				A2BAAB64160F912500160FCE /* NoPLGangerTests.m in Sources */,
-				A24F59BA162F2A5900FC9181 /* FileSystemNode.m in Sources */,
-				A24F59BF162F579B00FC9181 /* DataListController.m in Sources */,
-				A24F59C4163053CF00FC9181 /* DataManager.m in Sources */,
-				A24F59C81630560500FC9181 /* XMLScriptData.m in Sources */,
-				A24F59CC1630561400FC9181 /* PlistScriptData.m in Sources */,
-				A24F59D0163057F700FC9181 /* ScriptData.m in Sources */,
+				A2FF5BA5167CE5BD00E38B40 /* main.m in Sources */,
+				A2FF5BAC167CE5BD00E38B40 /* AppDelegate.m in Sources */,
+				A2E831C9167CF4EC000F368C /* DataListController.m in Sources */,
+				A2E831CA167CF4EC000F368C /* FileBrowserController.m in Sources */,
+				A2E831CB167CF4EC000F368C /* FileSystemNode.m in Sources */,
+				A2E831CC167CF4EC000F368C /* DataManager.m in Sources */,
+				A2E831CD167CF4EC000F368C /* NoPLScriptData.m in Sources */,
+				A2E831CE167CF4EC000F368C /* NSArray+NSArray_NoPL.m in Sources */,
+				A2E831CF167CF4EC000F368C /* NSDictionary+NSDictionary_NoPL.m in Sources */,
+				A2E831D0167CF4EC000F368C /* PlistScriptData.m in Sources */,
+				A2E831D1167CF4EC000F368C /* ScriptData.m in Sources */,
+				A2E831D2167CF4EC000F368C /* XMLScriptData.m in Sources */,
+				A2E831D3167CF4EC000F368C /* ScriptController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
-/* Begin PBXTargetDependency section */
-		A2BAAB5B160F912500160FCE /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = A2BAAB31160F912500160FCE /* NoPLGanger */;
-			targetProxy = A2BAAB5A160F912500160FCE /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
-
 /* Begin PBXVariantGroup section */
-		A2BAAB3F160F912500160FCE /* InfoPlist.strings */ = {
+		A2FF5BA1167CE5BD00E38B40 /* InfoPlist.strings */ = {
 			isa = PBXVariantGroup;
 			children = (
-				A2BAAB40160F912500160FCE /* en */,
+				A2FF5BA2167CE5BD00E38B40 /* en */,
 			);
 			name = InfoPlist.strings;
 			sourceTree = "<group>";
 		};
-		A2BAAB45160F912500160FCE /* Credits.rtf */ = {
+		A2FF5BA7167CE5BD00E38B40 /* Credits.rtf */ = {
 			isa = PBXVariantGroup;
 			children = (
-				A2BAAB46160F912500160FCE /* en */,
+				A2FF5BA8167CE5BD00E38B40 /* en */,
 			);
 			name = Credits.rtf;
 			sourceTree = "<group>";
 		};
-		A2BAAB4B160F912500160FCE /* Document.xib */ = {
+		A2FF5BAD167CE5BE00E38B40 /* MainMenu.xib */ = {
 			isa = PBXVariantGroup;
 			children = (
-				A2BAAB4C160F912500160FCE /* en */,
-			);
-			name = Document.xib;
-			sourceTree = "<group>";
-		};
-		A2BAAB4E160F912500160FCE /* MainMenu.xib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				A2BAAB4F160F912500160FCE /* en */,
+				A2FF5BAE167CE5BE00E38B40 /* en */,
 			);
 			name = MainMenu.xib;
-			sourceTree = "<group>";
-		};
-		A2BAAB5F160F912500160FCE /* InfoPlist.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				A2BAAB60160F912500160FCE /* en */,
-			);
-			name = InfoPlist.strings;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
-		A2BAAB65160F912500160FCE /* Debug */ = {
+		A2FF5BB0167CE5BE00E38B40 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -478,13 +339,17 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/../CompiledLibs/runtime/include/",
+					"$(SRCROOT)/../CompiledLibs/compiler/include/",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
 			};
 			name = Debug;
 		};
-		A2BAAB66160F912500160FCE /* Release */ = {
+		A2FF5BB1167CE5BE00E38B40 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -502,118 +367,71 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/../CompiledLibs/runtime/include/",
+					"$(SRCROOT)/../CompiledLibs/compiler/include/",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
 				SDKROOT = macosx;
 			};
 			name = Release;
 		};
-		A2BAAB68160F912500160FCE /* Debug */ = {
+		A2FF5BB3167CE5BE00E38B40 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CLANG_ENABLE_OBJC_ARC = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "NoPLGanger/NoPLGanger-Prefix.pch";
-				HEADER_SEARCH_PATHS = (
-					"$(SRCROOT)/../CompiledLibs/runtime/include/",
-					"$(SRCROOT)/../CompiledLibs/compiler/include/",
-				);
 				INFOPLIST_FILE = "NoPLGanger/NoPLGanger-Info.plist";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SRCROOT)/../CompiledLibs/runtime\"",
 					"\"$(SRCROOT)/../CompiledLibs/compiler\"",
+					"\"$(SRCROOT)/../CompiledLibs/runtime\"",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				USER_HEADER_SEARCH_PATHS = "";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
 		};
-		A2BAAB69160F912500160FCE /* Release */ = {
+		A2FF5BB4167CE5BE00E38B40 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CLANG_ENABLE_OBJC_ARC = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "NoPLGanger/NoPLGanger-Prefix.pch";
-				HEADER_SEARCH_PATHS = (
-					"$(SRCROOT)/../CompiledLibs/runtime/include/",
-					"$(SRCROOT)/../CompiledLibs/compiler/include/",
-				);
 				INFOPLIST_FILE = "NoPLGanger/NoPLGanger-Info.plist";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SRCROOT)/../CompiledLibs/runtime\"",
 					"\"$(SRCROOT)/../CompiledLibs/compiler\"",
+					"\"$(SRCROOT)/../CompiledLibs/runtime\"",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				USER_HEADER_SEARCH_PATHS = "";
 				WRAPPER_EXTENSION = app;
-			};
-			name = Release;
-		};
-		A2BAAB6B160F912500160FCE /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/NoPLGanger.app/Contents/MacOS/NoPLGanger";
-				COMBINE_HIDPI_IMAGES = YES;
-				FRAMEWORK_SEARCH_PATHS = "\"$(DEVELOPER_LIBRARY_DIR)/Frameworks\"";
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "NoPLGanger/NoPLGanger-Prefix.pch";
-				INFOPLIST_FILE = "NoPLGangerTests/NoPLGangerTests-Info.plist";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUNDLE_LOADER)";
-				WRAPPER_EXTENSION = octest;
-			};
-			name = Debug;
-		};
-		A2BAAB6C160F912500160FCE /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/NoPLGanger.app/Contents/MacOS/NoPLGanger";
-				COMBINE_HIDPI_IMAGES = YES;
-				FRAMEWORK_SEARCH_PATHS = "\"$(DEVELOPER_LIBRARY_DIR)/Frameworks\"";
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "NoPLGanger/NoPLGanger-Prefix.pch";
-				INFOPLIST_FILE = "NoPLGangerTests/NoPLGangerTests-Info.plist";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUNDLE_LOADER)";
-				WRAPPER_EXTENSION = octest;
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		A2BAAB2C160F912500160FCE /* Build configuration list for PBXProject "NoPLGanger" */ = {
+		A2FF5B8E167CE5BD00E38B40 /* Build configuration list for PBXProject "NoPLGanger" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				A2BAAB65160F912500160FCE /* Debug */,
-				A2BAAB66160F912500160FCE /* Release */,
+				A2FF5BB0167CE5BE00E38B40 /* Debug */,
+				A2FF5BB1167CE5BE00E38B40 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		A2BAAB67160F912500160FCE /* Build configuration list for PBXNativeTarget "NoPLGanger" */ = {
+		A2FF5BB2167CE5BE00E38B40 /* Build configuration list for PBXNativeTarget "NoPLGanger" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				A2BAAB68160F912500160FCE /* Debug */,
-				A2BAAB69160F912500160FCE /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		A2BAAB6A160F912500160FCE /* Build configuration list for PBXNativeTarget "NoPLGangerTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				A2BAAB6B160F912500160FCE /* Debug */,
-				A2BAAB6C160F912500160FCE /* Release */,
+				A2FF5BB3167CE5BE00E38B40 /* Debug */,
+				A2FF5BB4167CE5BE00E38B40 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = A2BAAB29160F912500160FCE /* Project object */;
+	rootObject = A2FF5B8B167CE5BD00E38B40 /* Project object */;
 }

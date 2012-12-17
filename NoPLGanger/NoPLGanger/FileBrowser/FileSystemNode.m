@@ -49,6 +49,8 @@
 
 #import "FileSystemNode.h"
 
+static NSString* usablePathExtensions[] = {@"nopl",@"plist",@"xml"};
+
 @implementation FileSystemNode
 
 - (id)initWithURL:(NSURL *)url {
@@ -149,6 +151,21 @@
 			{
 				for (NSString *filename in contentsAtPath)
 				{
+					//skip over any files that are not of a specific set of file extensions
+					int usablePathExtensionsLength = sizeof(usablePathExtensions)/sizeof(usablePathExtensions[0]);
+					NSString* extension = [filename pathExtension];
+					BOOL isValidExtension = [extension isEqualToString:@""];//accept any paths with not extension
+					for(int i = 0; i < usablePathExtensionsLength; i++)
+					{
+						if([extension compare:usablePathExtensions[i] options:NSCaseInsensitiveSearch] == NSOrderedSame)
+						{
+							isValidExtension = YES;
+							break;
+						}
+					}
+					if(!isValidExtension)
+						continue;
+					
 					// Use the filename as a key and see if it was around and reuse it, if possible
 					if (_children != nil)
 					{
