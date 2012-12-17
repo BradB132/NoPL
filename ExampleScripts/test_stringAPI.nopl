@@ -1,0 +1,27 @@
+String testStr = "Foo Bar, foo bar";
+
+#"TestStr = "+testStr;
+
+#format("Testing format string with number: %, boolean: % and string: '%'", 5, true, testStr);
+
+#"length(testStr) = "+length(testStr);
+
+#"fastHash(testStr) = "+fastHash(testStr);
+
+#"toLower(testStr) = "+toLower(testStr);
+
+#"toUpper(testStr) = "+toUpper(testStr);
+
+#"length(testStr) = "+length(testStr);
+
+#"substring(testStr, 9) = "+substring(testStr, 9);
+
+#"substring(testStr, 9, 3) = "+substring(testStr, 9, 3);
+
+#"indexOf(testStr, 'foo') = "+indexOf(testStr, 'foo');
+
+#"replaceAll(testStr, 'oo', 'ah') = "+replaceAll(testStr, 'oo', 'ah');
+
+#"replaceFirst(testStr, 'oo', 'ah') = "+replaceFirst(testStr, 'oo', 'ah');
+
+#"replaceLast(testStr, 'oo', 'ah') = "+replaceLast(testStr, 'oo', 'ah');

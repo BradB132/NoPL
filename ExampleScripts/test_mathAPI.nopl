@@ -1,0 +1,46 @@
+#"e = "+e;
+
+#"PI = "+PI;
+
+#"degreeToRadian = "+degreeToRadian;
+
+#"radianToDegree = "+radianToDegree;
+
+float testNumber = random(0.0f, 1.0f);
+#"The random test number is: "+testNumber;
+
+#testNumber+" degrees converted to radians is: "+degreeToRadian(testNumber);
+
+#testNumber+" radians converted to degrees is: "+radianToDegree(testNumber);
+
+#"sqrt(testNumber) - "+sqrt(testNumber);
+
+#"sin(testNumber) - "+sin(testNumber);
+
+#"cos(testNumber) - "+cos(testNumber);
+
+#"tan(testNumber) - "+tan(testNumber);
+
+#"asin(testNumber) - "+asin(testNumber);
+
+#"acos(testNumber) - "+acos(testNumber);
+
+#"atan(testNumber) - "+atan(testNumber);
+
+#"atan2(testNumber,1.0f) - "+atan2(testNumber, 1.0f);
+
+#"random() resulted in: "+random();
+
+#"random(testNumber) resulted in: "+random(testNumber);
+
+#"random(0, testNumber) resulted in: "+random(0, testNumber);
+
+#"log(testNumber) = "+log(testNumber);
+
+#"log(testNumber, 2) = "+log(testNumber, 2);
+
+#"round(testNumber) - "+round(testNumber);
+
+#"floor(testNumber) - "+floor(testNumber);
+
+#"ceil(testNumber) - "+ceil(testNumber);
