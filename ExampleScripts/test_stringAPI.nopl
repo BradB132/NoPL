@@ -12,8 +12,6 @@ String testStr = "Foo Bar, foo bar";
 
 #"toUpper(testStr) = "+toUpper(testStr);
 
-#"length(testStr) = "+length(testStr);
-
 #"substring(testStr, 9) = "+substring(testStr, 9);
 
 #"substring(testStr, 9, 3) = "+substring(testStr, 9, 3);
