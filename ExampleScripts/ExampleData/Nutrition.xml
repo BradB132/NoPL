@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<nutrition category="misc">
+	<Food name="lettuce" color="green" isHealthy="true"/>
+	<Food name="wine" color="red" isHealthy="true"/>
+	<Food name="chocolate" color="brown" isHealthy="false"/>
+	<Food name="cheese" color="yellow" isHealthy="false"/>
+</nutrition>

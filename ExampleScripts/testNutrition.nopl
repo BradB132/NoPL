@@ -1,0 +1,8 @@
+#"Test Nutrition.xml";
+
+Pointer nutObj = nutrition;
+
+for(int i = 0; i < nutObj.count; i++)
+{
+	#nutObj[i]+", "+nutObj[i].name;
+}

@@ -162,7 +162,6 @@ NoPL_FunctionValue nopl_standardFunctions(const void* calledOnObject, const char
 				break;
 			
 			//copy the string
-			returnVal.type = NoPL_DataType_String;
 			NoPL_assignString(argv[0].stringValue, returnVal);
 			
 			//make the copied string lowercase
@@ -178,7 +177,6 @@ NoPL_FunctionValue nopl_standardFunctions(const void* calledOnObject, const char
 				break;
 			
 			//copy the string
-			returnVal.type = NoPL_DataType_String;
 			NoPL_assignString(argv[0].stringValue, returnVal);
 			
 			//make the copied string lowercase
@@ -244,8 +242,6 @@ NoPL_FunctionValue nopl_standardFunctions(const void* calledOnObject, const char
 			if(argc != 3 || argv[0].type != NoPL_DataType_String || argv[1].type != NoPL_DataType_String || argv[2].type != NoPL_DataType_String)
 				break;
 			
-			returnVal.type = NoPL_DataType_String;
-			
 			//check to make sure the substring exists in the searched string
 			char* found = strstr(argv[0].stringValue, argv[1].stringValue);
 			if(!found)
@@ -254,6 +250,8 @@ NoPL_FunctionValue nopl_standardFunctions(const void* calledOnObject, const char
 				NoPL_assignString(argv[0].stringValue, returnVal);
 				break;
 			}
+			
+			returnVal.type = NoPL_DataType_String;
 			
 			//iterate over the string to find the last instance of the string
 			unsigned long arg1Length = strlen(argv[1].stringValue);
@@ -294,7 +292,7 @@ NoPL_FunctionValue nopl_standardFunctions(const void* calledOnObject, const char
 				found = strstr(found+arg1Length, argv[1].stringValue);
 			}
 			
-			//copy the end of the string
+			//copy the end of the string			
 			strcpy(returnVal.stringValue+copyToIndex, argv[0].stringValue+copyFromIndex);
 		}
 			break;
@@ -302,8 +300,6 @@ NoPL_FunctionValue nopl_standardFunctions(const void* calledOnObject, const char
 		{
 			if(argc != 3 || argv[0].type != NoPL_DataType_String || argv[1].type != NoPL_DataType_String || argv[2].type != NoPL_DataType_String)
 				break;
-			
-			returnVal.type = NoPL_DataType_String;
 			
 			//check to make sure the substring exists in the searched string
 			char* found = strstr(argv[0].stringValue, argv[1].stringValue);
@@ -320,6 +316,7 @@ NoPL_FunctionValue nopl_standardFunctions(const void* calledOnObject, const char
 			returnVal.stringValue = malloc(1+strlen(argv[0].stringValue)+(arg2Length-arg1Length));
 			
 			//copy the string, taking the replaced section from the new string
+			returnVal.type = NoPL_DataType_String;
 			unsigned long replaceIndex = found-argv[0].stringValue;
 			memcpy(returnVal.stringValue, argv[0].stringValue, replaceIndex);
 			memcpy(returnVal.stringValue+replaceIndex, argv[2].stringValue, arg2Length);
@@ -330,8 +327,6 @@ NoPL_FunctionValue nopl_standardFunctions(const void* calledOnObject, const char
 		{
 			if(argc != 3 || argv[0].type != NoPL_DataType_String || argv[1].type != NoPL_DataType_String || argv[2].type != NoPL_DataType_String)
 				break;
-			
-			returnVal.type = NoPL_DataType_String;
 			
 			//check to make sure the substring exists in the searched string
 			char* found = strstr(argv[0].stringValue, argv[1].stringValue);
@@ -360,6 +355,7 @@ NoPL_FunctionValue nopl_standardFunctions(const void* calledOnObject, const char
 			returnVal.stringValue = malloc(1+strlen(argv[0].stringValue)+(arg2Length-arg1Length));
 			
 			//copy the string, taking the replaced section from the new string
+			returnVal.type = NoPL_DataType_String;
 			unsigned long replaceIndex = found-argv[0].stringValue;
 			memcpy(returnVal.stringValue, argv[0].stringValue, replaceIndex);
 			memcpy(returnVal.stringValue+replaceIndex, argv[2].stringValue, arg2Length);
