@@ -10,6 +10,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include "NoPLRuntime.h"
 
 //TODO: test every feature of this language to make sure it works
@@ -771,7 +772,22 @@ int evaluateBoolean(NoPL_Evaluation* eval)
 			evaluateString(eval, &strObj);
 			
 			//check if this is a string with a value
-			int boolResult = (strObj.stringValue && strcmp(strObj.stringValue, ""));
+			int boolResult = (strObj.stringValue != NULL);
+			if(boolResult)
+			{
+				//test if the value of this string equates to 'yes' or 'true'
+				long resultLength = strlen(strObj.stringValue);
+				char resultCpy[resultLength];
+				strcpy(resultCpy, strObj.stringValue);
+				
+				//do a case insensitive compare
+				for(int i = 0; i < resultLength; i++)
+				{
+					resultCpy[i] = tolower(resultCpy[i]);
+				}
+				
+				boolResult = (!strcmp("true", resultCpy) || !strcmp("yes", resultCpy));
+			}
 			
 			//we're done with the string
 			freeNoPL_String(&strObj);
