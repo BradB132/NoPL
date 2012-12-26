@@ -2,7 +2,34 @@
 
 Pointer nutObj = nutrition;
 
-for(int i = 0; i < nutObj.count; i++)
+//we'll use these pretty strings as replacements for 'true' and 'false'
+String trueStr = "Yes";
+String falseStr = "No";
+
+//determine which of the foods are healthy
+int count = nutObj.count;
+for(int i = 0; i < count; i++)
 {
-	#nutObj[i]+", "+nutObj[i].name;
+	String isHealthy;
+	Object currentFood = nutObj[i];
+	if(currentFood.isHealthy)
+		isHealthy = trueStr;
+	else
+		isHealthy = falseStr;
+
+	#format("Is % healthy? %.", (String)currentFood.name, isHealthy);
+}
+
+//try looking at some more attributes
+#"Looking for a red food:";
+for(int i = 0; i < count; i++)
+{
+	Object currentFood = nutObj[i];
+	if(currentFood.color == 'red')
+	{
+		//capitalize the name of the food
+		String firstLetter = substring((String)currentFood.name, 0, 1);
+		String remainingWord = substring((String)currentFood.name, 1);
+		#format("% is red", toUpper(firstLetter)+remainingWord, (String)currentFood.color);
+	}
 }

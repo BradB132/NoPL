@@ -55,6 +55,30 @@ void boolToString(int boolVal, NoPL_String* outStr);
 void numberToString(float number, NoPL_String* outStr);
 void objectToString(void* object, NoPL_String* outStr);
 void setUpScript(NoPL_Evaluation* eval, const NoPL_Instruction* scriptBuffer, unsigned int bufferLength, const NoPL_Callbacks* callbacks);
+int stringToBoolean(char* str);
+
+#pragma mark - Type Casting
+
+int stringToBoolean(char* str)
+{
+	//check if this is a string with a value
+	int boolResult = (str != NULL);
+	if(boolResult)
+	{
+		//test if the value of this string equates to 'yes' or 'true'
+		long resultLength = strlen(str);
+		char resultCpy[resultLength];
+		strcpy(resultCpy, str);
+		
+		//do a case insensitive compare
+		for(int i = 0; i < resultLength; i++)
+			resultCpy[i] = tolower(str[i]);
+		
+		boolResult = (!strcmp("true", resultCpy) || !strcmp("yes", resultCpy));
+	}
+	
+	return boolResult;
+}
 
 #pragma mark - String management
 
@@ -759,7 +783,7 @@ int evaluateBoolean(NoPL_Evaluation* eval)
 			else if(val.type == NoPL_DataType_Number)
 				return (val.numberValue != 0.0f);
 			else if(val.type == NoPL_DataType_String)
-				return (val.stringValue && strcmp(val.stringValue, ""));
+				return stringToBoolean(val.stringValue);
 			else
 				return 0;
 		}
@@ -772,22 +796,7 @@ int evaluateBoolean(NoPL_Evaluation* eval)
 			evaluateString(eval, &strObj);
 			
 			//check if this is a string with a value
-			int boolResult = (strObj.stringValue != NULL);
-			if(boolResult)
-			{
-				//test if the value of this string equates to 'yes' or 'true'
-				long resultLength = strlen(strObj.stringValue);
-				char resultCpy[resultLength];
-				strcpy(resultCpy, strObj.stringValue);
-				
-				//do a case insensitive compare
-				for(int i = 0; i < resultLength; i++)
-				{
-					resultCpy[i] = tolower(resultCpy[i]);
-				}
-				
-				boolResult = (!strcmp("true", resultCpy) || !strcmp("yes", resultCpy));
-			}
+			int boolResult = stringToBoolean(strObj.stringValue);
 			
 			//we're done with the string
 			freeNoPL_String(&strObj);
