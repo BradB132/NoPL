@@ -38,6 +38,7 @@ typedef struct
 typedef enum
 {
 	NoPL_StringFeedbackType_PrintStatement,
+	NoPL_StringFeedbackType_Metadata,
 	NoPL_StringFeedbackType_RuntimeError,
 	NoPL_StringFeedbackType_DebugInfo,
 } NoPL_StringFeedbackType;

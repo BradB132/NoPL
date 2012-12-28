@@ -3,7 +3,7 @@
 //  NoPLc
 //
 //  Created by Brad Bambara on 4/15/12.
-//  Copyright (c) 2012 Small Planet Digital. All rights reserved.
+//  Copyright (c) 2012. All rights reserved.
 //
 
 #include <stdio.h>
@@ -1914,6 +1914,24 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				nopl_freeInnerCompileContext(&outerLoopCtx);
 			}
 				break;
+			case METADATA:
+			{
+				//get the string and length
+				char* string = (char*)tree->getText(tree)->chars;
+				int length = (int)strlen(string);
+				
+				//strip the quotes
+				char stringCopy[length-1];
+				strcpy(stringCopy, (string+2));
+				stringCopy[length-4] = 0;
+				
+				//add the operator
+				nopl_addOperator(NoPL_BYTE_METADATA, context);
+				
+				//add the string
+				nopl_addBytesToContext(stringCopy, sizeof(char)*(length-3), context);
+			}
+				break;
 			case MOD:
 			{
 				//this is a binary operator
@@ -2699,6 +2717,8 @@ void nopl_compileWithInputStream(pANTLR3_INPUT_STREAM stream, const NoPL_Compile
 					case COMMENT:
 						nopl_addTokenRange(context, tok, NoPL_TokenRangeType_comments);
 						break;
+					case METADATA:
+						nopl_addTokenRange(context, tok, NoPL_TokenRangeType_metadata);
 				}
 			}
 		}

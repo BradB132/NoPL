@@ -514,6 +514,17 @@ int evaluateStatement(NoPL_Evaluation* eval)
 				eval->callbacks->stringFeedback(str, NoPL_StringFeedbackType_DebugInfo);
 		}
 			break;
+		case NoPL_BYTE_METADATA:
+		{
+			//get the string value
+			char* str = (char*)(eval->scriptBuffer+eval->evaluationPosition);
+			eval->evaluationPosition += strlen(str)+1;
+			
+			//print to callback function
+			if(eval->callbacks->stringFeedback)
+				eval->callbacks->stringFeedback(str, NoPL_StringFeedbackType_Metadata);
+		}
+			break;
 		default:
 			printf("Statement Error: instruction #%d doesn't make sense here\n", (int)instr);
 			break;
@@ -932,7 +943,6 @@ void evaluateFunction(NoPL_Evaluation* eval, NoPL_FunctionValue* returnVal)
 			
 			//call the function
 			*returnVal = eval->callbacks->evaluateFunction(ptr, funcName, argv, (unsigned int)(*argCount));
-			//TODO: print an error if the value is uninitialized
 			
 			//release any strings that were allocated
 			for(int i = 0; i < releaseStringCount; i++)
@@ -975,6 +985,13 @@ void evaluateFunction(NoPL_Evaluation* eval, NoPL_FunctionValue* returnVal)
 		default:
 			printf("Function Error: instruction #%d doesn't make sense here\n", (int)instr);
 			break;
+	}
+	
+	//send an error if the function was uninitialized
+	if(returnVal->type == NoPL_DataType_Uninitialized && eval->callbacks->stringFeedback)
+	{
+		//TODO: make this error message more useful
+		eval->callbacks->stringFeedback("Did not receive a value from function call.", NoPL_StringFeedbackType_RuntimeError);
 	}
 }
 

@@ -37,6 +37,7 @@ statement
 	|	BREAK STATEMENT_DELIMITER!
 	|	CONTINUE STATEMENT_DELIMITER!
 	|	EXIT STATEMENT_DELIMITER!
+	|	METADATA
 	;
 
 nonControlStatement
@@ -270,6 +271,8 @@ STATEMENT_DELIMITER:	';';
 PRINT_VALUE:		'#';
 
 //OTHER MISC LEXER
+METADATA:	'<?' ( options {greedy=false;} : . )* '?>';
+
 ID  :	('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'0'..'9'|'_')*
     ;
     
