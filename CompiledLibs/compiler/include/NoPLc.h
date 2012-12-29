@@ -3,7 +3,7 @@
 //  NoPLc
 //
 //  Created by Brad Bambara on 4/15/12.
-//  Copyright (c) 2012 Small Planet Digital. All rights reserved.
+//  Copyright (c) 2012. All rights reserved.
 //
 
 #ifndef NoPLc_NoPLc_h
@@ -32,7 +32,8 @@ typedef enum
 	NoPL_TokenRangeType_functions = 8,
 	NoPL_TokenRangeType_syntax = 9,
 	NoPL_TokenRangeType_comments = 10,
-	NoPL_TokenRangeType_count = 11,
+	NoPL_TokenRangeType_metadata = 11,
+	NoPL_TokenRangeType_count = 12,
 } NoPL_TokenRangeType;
 
 typedef struct
@@ -54,7 +55,6 @@ typedef struct
 
 NoPL_CompileContext newNoPL_CompileContext();
 void freeNoPL_CompileContext(NoPL_CompileContext* context);
-
 
 #pragma mark - NoPL_CompileOptions
 

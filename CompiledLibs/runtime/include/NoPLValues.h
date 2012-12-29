@@ -3,7 +3,7 @@
 //  NoPLc
 //
 //  Created by Brad Bambara on 4/26/12.
-//  Copyright (c) 2012 Small Planet Digital. All rights reserved.
+//  Copyright (c) 2012. All rights reserved.
 //
 
 #ifndef NoPLc_NoPLByteValues_h
@@ -124,11 +124,15 @@ typedef unsigned char NoPL_Instruction;
 
 #define NoPL_BYTE_CAST_OBJECT_TO_STRING 75
 
+//METADATA
+
+#define NoPL_BYTE_METADATA 76
+
 //DEBUGGING
-#define NoPL_BYTE_DEBUG_LINE 76
-#define NoPL_BYTE_DEBUG_VALUE_NUMBER 77
-#define NoPL_BYTE_DEBUG_VALUE_BOOLEAN 78
-#define NoPL_BYTE_DEBUG_VALUE_STRING 79
-#define NoPL_BYTE_DEBUG_VALUE_OBJECT 80
+#define NoPL_BYTE_DEBUG_LINE 77
+#define NoPL_BYTE_DEBUG_VALUE_NUMBER 78
+#define NoPL_BYTE_DEBUG_VALUE_BOOLEAN 79
+#define NoPL_BYTE_DEBUG_VALUE_STRING 80
+#define NoPL_BYTE_DEBUG_VALUE_OBJECT 81
 
 #endif
