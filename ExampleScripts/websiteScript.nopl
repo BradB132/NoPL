@@ -1,0 +1,24 @@
+//let's test the metadata feature of NoPL as if we're using the script like PHP
+
+<?
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>Test site</title>
+</head>
+<body>
+
+	<ul>
+?>
+
+for(int i = 0; i < 20; i++)
+{
+	<?<li>?>
+	#"This is list number "+i;
+	<?</li>?>
+}
+
+<?
+	</ul>
+</body></html>
+?>
