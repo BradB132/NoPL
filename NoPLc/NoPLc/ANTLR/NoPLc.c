@@ -956,6 +956,8 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				//get the boolean for the conditional, and the first child to check if there is a corresponding 'else' statement
 				pANTLR3_BASE_TREE condition = treeIndex(tree,0);
 				pANTLR3_BASE_TREE firstStatement = treeIndex(tree,1);
+				if(!firstStatement)
+					return;
 				
 				//add the operator
 				nopl_addOperator(NoPL_BYTE_CONDITIONAL, context);
