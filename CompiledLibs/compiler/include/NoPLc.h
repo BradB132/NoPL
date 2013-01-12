@@ -9,6 +9,10 @@
 #ifndef NoPLc_NoPLc_h
 #define NoPLc_NoPLc_h
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "NoPLValues.h"
 
 #pragma mark - Ranges
@@ -71,5 +75,9 @@ typedef struct
 
 void compileContextWithFilePath(const char* path, const NoPL_CompileOptions* options, NoPL_CompileContext* context);
 void compileContextWithString(const char* scriptString, const NoPL_CompileOptions* options, NoPL_CompileContext* context);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

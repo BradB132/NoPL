@@ -9,6 +9,10 @@
 #ifndef NoPL_Runtime_NoPLRuntime_h
 #define NoPL_Runtime_NoPLRuntime_h
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "NoPLValues.h"
 
 #pragma mark - Enums / structs for script interface
@@ -54,7 +58,7 @@ typedef struct
 
 #define NoPL_FunctionValue()				(NoPL_FunctionValue){0,NoPL_DataType_Uninitialized}
 #define NoPL_Callbacks()					(NoPL_Callbacks){0,0,0}
-#define NoPL_assignString(charStr, funcVal)	funcVal.type = NoPL_DataType_String;funcVal.stringValue = malloc(strlen(charStr)+1);strcpy(funcVal.stringValue, charStr);
+#define NoPL_assignString(charStr, funcVal)	funcVal.type = NoPL_DataType_String;funcVal.stringValue = (char*)malloc(strlen(charStr)+1);strcpy(funcVal.stringValue, charStr);
 
 #pragma mark - Script API
 
@@ -68,5 +72,9 @@ NoPL_DebugHandle createNoPL_DebugHandle(const NoPL_Instruction* scriptBuffer, un
 void freeNoPL_DebugHandle(NoPL_DebugHandle handle);
 int debugStep(NoPL_DebugHandle handle);
 NoPL_FunctionValue queryValue(NoPL_DebugHandle handle, NoPL_DataType type, NoPL_Index index);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
