@@ -66,7 +66,8 @@ NoPL_FunctionValue nopl_standardFunctions(const void* calledOnObject, const char
 						returnLength += sizeof(void*)*2+2;
 						break;
 					case NoPL_DataType_String:
-						returnLength += strlen(argv[i].stringValue);
+						if(argv[i].stringValue)
+							returnLength += strlen(argv[i].stringValue);
 						break;
 					default:
 						break;
@@ -92,26 +93,26 @@ NoPL_FunctionValue nopl_standardFunctions(const void* calledOnObject, const char
 					if(*(copyFrom+1) != '%')
 					{
 						//we have a '%' character that represents a variable
-						char* copyBuffer;
+						char* copyBuffer = varBuffer;
 						switch(argv[argIndex].type)
 						{
 							case NoPL_DataType_Boolean:
-								copyBuffer = varBuffer;
 								if(argv[argIndex].booleanValue)
 									strcpy(copyBuffer, "true");
 								else
 									strcpy(copyBuffer, "false");
 								break;
 							case NoPL_DataType_Number:
-								copyBuffer = varBuffer;
 								sprintf(copyBuffer, "%g", argv[argIndex].numberValue);
 								break;
 							case NoPL_DataType_Pointer:
-								copyBuffer = varBuffer;
 								sprintf(copyBuffer, "0x%X", (unsigned int)argv[argIndex].pointerValue);
 								break;
 							case NoPL_DataType_String:
-								copyBuffer = argv[argIndex].stringValue;
+								if(argv[argIndex].stringValue)
+									copyBuffer = argv[argIndex].stringValue;
+								else
+									strcpy(copyBuffer, "");//strings can be NULL, they just show up empty
 								break;
 							default:
 								break;

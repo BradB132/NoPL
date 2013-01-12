@@ -1154,7 +1154,7 @@ void freeNoPL_DebugHandle(NoPL_DebugHandle handle)
 	}
 	if(eval->scriptBuffer)
 	{
-		free(eval->scriptBuffer);
+		free((NoPL_Instruction*)eval->scriptBuffer);
 		eval->scriptBuffer = NULL;
 	}
 }
