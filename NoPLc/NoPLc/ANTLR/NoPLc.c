@@ -956,14 +956,20 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				//get the boolean for the conditional, and the first child to check if there is a corresponding 'else' statement
 				pANTLR3_BASE_TREE condition = treeIndex(tree,0);
 				pANTLR3_BASE_TREE firstStatement = treeIndex(tree,1);
-				if(!firstStatement)
-					return;
 				
 				//add the operator
 				nopl_addOperator(NoPL_BYTE_CONDITIONAL, context);
 				
 				//append the boolean expression for the conditional
 				nopl_appendNodeWithRequiredType(condition, NoPL_type_Boolean, context, options);
+				
+				//handle the case that we have an empty if statement
+				if(!firstStatement)
+				{
+					NoPL_Index zero = 0;
+					nopl_addBytesToContext(&zero, sizeof(NoPL_Index), context);
+					return;
+				}
 				
 				//check if the first statement node is an else statement
 				int hasElse = firstStatement->getType(firstStatement) == CONDITIONAL_ELSE;
@@ -2139,19 +2145,76 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 			case STRING:
 			{
 				//get the string and length
-				char* string = (char*)tree->getText(tree)->chars;
-				int length = (int)strlen(string);
+				char* input = (char*)tree->getText(tree)->chars;
 				
-				//strip the quotes
-				char stringCopy[length];
-				strcpy(stringCopy, (string+1));
-				stringCopy[length-2] = 0;
+				//our string still has quotes around it, take one char off the beginning and end
+				input++;
+				size_t inputLength = strlen(input)-1;
+				
+				//make a copy of this string with substituted special characters
+				char* subString = (char*)malloc(inputLength+1);
+				char* copyTo = subString;
+				size_t i;
+				for(i = 0; i < inputLength; i++)
+				{
+					//check for an escape character
+					if(input[i] == '\\')
+					{
+						//skip the escape character
+						i++;
+						
+						//check which special character we're putting in here
+						switch (input[i])
+						{
+							case '\'':
+								*copyTo = '\'';
+								break;
+							case '\"':
+								*copyTo = '\"';
+								break;
+							case '?':
+								*copyTo = '\?';
+								break;
+							case '\\':
+								*copyTo = '\\';
+								break;
+							case '0':
+								*copyTo = '\0';
+								break;
+							case 'f':
+								*copyTo = '\f';
+								break;
+							case 'n':
+								*copyTo = '\n';
+								break;
+							case 'r':
+								*copyTo = '\r';
+								break;
+							case 't':
+								*copyTo = '\t';
+								break;
+							case 'v':
+								*copyTo = '\v';
+								break;
+							default:
+								copyTo--;
+								break;
+						}
+						copyTo++;
+					}
+					else
+					{
+						*copyTo = input[i];
+						copyTo++;
+					}
+				}
+				*copyTo = '\0';
 				
 				//add the operator
 				nopl_addOperator(NoPL_BYTE_LITERAL_STRING, context);
 				
 				//add the string
-				nopl_addBytesToContext(stringCopy, sizeof(char)*(length-1), context);
+				nopl_addBytesToContext(subString, (int)strlen(subString)+1, context);
 			}
 				break;
 			case SUBSCRIPT_OPEN:
