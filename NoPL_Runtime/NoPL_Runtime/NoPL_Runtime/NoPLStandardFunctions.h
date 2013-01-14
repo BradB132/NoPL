@@ -27,6 +27,7 @@ Number indexOf(String searched, String match);
 String replaceAll(String original, String match, String replaceWith);
 String replaceFirst(String original, String match, String replaceWith);
 String replaceLast(String original, String match, String replaceWith);
+String capitalize(String str);
 Number PI();
 Number e();
 Number degreeToRadian();

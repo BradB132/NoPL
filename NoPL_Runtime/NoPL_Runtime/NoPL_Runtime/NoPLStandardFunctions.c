@@ -17,7 +17,7 @@
 #pragma mark -
 #pragma mark fast hash for looking up function names
 
-unsigned long hash_djb2ToInt(unsigned char* str)
+int hash_djb2ToInt(unsigned char* str)
 {
 	unsigned long hash = 5381;
 	int c;
@@ -361,6 +361,15 @@ NoPL_FunctionValue nopl_standardFunctions(const void* calledOnObject, const char
 			memcpy(returnVal.stringValue, argv[0].stringValue, replaceIndex);
 			memcpy(returnVal.stringValue+replaceIndex, argv[2].stringValue, arg2Length);
 			strcpy(returnVal.stringValue+replaceIndex+arg2Length, argv[0].stringValue+replaceIndex+arg1Length);
+		}
+			break;
+		case 4930025://capitalize
+		{
+			if(argc != 1 || argv[0].type != NoPL_DataType_String)
+				break;
+			
+			NoPL_assignString(argv[0].stringValue, returnVal);
+			returnVal.stringValue[0] = toupper(returnVal.stringValue[0]);
 		}
 			break;
 		case 5862622://PI

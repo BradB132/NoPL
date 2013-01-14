@@ -77,6 +77,9 @@ void testStrings(const char* string, NoPL_StringFeedbackType type)
 		case NoPL_StringFeedbackType_RuntimeError:
 			printf("NoPL Error: %s\n", string);
 			return;
+		case NoPL_StringFeedbackType_Metadata:
+			printf("NoPL Metadata: %s\n", string);
+			return;
 	}
 }
 
