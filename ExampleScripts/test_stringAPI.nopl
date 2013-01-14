@@ -12,6 +12,8 @@ String testStr = "Foo Bar, foo bar";
 
 #"toUpper(testStr) = "+toUpper(testStr);
 
+#"capitalize('foo bar') = "+capitalize('foo bar');
+
 #"substring(testStr, 9) = "+substring(testStr, 9);
 
 #"substring(testStr, 9, 3) = "+substring(testStr, 9, 3);
