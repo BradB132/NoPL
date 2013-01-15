@@ -372,6 +372,118 @@ NoPL_FunctionValue nopl_standardFunctions(const void* calledOnObject, const char
 			returnVal.stringValue[0] = toupper(returnVal.stringValue[0]);
 		}
 			break;
+		case 10435695://timeDesc
+		{
+			if(argc == 0)
+			{
+				time_t t = time(NULL);
+				struct tm tm = *localtime(&t);
+				char* timeStr = asctime(&tm);
+				NoPL_assignString(timeStr, returnVal);
+				
+				//this string always includes a newline at the end, remove it
+				returnVal.stringValue[strlen(returnVal.stringValue)-1] = '\0';
+			}
+		}
+			break;
+		case 11237036://timeZone
+		{
+			if(argc == 0)
+			{
+				time_t t = time(NULL);
+				struct tm tm = *localtime(&t);
+				NoPL_assignString(tm.tm_zone, returnVal);
+			}
+		}
+			break;
+		case 10560882://year
+		{
+			if(argc == 0)
+			{
+				time_t t = time(NULL);
+				struct tm tm = *localtime(&t);
+				returnVal.numberValue = (float)(1900+tm.tm_year);
+				returnVal.type = NoPL_DataType_Number;
+			}
+		}
+			break;
+		case 15884666://month
+		{
+			if(argc == 0)
+			{
+				time_t t = time(NULL);
+				struct tm tm = *localtime(&t);
+				returnVal.numberValue = (float)(1+tm.tm_mon);
+				returnVal.type = NoPL_DataType_Number;
+			}
+		}
+			break;
+		case 11954685://dayOfTheYear
+		{
+			if(argc == 0)
+			{
+				time_t t = time(NULL);
+				struct tm tm = *localtime(&t);
+				returnVal.numberValue = (float)(1+tm.tm_yday);
+				returnVal.type = NoPL_DataType_Number;
+			}
+		}
+			break;
+		case 9844584://dayOfTheMonth
+		{
+			if(argc == 0)
+			{
+				time_t t = time(NULL);
+				struct tm tm = *localtime(&t);
+				returnVal.numberValue = (float)tm.tm_mday;
+				returnVal.type = NoPL_DataType_Number;
+			}
+		}
+			break;
+		case 11882936://dayOfTheWeek
+		{
+			if(argc == 0)
+			{
+				time_t t = time(NULL);
+				struct tm tm = *localtime(&t);
+				returnVal.numberValue = (float)tm.tm_wday;
+				returnVal.type = NoPL_DataType_Number;
+			}
+		}
+			break;
+		case 9961503://hour
+		{
+			if(argc == 0)
+			{
+				time_t t = time(NULL);
+				struct tm tm = *localtime(&t);
+				returnVal.numberValue = (float)tm.tm_hour;
+				returnVal.type = NoPL_DataType_Number;
+			}
+		}
+			break;
+		case 13763588://minute
+		{
+			if(argc == 0)
+			{
+				time_t t = time(NULL);
+				struct tm tm = *localtime(&t);
+				returnVal.numberValue = (float)tm.tm_min;
+				returnVal.type = NoPL_DataType_Number;
+			}
+		}
+			break;
+		case 8549212://second
+		{
+			if(argc == 0)
+			{
+				time_t t = time(NULL);
+				struct tm tm = *localtime(&t);
+				returnVal.numberValue = (float)tm.tm_sec;
+				returnVal.type = NoPL_DataType_Number;
+			}
+		}
+			break;
 		case 5862622://PI
 		{
 			//bail if we have args

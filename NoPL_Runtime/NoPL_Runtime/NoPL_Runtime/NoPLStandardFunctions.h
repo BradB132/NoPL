@@ -16,6 +16,8 @@ NoPL_FunctionValue nopl_standardFunctions(const void* calledOnObject, const char
 
 //NoPL FUNCTIONS IMPLEMENTED IN THIS FILE:
 /*
+
+//STRINGS:
 String format(String format, ...); -- use only '%' character for each variable, example: #format("My num is %", 5)
 Number length(String str);
 Number fastHash(String str);
@@ -28,6 +30,20 @@ String replaceAll(String original, String match, String replaceWith);
 String replaceFirst(String original, String match, String replaceWith);
 String replaceLast(String original, String match, String replaceWith);
 String capitalize(String str);
+
+//CURRENT TIME:
+String timeDesc();
+String timeZone();
+Number year();
+Number month();
+Number dayOfTheYear();
+Number dayOfTheMonth();
+Number dayOfTheWeek();
+Number hour();
+Number minute();
+Number second();
+
+//MATH:
 Number PI();
 Number e();
 Number degreeToRadian();
