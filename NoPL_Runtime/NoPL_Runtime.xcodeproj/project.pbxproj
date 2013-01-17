@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		9B70EF9A16A7893E00C7459C /* NoPLValues.h in Headers */ = {isa = PBXBuildFile; fileRef = 9B70EF9916A7893E00C7459C /* NoPLValues.h */; };
+		9B70EF9A16A7893E00C7459C /* NoPLValues.h in Headers */ = {isa = PBXBuildFile; fileRef = 9B70EF9916A7893E00C7459C /* NoPLValues.h */; settings = {ATTRIBUTES = (); }; };
 		A24F59EA163098ED00FC9181 /* NoPLRuntime.c in Sources */ = {isa = PBXBuildFile; fileRef = A261C29C15C0E878008AE0C4 /* NoPLRuntime.c */; };
 		A24F59EB163098F100FC9181 /* NoPLStandardFunctions.c in Sources */ = {isa = PBXBuildFile; fileRef = A2807F3715D6ACD9003FDDCD /* NoPLStandardFunctions.c */; };
 		A24F59EC163098F900FC9181 /* NoPLRuntime.h in Headers */ = {isa = PBXBuildFile; fileRef = A261C29E15C0E892008AE0C4 /* NoPLRuntime.h */; settings = {ATTRIBUTES = (Public, ); }; };

@@ -9,6 +9,10 @@
 #ifndef NoPL_Runtime_NoPLStandardFunctions_h
 #define NoPL_Runtime_NoPLStandardFunctions_h
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "NoPLRuntime.h"
 
 //function that handles all standard function calls
@@ -67,5 +71,9 @@ Number round(Number num);
 Number ceil(Number num);
 Number floor(Number num);
 */
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -9,6 +9,10 @@
 #ifndef NoPL_Runtime_NoPLRuntime_h
 #define NoPL_Runtime_NoPLRuntime_h
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "NoPLValues.h"
 
 #pragma mark - Enums / structs for script interface
@@ -68,5 +72,9 @@ NoPL_DebugHandle createNoPL_DebugHandle(const NoPL_Instruction* scriptBuffer, un
 void freeNoPL_DebugHandle(NoPL_DebugHandle handle);
 int debugStep(NoPL_DebugHandle handle);
 NoPL_FunctionValue queryValue(NoPL_DebugHandle handle, NoPL_DataType type, NoPL_Index index);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
