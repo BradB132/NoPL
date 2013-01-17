@@ -83,7 +83,7 @@
 
 /* Begin PBXFileReference section */
 		A27FA7FC1632464700D686E9 /* libNoPLc.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libNoPLc.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		A29783E6154A467300903BDD /* NoPLValues.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NoPLValues.h; sourceTree = "<group>"; };
+		A29783E6154A467300903BDD /* NoPLValues.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NoPLValues.h; path = ../../include/NoPLValues.h; sourceTree = "<group>"; };
 		A2AB8154153B42B60080E9FB /* NoPLc */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; name = NoPLc; path = NoPLc_testing; sourceTree = BUILT_PRODUCTS_DIR; };
 		A2AB8158153B42B60080E9FB /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
 		A2AB815A153B42B60080E9FB /* NoPLc.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = NoPLc.1; sourceTree = "<group>"; };
@@ -148,7 +148,7 @@
 		A2AB819F153B42F20080E9FB /* NoPLLexer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NoPLLexer.h; sourceTree = "<group>"; };
 		A2AB81A0153B42F20080E9FB /* NoPLParser.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = NoPLParser.c; sourceTree = "<group>"; };
 		A2AB81A1153B42F20080E9FB /* NoPLParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NoPLParser.h; sourceTree = "<group>"; };
-		A2AB81BD153B71280080E9FB /* NoPLc.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NoPLc.h; sourceTree = "<group>"; };
+		A2AB81BD153B71280080E9FB /* NoPLc.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = NoPLc.h; path = ../../include/NoPLc.h; sourceTree = "<group>"; };
 		A2AB81C0153B715A0080E9FB /* NoPLc.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = NoPLc.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
