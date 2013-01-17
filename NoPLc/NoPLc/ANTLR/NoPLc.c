@@ -131,14 +131,8 @@ void nopl_appendErrorString(NoPL_CompileContext* context, int startLine, int end
 	if(errLength+currentLength > pContext->errDescLength)
 	{
 		//create a bigger buffer
-		int newLength = pContext->errDescLength*2+errLength;
-		char* newString = malloc(newLength);
-		
-		//copy the buffer
-		memcpy(newString, context->errDescriptions, currentLength);
-		free(context->errDescriptions);
-		context->errDescriptions = newString;
-		pContext->errDescLength = newLength;
+		pContext->errDescLength = pContext->errDescLength*2+errLength;
+		context->errDescriptions = realloc(context->errDescriptions, pContext->errDescLength);
 	}
 	
 	//append
@@ -203,14 +197,8 @@ void nopl_addTokenRange(NoPL_CompileContext* context, pANTLR3_COMMON_TOKEN token
 	else if(ranges->counts[type]+1 > pContext->tokenArrayLengths[type])
 	{
 		//double the size of the buffer
-		NoPL_TokenRange* oldBuffer = ranges->ranges[type];
-		unsigned int newByteLength = sizeof(NoPL_TokenRange)*(pContext->tokenArrayLengths[type]*2);
-		ranges->ranges[type] = malloc(newByteLength);
-		
-		//copy over and clean up the old buffer
-		memcpy(ranges->ranges[type], oldBuffer, sizeof(NoPL_TokenRange)*ranges->counts[type]);
-		pContext->tokenArrayLengths[type] = newByteLength;
-		free(oldBuffer);
+		pContext->tokenArrayLengths[type] = sizeof(NoPL_TokenRange)*(pContext->tokenArrayLengths[type]*2);
+		ranges->ranges[type] = realloc(ranges->ranges[type], pContext->tokenArrayLengths[type]);
 	}
 	
 	//set the start and end indices for this token
@@ -229,19 +217,13 @@ void nopl_addBytesToContext(const void* bytes, int byteCount, NoPL_CompileContex
 	if(!pContext->arrayLength)
 	{
 		pContext->arrayLength = 128;
-		context->compiledData = malloc(sizeof(NoPL_Instruction)*pContext->arrayLength);
+		context->compiledData = malloc(pContext->arrayLength);
 	}
 	else if(byteCount+context->dataLength > pContext->arrayLength)
 	{
 		//double the size of the buffer
-		NoPL_Instruction* oldBuffer = context->compiledData;
-		unsigned int newByteLength = sizeof(NoPL_Instruction)*(pContext->arrayLength*2+byteCount);
-		context->compiledData = malloc(newByteLength);
-		
-		//copy over and clean up the old buffer
-		memcpy(context->compiledData, oldBuffer, pContext->arrayLength);
-		pContext->arrayLength = newByteLength;
-		free(oldBuffer);
+		pContext->arrayLength = (pContext->arrayLength*2+byteCount);
+		context->compiledData = realloc(context->compiledData, pContext->arrayLength);
 	}
 	
 	//add the new bytes to the buffer
@@ -2152,7 +2134,7 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				size_t inputLength = strlen(input)-1;
 				
 				//make a copy of this string with substituted special characters
-				char* subString = (char*)malloc(inputLength+1);
+				char subString[inputLength+1];
 				char* copyTo = subString;
 				size_t i;
 				for(i = 0; i < inputLength; i++)
