@@ -38,7 +38,7 @@
 		A261C29415C0E846008AE0C4 /* NoPL_Runtime.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = NoPL_Runtime.1; sourceTree = "<group>"; };
 		A261C29C15C0E878008AE0C4 /* NoPLRuntime.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = NoPLRuntime.c; sourceTree = "<group>"; };
 		A261C29E15C0E892008AE0C4 /* NoPLRuntime.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NoPLRuntime.h; sourceTree = "<group>"; };
-		A261C2A315C0E8D6008AE0C4 /* NoPLValues.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = NoPLValues.h; path = ../../../NoPLc/NoPLc/ANTLR/NoPLValues.h; sourceTree = "<group>"; };
+		A261C2A315C0E8D6008AE0C4 /* NoPLValues.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = NoPLValues.h; path = ../../NoPLc/NoPLc/ANTLR/NoPLValues.h; sourceTree = "<group>"; };
 		A2807F3715D6ACD9003FDDCD /* NoPLStandardFunctions.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = NoPLStandardFunctions.c; sourceTree = "<group>"; };
 		A2807F3A15D6ACEF003FDDCD /* NoPLStandardFunctions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NoPLStandardFunctions.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
