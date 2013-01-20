@@ -189,7 +189,7 @@ void nopl_addTokenRange(NoPL_CompileContext* context, pANTLR3_COMMON_TOKEN token
 	NoPL_TokenRanges* ranges = context->tokenRanges;
 	
 	//make sure our array is big enough
-	if(!pContext->tokenArrayLengths[type])
+	if(!ranges->ranges[type])
 	{
 		pContext->tokenArrayLengths[type] = 64;
 		ranges->ranges[type] = malloc(sizeof(NoPL_TokenRange)*pContext->tokenArrayLengths[type]);
@@ -197,8 +197,8 @@ void nopl_addTokenRange(NoPL_CompileContext* context, pANTLR3_COMMON_TOKEN token
 	else if(ranges->counts[type]+1 > pContext->tokenArrayLengths[type])
 	{
 		//double the size of the buffer
-		pContext->tokenArrayLengths[type] = sizeof(NoPL_TokenRange)*(pContext->tokenArrayLengths[type]*2);
-		ranges->ranges[type] = realloc(ranges->ranges[type], pContext->tokenArrayLengths[type]);
+		pContext->tokenArrayLengths[type] *= 2;
+		ranges->ranges[type] = realloc(ranges->ranges[type], sizeof(NoPL_TokenRange)*pContext->tokenArrayLengths[type]);
 	}
 	
 	//set the start and end indices for this token
