@@ -30,6 +30,7 @@ String toUpper(String str);
 String substring(String str, Number startIndex);
 String substring(String str, Number startIndex, Number length);
 Number indexOf(String searched, String match);
+Number lastIndexOf(String searched, String match);
 String replaceAll(String original, String match, String replaceWith);
 String replaceFirst(String original, String match, String replaceWith);
 String replaceLast(String original, String match, String replaceWith);

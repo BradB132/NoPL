@@ -238,6 +238,28 @@ NoPL_FunctionValue nopl_standardFunctions(const void* calledOnObject, const char
 				returnVal.numberValue = found-argv[0].stringValue;
 		}
 			break;
+		case 15010786://lastIndexOf
+		{
+			//bail if we don't have two string arguments
+			if(argc != 2 || argv[0].type != NoPL_DataType_String || argv[1].type != NoPL_DataType_String)
+				break;
+			
+			//search the string until we can't find another string that matches
+			char* found;
+			char* nextFound = argv[0].stringValue;
+			do
+			{
+				found = nextFound;
+				nextFound = strstr(found+1, argv[1].stringValue);
+			} while(nextFound);
+			
+			returnVal.type = NoPL_DataType_Number;
+			if(!found)
+				returnVal.numberValue = -1;
+			else
+				returnVal.numberValue = found-argv[0].stringValue;
+		}
+			break;
 		case 1452132://replaceAll
 		{
 			if(argc != 3 || argv[0].type != NoPL_DataType_String || argv[1].type != NoPL_DataType_String || argv[2].type != NoPL_DataType_String)
