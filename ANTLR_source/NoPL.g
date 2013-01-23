@@ -11,6 +11,8 @@ options
 //*/
 }
 
+//TODO: && operator is broken
+
 tokens
 {
 	TYPE_CAST;
