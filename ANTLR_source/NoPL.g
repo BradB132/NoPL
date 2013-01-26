@@ -12,6 +12,7 @@ options
 }
 
 //TODO: && operator is broken
+//TODO: using {} operators for scope without a loop or conditional doesn't work
 
 tokens
 {
