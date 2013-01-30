@@ -1,0 +1,18 @@
+//This script should test all of the syntax features
+<? as a sort of unit test ?>
+/* to make sure stuff is still working */
+
+BOOL b = 3 < 5 && 5%2 == 1;
+
+if(b)
+{
+	{
+		String str = "truth!";
+		#str;
+	}
+	
+	int x = 50;
+	
+	Object a = getMyObject();
+	a[x].call("stuff");
+}

@@ -11,9 +11,6 @@ options
 //*/
 }
 
-//TODO: && operator is broken
-//TODO: using {} operators for scope without a loop or conditional doesn't work
-
 tokens
 {
 	TYPE_CAST;
@@ -27,11 +24,7 @@ tokens
 
 //PARSER
 program
-	:	(statement|variableScope)* EOF!
-	;
-
-variableScope
-	:	SCOPE_OPEN^ statement+ SCOPE_CLOSE!
+	:	(statement)* EOF!
 	;
 
 statement
@@ -41,6 +34,7 @@ statement
 	|	CONTINUE STATEMENT_DELIMITER!
 	|	EXIT STATEMENT_DELIMITER!
 	|	METADATA
+	|	SCOPE_OPEN^ statement+ SCOPE_CLOSE!
 	;
 
 nonControlStatement
@@ -63,13 +57,13 @@ controlFlowStatement
 
 expression
 	:	booleanExpression
-	|	numericExpression
+//	|	numericExpression
 	|	objectExpression
-	|	atom
+//	|	atom
 	;
 
 booleanExpression
-	:	booleanSubExpression ((LOGICAL_AND^ | LOGICAL_OR^) booleanSubExpression)?
+	:	(booleanSubExpression|numericExpression) ((LOGICAL_AND^ | LOGICAL_OR^) booleanExpression)?
 	;
 
 booleanSubExpression
@@ -81,8 +75,7 @@ booleanSubExpression
 			LESS_THAN_EQUAL^ |
 			GREATER_THAN^ |
 			GREATER_THAN_EQUAL^
-		) expression
-	;
+		) expression;
 
 expressionCast
 	:	PAREN_OPEN DECL_BOOL PAREN_CLOSE expression -> ^(TYPE_CAST DECL_BOOL expression)
