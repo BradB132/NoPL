@@ -733,9 +733,19 @@ int evaluateBoolean(NoPL_Evaluation* eval)
 		case NoPL_BYTE_BOOLEAN_LOGICAL_INEQUALITY:
 			return (evaluateBoolean(eval) != evaluateBoolean(eval));
 		case NoPL_BYTE_BOOLEAN_AND:
-			return (evaluateBoolean(eval) && evaluateBoolean(eval));
+		{
+			//TODO: optimize this so that we don't have to traverse the second boolean when the first is false
+			int bool1 = evaluateBoolean(eval);
+			int bool2 = evaluateBoolean(eval);
+			return (bool1 && bool2);
+		}
 		case NoPL_BYTE_BOOLEAN_OR:
-			return (evaluateBoolean(eval) || evaluateBoolean(eval));
+		{
+			//TODO: optimize this so that we don't have to traverse the second boolean when the first is true
+			int bool1 = evaluateBoolean(eval);
+			int bool2 = evaluateBoolean(eval);
+			return (bool1 || bool2);
+		}
 		case NoPL_BYTE_BOOLEAN_LESS_THAN:
 			return (evaluateNumber(eval) < evaluateNumber(eval));
 		case NoPL_BYTE_BOOLEAN_LESS_THAN_EQUAL:
