@@ -1549,8 +1549,8 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				nopl_addOperator(NoPL_BYTE_BOOLEAN_AND, context);
 				
 				//append the expressions
-				nopl_appendNodeWithRequiredType(child1, NoPL_type_Number, context, options);
-				nopl_appendNodeWithRequiredType(child2, NoPL_type_Number, context, options);
+				nopl_appendNodeWithRequiredType(child1, NoPL_type_Boolean, context, options);
+				nopl_appendNodeWithRequiredType(child2, NoPL_type_Boolean, context, options);
 			}
 				break;
 			case LOGICAL_EQUALITY:
@@ -1675,8 +1675,8 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				nopl_addOperator(NoPL_BYTE_BOOLEAN_OR, context);
 				
 				//append the expressions
-				nopl_appendNodeWithRequiredType(child1, NoPL_type_Number, context, options);
-				nopl_appendNodeWithRequiredType(child2, NoPL_type_Number, context, options);
+				nopl_appendNodeWithRequiredType(child1, NoPL_type_Boolean, context, options);
+				nopl_appendNodeWithRequiredType(child2, NoPL_type_Boolean, context, options);
 			}
 				break;
 			case LOOP_DO:
