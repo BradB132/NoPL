@@ -92,7 +92,6 @@ atom
 	|	STRING
 	|	expressionCast
 	|	SUBTRACT atom -> ^(NUMERIC_NEGATION atom)
-	|	LOGICAL_NEGATION^ expression
 	|	PAREN_OPEN! expression PAREN_CLOSE!
 	|	ABS_VALUE^ expression ABS_VALUE!
 	|	objectExpression
@@ -112,7 +111,11 @@ eNumericExpression
 	;
 
 modNumericExpression
-	:	atom (MOD^ modNumericExpression)?
+	:	negationExpression (MOD^ modNumericExpression)?
+	;
+
+negationExpression
+	:	(LOGICAL_NEGATION^)? atom
 	;
 
 //VARIABLES
