@@ -57,25 +57,8 @@ controlFlowStatement
 
 expression
 	:	booleanExpression
-//	|	numericExpression
 	|	objectExpression
-//	|	atom
 	;
-
-booleanExpression
-	:	(booleanSubExpression|numericExpression) ((LOGICAL_AND^ | LOGICAL_OR^) booleanExpression)?
-	;
-
-booleanSubExpression
-	:	numericExpression
-		(
-			LOGICAL_EQUALITY^ |
-			LOGICAL_INEQUALITY^ |
-			LESS_THAN^ |
-			LESS_THAN_EQUAL^ |
-			GREATER_THAN^ |
-			GREATER_THAN_EQUAL^
-		) expression;
 
 expressionCast
 	:	PAREN_OPEN DECL_BOOL PAREN_CLOSE expression -> ^(TYPE_CAST DECL_BOOL expression)
@@ -84,20 +67,22 @@ expressionCast
 	|	PAREN_OPEN DECL_OBJ PAREN_CLOSE expression -> ^(TYPE_CAST DECL_OBJ expression)
 	;
 
-atom
-	:	LITERAL_TRUE
-	|	LITERAL_FALSE
-	|	LITERAL_NULL
-	|	NUMBER
-	|	STRING
-	|	expressionCast
-	|	SUBTRACT atom -> ^(NUMERIC_NEGATION atom)
-	|	PAREN_OPEN! expression PAREN_CLOSE!
-	|	ABS_VALUE^ expression ABS_VALUE!
-	|	objectExpression
+//operator precedences
+booleanExpression
+	:	booleanSubExpression ((LOGICAL_AND^ | LOGICAL_OR^) booleanExpression)?
 	;
 
-//NUMBERS
+booleanSubExpression
+	:	numericExpression
+		((
+			LOGICAL_EQUALITY^ |
+			LOGICAL_INEQUALITY^ |
+			LESS_THAN^ |
+			LESS_THAN_EQUAL^ |
+			GREATER_THAN^ |
+			GREATER_THAN_EQUAL^
+		) numericExpression)?;
+
 numericExpression
 	:	mdNumericExpression ((ADD^ | SUBTRACT^) numericExpression)?
 	;
@@ -116,6 +101,19 @@ modNumericExpression
 
 negationExpression
 	:	(LOGICAL_NEGATION^)? atom
+	;
+	
+atom
+	:	LITERAL_TRUE
+	|	LITERAL_FALSE
+	|	LITERAL_NULL
+	|	NUMBER
+	|	STRING
+	|	expressionCast
+	|	SUBTRACT atom -> ^(NUMERIC_NEGATION atom)
+	|	PAREN_OPEN! expression PAREN_CLOSE!
+	|	ABS_VALUE^ expression ABS_VALUE!
+	|	objectExpression
 	;
 
 //VARIABLES
