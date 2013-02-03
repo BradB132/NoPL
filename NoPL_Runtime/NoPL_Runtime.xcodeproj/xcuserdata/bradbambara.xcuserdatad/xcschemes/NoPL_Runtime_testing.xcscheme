@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "A261C28D15C0E845008AE0C4"
-               BuildableName = "NoPL_Runtime_testing"
+               BuildableName = "NoPL_Runtime"
                BlueprintName = "NoPL_Runtime_testing"
                ReferencedContainer = "container:NoPL_Runtime.xcodeproj">
             </BuildableReference>
@@ -33,7 +33,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "A261C28D15C0E845008AE0C4"
-            BuildableName = "NoPL_Runtime_testing"
+            BuildableName = "NoPL_Runtime"
             BlueprintName = "NoPL_Runtime_testing"
             ReferencedContainer = "container:NoPL_Runtime.xcodeproj">
          </BuildableReference>
@@ -52,7 +52,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "A261C28D15C0E845008AE0C4"
-            BuildableName = "NoPL_Runtime_testing"
+            BuildableName = "NoPL_Runtime"
             BlueprintName = "NoPL_Runtime_testing"
             ReferencedContainer = "container:NoPL_Runtime.xcodeproj">
          </BuildableReference>
@@ -70,7 +70,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "A261C28D15C0E845008AE0C4"
-            BuildableName = "NoPL_Runtime_testing"
+            BuildableName = "NoPL_Runtime"
             BlueprintName = "NoPL_Runtime_testing"
             ReferencedContainer = "container:NoPL_Runtime.xcodeproj">
          </BuildableReference>
