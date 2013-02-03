@@ -271,7 +271,7 @@ int nopl_variableExistsInStack(const pANTLR3_STRING varName, const  pANTLR3_STAC
 		for(int j = 0; j < vect->size(vect); j++)
 		{
 			pANTLR3_STRING str = (pANTLR3_STRING)(vect->get(vect,j));
-			if(!strcmp((const char*)str->chars, (const char*)varName->chars))
+			if(str && !strcmp((const char*)str->chars, (const char*)varName->chars))
 				return 1;
 		}
 	}
@@ -335,7 +335,7 @@ NoPL_Index nopl_indexOfVariableInStack(const pANTLR3_STRING varName, const pANTL
 		for(int j = 0; j < vect->size(vect); j++)
 		{
 			pANTLR3_STRING str = (pANTLR3_STRING)(vect->get(vect,j));
-			if(!strcmp((const char*)str->chars, (const char*)varName->chars))
+			if(str && !strcmp((const char*)str->chars, (const char*)varName->chars))
 				return currentIndex;
 			
 			currentIndex++;
