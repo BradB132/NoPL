@@ -157,9 +157,9 @@
 			productReference = 9B84F86516BDF21E00F34DF1 /* libNoPLRuntime(arm).a */;
 			productType = "com.apple.product-type.library.static";
 		};
-		A24F59E5163098DB00FC9181 /* NoPLRuntime(OSX) */ = {
+		A24F59E5163098DB00FC9181 /* NoPLRuntime */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = A24F59E7163098DB00FC9181 /* Build configuration list for PBXNativeTarget "NoPLRuntime(OSX)" */;
+			buildConfigurationList = A24F59E7163098DB00FC9181 /* Build configuration list for PBXNativeTarget "NoPLRuntime" */;
 			buildPhases = (
 				A24F59E2163098DB00FC9181 /* Sources */,
 				A24F59E3163098DB00FC9181 /* Frameworks */,
@@ -169,7 +169,7 @@
 			);
 			dependencies = (
 			);
-			name = "NoPLRuntime(OSX)";
+			name = NoPLRuntime;
 			productName = NoPLRuntime;
 			productReference = A24F59E6163098DB00FC9181 /* libNoPLRuntime.a */;
 			productType = "com.apple.product-type.library.static";
@@ -213,7 +213,7 @@
 			projectRoot = "";
 			targets = (
 				A261C28D15C0E845008AE0C4 /* NoPL_Runtime_testing */,
-				A24F59E5163098DB00FC9181 /* NoPLRuntime(OSX) */,
+				A24F59E5163098DB00FC9181 /* NoPLRuntime */,
 				9B84F85916BDF21E00F34DF1 /* NoPLRuntime(arm) */,
 			);
 		};
@@ -318,7 +318,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
-				ONLY_ACTIVE_ARCH = YES;
+				ONLY_ACTIVE_ARCH = NO;
 				SDKROOT = iphoneos;
 			};
 			name = Debug;
@@ -373,7 +373,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		A24F59E7163098DB00FC9181 /* Build configuration list for PBXNativeTarget "NoPLRuntime(OSX)" */ = {
+		A24F59E7163098DB00FC9181 /* Build configuration list for PBXNativeTarget "NoPLRuntime" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				A24F59E8163098DB00FC9181 /* Debug */,
