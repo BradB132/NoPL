@@ -7,6 +7,7 @@
 //
 
 #include <stdio.h>
+#include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -19,7 +20,7 @@
 
 int hash_djb2ToInt(unsigned char* str)
 {
-	unsigned long hash = 5381;
+	uint64_t hash = 5381;
 	int c;
 	while ((c = *str++))
 		hash = ((hash << 5) + hash) + c;
