@@ -39,7 +39,7 @@
 /* Begin PBXFileReference section */
 		9B70EF9916A7893E00C7459C /* NoPLValues.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NoPLValues.h; path = ../../NoPLc/include/NoPLValues.h; sourceTree = "<group>"; };
 		9B84F86516BDF21E00F34DF1 /* libNoPLRuntime(arm).a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libNoPLRuntime(arm).a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		A24F59E6163098DB00FC9181 /* libNoPLRuntime.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = libNoPLRuntime.a; path = "libNoPLRuntime(OSX).a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		A24F59E6163098DB00FC9181 /* libNoPLRuntime.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libNoPLRuntime.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		A261C28E15C0E845008AE0C4 /* NoPL_Runtime */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = NoPL_Runtime; sourceTree = BUILT_PRODUCTS_DIR; };
 		A261C29215C0E846008AE0C4 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
 		A261C29415C0E846008AE0C4 /* NoPL_Runtime.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = NoPL_Runtime.1; sourceTree = "<group>"; };
@@ -299,7 +299,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
@@ -327,7 +327,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
