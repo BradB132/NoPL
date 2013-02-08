@@ -546,9 +546,10 @@ float evaluateNumber(NoPL_Evaluation* eval)
 	{
 		case NoPL_BYTE_LITERAL_NUMBER:
 		{
-			float* literalPtr = (float*)(eval->scriptBuffer+eval->evaluationPosition);
+			float fValue;
+			memcpy(&fValue, (eval->scriptBuffer+eval->evaluationPosition), sizeof(float));
 			eval->evaluationPosition += sizeof(float);
-			return *literalPtr;
+			return fValue;
 		}
 		case NoPL_BYTE_VARIABLE_NUMBER:
 		{
