@@ -527,6 +527,16 @@ NoPL_FunctionValue nopl_standardFunctions(const void* calledOnObject, const char
 			returnVal.numberValue = M_E;
 		}
 			break;
+		case 8936614://abs
+		{
+			//bail if we don't have the correct args
+			if(argc != 1 || argv[0].type != NoPL_DataType_Number)
+				break;
+			
+			returnVal.type = NoPL_DataType_Number;
+			returnVal.numberValue = fabsf(argv[0].numberValue);
+		}
+			break;
 		case 3307147://degreeToRadian
 		{
 			//bail if we don't have the correct args

@@ -51,6 +51,7 @@ Number second();
 //MATH:
 Number PI();
 Number e();
+Number abs();
 Number degreeToRadian();
 Number degreeToRadian(Number degree);
 Number radianToDegree();
