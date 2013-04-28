@@ -57,6 +57,7 @@ Number degreeToRadian(Number degree);
 Number radianToDegree();
 Number radianToDegree(Number radian);
 Number sqrt(Number num);
+Number magnitude(Number num1, ...); -- all arguments must be numeric
 Number sin(Number num);
 Number cos(Number num);
 Number tan(Number num);
