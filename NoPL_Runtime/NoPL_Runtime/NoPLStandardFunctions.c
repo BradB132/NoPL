@@ -579,6 +579,29 @@ NoPL_FunctionValue nopl_standardFunctions(const void* calledOnObject, const char
 			returnVal.numberValue = sqrtf(argv[0].numberValue);
 		}
 			break;
+		case 13538699://magnitude
+		{
+			if(argc == 0)
+				break;
+			
+			int onlyNumericArgs = 1;
+			float squaredMagnitude = 0.0f;
+			for(int i = 0; i < argc; i++)
+			{
+				if(argv[i].type != NoPL_DataType_Number)
+				{
+					onlyNumericArgs = 0;
+					break;
+				}
+				squaredMagnitude += argv[i].numberValue*argv[i].numberValue;
+			}
+			if(!onlyNumericArgs)
+				break;
+			
+			returnVal.type = NoPL_DataType_Number;
+			returnVal.numberValue = sqrtf(squaredMagnitude);
+		}
+			break;
 		case 8956442://sin
 		{
 			//bail if we don't have the correct args
