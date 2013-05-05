@@ -10,13 +10,13 @@
 		9B70EF9A16A7893E00C7459C /* NoPLValues.h in Headers */ = {isa = PBXBuildFile; fileRef = 9B70EF9916A7893E00C7459C /* NoPLValues.h */; settings = {ATTRIBUTES = (); }; };
 		9B84F85B16BDF21E00F34DF1 /* NoPLStandardFunctions.c in Sources */ = {isa = PBXBuildFile; fileRef = A2807F3715D6ACD9003FDDCD /* NoPLStandardFunctions.c */; };
 		9B84F85C16BDF21E00F34DF1 /* NoPLRuntime.c in Sources */ = {isa = PBXBuildFile; fileRef = A261C29C15C0E878008AE0C4 /* NoPLRuntime.c */; };
-		9B84F85F16BDF21E00F34DF1 /* NoPLStandardFunctions.h in Headers */ = {isa = PBXBuildFile; fileRef = A2807F3A15D6ACEF003FDDCD /* NoPLStandardFunctions.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		9B84F86016BDF21E00F34DF1 /* NoPLRuntime.h in Headers */ = {isa = PBXBuildFile; fileRef = A261C29E15C0E892008AE0C4 /* NoPLRuntime.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		9B84F85F16BDF21E00F34DF1 /* NoPLStandardFunctions.h in Headers */ = {isa = PBXBuildFile; fileRef = A2807F3A15D6ACEF003FDDCD /* NoPLStandardFunctions.h */; settings = {ATTRIBUTES = (); }; };
+		9B84F86016BDF21E00F34DF1 /* NoPLRuntime.h in Headers */ = {isa = PBXBuildFile; fileRef = A261C29E15C0E892008AE0C4 /* NoPLRuntime.h */; settings = {ATTRIBUTES = (); }; };
 		9B84F86116BDF21E00F34DF1 /* NoPLValues.h in Headers */ = {isa = PBXBuildFile; fileRef = 9B70EF9916A7893E00C7459C /* NoPLValues.h */; settings = {ATTRIBUTES = (); }; };
 		A24F59EA163098ED00FC9181 /* NoPLRuntime.c in Sources */ = {isa = PBXBuildFile; fileRef = A261C29C15C0E878008AE0C4 /* NoPLRuntime.c */; };
 		A24F59EB163098F100FC9181 /* NoPLStandardFunctions.c in Sources */ = {isa = PBXBuildFile; fileRef = A2807F3715D6ACD9003FDDCD /* NoPLStandardFunctions.c */; };
-		A24F59EC163098F900FC9181 /* NoPLRuntime.h in Headers */ = {isa = PBXBuildFile; fileRef = A261C29E15C0E892008AE0C4 /* NoPLRuntime.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		A24F59ED1630990200FC9181 /* NoPLStandardFunctions.h in Headers */ = {isa = PBXBuildFile; fileRef = A2807F3A15D6ACEF003FDDCD /* NoPLStandardFunctions.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		A24F59EC163098F900FC9181 /* NoPLRuntime.h in Headers */ = {isa = PBXBuildFile; fileRef = A261C29E15C0E892008AE0C4 /* NoPLRuntime.h */; settings = {ATTRIBUTES = (); }; };
+		A24F59ED1630990200FC9181 /* NoPLStandardFunctions.h in Headers */ = {isa = PBXBuildFile; fileRef = A2807F3A15D6ACEF003FDDCD /* NoPLStandardFunctions.h */; settings = {ATTRIBUTES = (); }; };
 		A261C29315C0E846008AE0C4 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = A261C29215C0E846008AE0C4 /* main.c */; };
 		A261C29515C0E846008AE0C4 /* NoPL_Runtime.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = A261C29415C0E846008AE0C4 /* NoPL_Runtime.1 */; };
 		A261C29D15C0E878008AE0C4 /* NoPLRuntime.c in Sources */ = {isa = PBXBuildFile; fileRef = A261C29C15C0E878008AE0C4 /* NoPLRuntime.c */; };
@@ -40,7 +40,7 @@
 		9B70EF9916A7893E00C7459C /* NoPLValues.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NoPLValues.h; path = ../../NoPLc/include/NoPLValues.h; sourceTree = "<group>"; };
 		9B84F86516BDF21E00F34DF1 /* libNoPLRuntime(arm).a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libNoPLRuntime(arm).a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		A24F59E6163098DB00FC9181 /* libNoPLRuntime.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libNoPLRuntime.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		A261C28E15C0E845008AE0C4 /* NoPL_Runtime */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = NoPL_Runtime; sourceTree = BUILT_PRODUCTS_DIR; };
+		A261C28E15C0E845008AE0C4 /* NoPL_Runtime */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; name = NoPL_Runtime; path = NoPL_Runtime_testing; sourceTree = BUILT_PRODUCTS_DIR; };
 		A261C29215C0E846008AE0C4 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
 		A261C29415C0E846008AE0C4 /* NoPL_Runtime.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = NoPL_Runtime.1; sourceTree = "<group>"; };
 		A261C29C15C0E878008AE0C4 /* NoPLRuntime.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = NoPLRuntime.c; sourceTree = "<group>"; };
@@ -121,9 +121,9 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9B84F86116BDF21E00F34DF1 /* NoPLValues.h in Headers */,
 				9B84F85F16BDF21E00F34DF1 /* NoPLStandardFunctions.h in Headers */,
 				9B84F86016BDF21E00F34DF1 /* NoPLRuntime.h in Headers */,
-				9B84F86116BDF21E00F34DF1 /* NoPLValues.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -131,9 +131,9 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9B70EF9A16A7893E00C7459C /* NoPLValues.h in Headers */,
 				A24F59ED1630990200FC9181 /* NoPLStandardFunctions.h in Headers */,
 				A24F59EC163098F900FC9181 /* NoPLRuntime.h in Headers */,
-				9B70EF9A16A7893E00C7459C /* NoPLValues.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -301,7 +301,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_ENABLE_OBJC_ARC = YES;
@@ -323,6 +322,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
 				ONLY_ACTIVE_ARCH = NO;
 				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
 			};
 			name = Debug;
 		};
@@ -330,7 +330,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_ENABLE_OBJC_ARC = YES;
@@ -346,6 +345,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
 				ONLY_ACTIVE_ARCH = NO;
 				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
 			};
 			name = Release;
 		};
