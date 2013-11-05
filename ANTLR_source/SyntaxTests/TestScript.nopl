@@ -16,3 +16,14 @@ if(b)
 	Object a = getMyObject();
 	a[x].call("stuff");
 }
+
+int a = 5;
+switch(a)
+{
+	case 1:
+		#"1";
+	case 2:
+		#"2";
+	default:
+		break;
+}
