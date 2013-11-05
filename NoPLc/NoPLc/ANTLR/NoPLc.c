@@ -55,6 +55,7 @@ const char* NoPL_ErrStr_EqualityExpressionsAbiguous = "The type of both expressi
 const char* NoPL_ErrStr_EqualityDifferentType = "Both expressions compared by this equality operator must evaluate to the same type";
 const char* NoPL_ErrStr_CannotControlFlow = "Cannot use this control flow statement in this context";
 const char* NoPL_ErrStr_DuplicateSwitchCase = "This case's value matches another case in this switch statement";
+const char* NoPL_ErrStr_SwitchCaseInconsistentType = "The type of this case statement is inconsistent with other statements inside the switch";
 const char* NoPL_ErrStr_MisplacedDefault = "The default statement must be the last case in the switch statement";
 
 //enum for checking AST node types
@@ -2349,6 +2350,11 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 							{
 								//this is not a default statement
 								pANTLR3_BASE_TREE caseValue = treeIndex(caseNode, 0);
+								NoPL_DataType caseValueType = nopl_dataTypeForTree(caseValue, &switchCtx);
+								if(caseValueType != expType)
+								{
+									nopl_error(caseValue, NoPL_ErrStr_SwitchCaseInconsistentType, &switchCtx);
+								}
 								
 								//append a case statement for each case value
 								nopl_addOperator(NoPL_BYTE_SWITCH_CASE_BOOLEAN, &switchCtx);
@@ -2418,6 +2424,11 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 							{
 								//this is not a default statement
 								pANTLR3_BASE_TREE caseValue = treeIndex(caseNode, 0);
+								NoPL_DataType caseValueType = nopl_dataTypeForTree(caseValue, &switchCtx);
+								if(caseValueType != expType)
+								{
+									nopl_error(caseValue, NoPL_ErrStr_SwitchCaseInconsistentType, &switchCtx);
+								}
 								
 								//append a case statement for each case value
 								nopl_addOperator(NoPL_BYTE_SWITCH_CASE_NUMBER, &switchCtx);
@@ -2486,6 +2497,11 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 							{
 								//this is not a default statement
 								pANTLR3_BASE_TREE caseValue = treeIndex(caseNode, 0);
+								NoPL_DataType caseValueType = nopl_dataTypeForTree(caseValue, &switchCtx);
+								if(caseValueType != expType)
+								{
+									nopl_error(caseValue, NoPL_ErrStr_SwitchCaseInconsistentType, &switchCtx);
+								}
 								
 								//append a case statement for each case value
 								nopl_addOperator(NoPL_BYTE_SWITCH_CASE_STRING, &switchCtx);
