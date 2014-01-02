@@ -49,9 +49,9 @@ typedef enum
 
 typedef struct
 {
-	NoPL_FunctionValue (*evaluateFunction)(void* calledOnObject, const char* functionName, const NoPL_FunctionValue* argv, unsigned int argc);
-	NoPL_FunctionValue (*subscript)(void* calledOnObject, NoPL_FunctionValue index);
-	void (*stringFeedback)(const char* string, NoPL_StringFeedbackType type);
+	NoPL_FunctionValue (*evaluateFunction)(void* calledOnObject, const char* functionName, const NoPL_FunctionValue* argv, uint32_t argc, void* context);
+	NoPL_FunctionValue (*subscript)(void* calledOnObject, NoPL_FunctionValue index, void* context);
+	void (*stringFeedback)(const char* string, NoPL_StringFeedbackType type, void* context);
 } NoPL_Callbacks;
 
 #pragma mark - Struct helpers
@@ -62,7 +62,7 @@ typedef struct
 
 #pragma mark - Script API
 
-void nopl_runScript(const NoPL_Instruction* scriptBuffer, unsigned int bufferLength, const NoPL_Callbacks* callbacks);
+void nopl_runScript(const NoPL_Instruction* scriptBuffer, uint32_t bufferLength, const NoPL_Callbacks* callbacks, void* context);
 
 #ifdef __cplusplus
 }

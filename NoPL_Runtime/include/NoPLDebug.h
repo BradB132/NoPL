@@ -19,7 +19,7 @@ extern "C" {
 
 typedef void* NoPL_DebugHandle;
 
-NoPL_DebugHandle createNoPL_DebugHandle(const NoPL_Instruction* scriptBuffer, unsigned int bufferLength, const NoPL_Callbacks* callbacks);
+NoPL_DebugHandle createNoPL_DebugHandle(const NoPL_Instruction* scriptBuffer, uint32_t bufferLength, const NoPL_Callbacks* callbacks, void* context);
 void freeNoPL_DebugHandle(NoPL_DebugHandle handle);
 int nopl_debugStep(NoPL_DebugHandle handle);
 NoPL_FunctionValue nopl_queryValue(NoPL_DebugHandle handle, NoPL_DataType type, NoPL_Index index);
