@@ -62,16 +62,7 @@ typedef struct
 
 #pragma mark - Script API
 
-void runScript(const NoPL_Instruction* scriptBuffer, unsigned int bufferLength, const NoPL_Callbacks* callbacks);
-
-#pragma mark - Debug API
-
-typedef void* NoPL_DebugHandle;
-
-NoPL_DebugHandle createNoPL_DebugHandle(const NoPL_Instruction* scriptBuffer, unsigned int bufferLength, const NoPL_Callbacks* callbacks);
-void freeNoPL_DebugHandle(NoPL_DebugHandle handle);
-int debugStep(NoPL_DebugHandle handle);
-NoPL_FunctionValue queryValue(NoPL_DebugHandle handle, NoPL_DataType type, NoPL_Index index);
+void nopl_runScript(const NoPL_Instruction* scriptBuffer, unsigned int bufferLength, const NoPL_Callbacks* callbacks);
 
 #ifdef __cplusplus
 }

@@ -12,6 +12,7 @@
 #include <string.h>
 #include <ctype.h>
 #include "NoPLRuntime.h"
+#include "NoPLDebug.h"
 
 //TODO: test every feature of this language to make sure it works
 
@@ -27,8 +28,8 @@ typedef struct
 {
 	const NoPL_Callbacks* callbacks;
 	const NoPL_Instruction* scriptBuffer;
-	unsigned int bufferLength;
-	unsigned int evaluationPosition;
+	uint32_t bufferLength;
+	uint32_t evaluationPosition;
 	NoPL_Index pointerTableSize;
 	NoPL_Index numberTableSize;
 	NoPL_Index booleanTableSize;
@@ -1082,7 +1083,7 @@ void setUpScript(NoPL_Evaluation* eval, const NoPL_Instruction* scriptBuffer, un
 
 #pragma mark - Script API
 
-void runScript(const NoPL_Instruction* scriptBuffer, unsigned int bufferLength, const NoPL_Callbacks* callbacks)
+void nopl_runScript(const NoPL_Instruction* scriptBuffer, unsigned int bufferLength, const NoPL_Callbacks* callbacks)
 {
 	//set up the evaluation struct
 	NoPL_Evaluation eval;
@@ -1118,7 +1119,7 @@ NoPL_DebugHandle createNoPL_DebugHandle(const NoPL_Instruction* scriptBuffer, un
 	return eval;
 }
 
-int debugStep(NoPL_DebugHandle handle)
+int nopl_debugStep(NoPL_DebugHandle handle)
 {
 	NoPL_Evaluation* eval = (NoPL_Evaluation*)handle;
 	
@@ -1170,7 +1171,7 @@ void freeNoPL_DebugHandle(NoPL_DebugHandle handle)
 	}
 }
 
-NoPL_FunctionValue queryValue(NoPL_DebugHandle handle, NoPL_DataType type, NoPL_Index index)
+NoPL_FunctionValue nopl_queryValue(NoPL_DebugHandle handle, NoPL_DataType type, NoPL_Index index)
 {
 	NoPL_Evaluation* eval = (NoPL_Evaluation*)handle;
 	

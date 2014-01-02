@@ -84,7 +84,7 @@
 /* Begin PBXFileReference section */
 		A27FA7FC1632464700D686E9 /* libNoPLc.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libNoPLc.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		A29783E6154A467300903BDD /* NoPLValues.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NoPLValues.h; path = ../../include/NoPLValues.h; sourceTree = "<group>"; };
-		A2AB8154153B42B60080E9FB /* NoPLc */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; name = NoPLc; path = NoPLc_testing; sourceTree = BUILT_PRODUCTS_DIR; };
+		A2AB8154153B42B60080E9FB /* NoPLc_testing */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = NoPLc_testing; sourceTree = BUILT_PRODUCTS_DIR; };
 		A2AB8158153B42B60080E9FB /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
 		A2AB815A153B42B60080E9FB /* NoPLc.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = NoPLc.1; sourceTree = "<group>"; };
 		A2AB8163153B42F20080E9FB /* antlr3config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = antlr3config.h; sourceTree = "<group>"; };
@@ -181,7 +181,7 @@
 		A2AB8155153B42B60080E9FB /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				A2AB8154153B42B60080E9FB /* NoPLc */,
+				A2AB8154153B42B60080E9FB /* NoPLc_testing */,
 				A27FA7FC1632464700D686E9 /* libNoPLc.a */,
 			);
 			name = Products;
@@ -337,7 +337,7 @@
 			);
 			name = NoPLc_testing;
 			productName = NoPLc;
-			productReference = A2AB8154153B42B60080E9FB /* NoPLc */;
+			productReference = A2AB8154153B42B60080E9FB /* NoPLc_testing */;
 			productType = "com.apple.product-type.tool";
 		};
 /* End PBXNativeTarget section */

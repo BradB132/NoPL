@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9B4D56521875C70700B9A619 /* NoPLDebug.h in Headers */ = {isa = PBXBuildFile; fileRef = 9B4D56511875C70700B9A619 /* NoPLDebug.h */; };
+		9B4D56531875C70700B9A619 /* NoPLDebug.h in Headers */ = {isa = PBXBuildFile; fileRef = 9B4D56511875C70700B9A619 /* NoPLDebug.h */; };
 		9B70EF9A16A7893E00C7459C /* NoPLValues.h in Headers */ = {isa = PBXBuildFile; fileRef = 9B70EF9916A7893E00C7459C /* NoPLValues.h */; settings = {ATTRIBUTES = (); }; };
 		9B84F85B16BDF21E00F34DF1 /* NoPLStandardFunctions.c in Sources */ = {isa = PBXBuildFile; fileRef = A2807F3715D6ACD9003FDDCD /* NoPLStandardFunctions.c */; };
 		9B84F85C16BDF21E00F34DF1 /* NoPLRuntime.c in Sources */ = {isa = PBXBuildFile; fileRef = A261C29C15C0E878008AE0C4 /* NoPLRuntime.c */; };
@@ -37,10 +39,11 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		9B4D56511875C70700B9A619 /* NoPLDebug.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NoPLDebug.h; path = ../include/NoPLDebug.h; sourceTree = "<group>"; };
 		9B70EF9916A7893E00C7459C /* NoPLValues.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NoPLValues.h; path = ../../NoPLc/include/NoPLValues.h; sourceTree = "<group>"; };
 		9B84F86516BDF21E00F34DF1 /* libNoPLRuntime(arm).a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libNoPLRuntime(arm).a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		A24F59E6163098DB00FC9181 /* libNoPLRuntime.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libNoPLRuntime.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		A261C28E15C0E845008AE0C4 /* NoPL_Runtime */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; name = NoPL_Runtime; path = NoPL_Runtime_testing; sourceTree = BUILT_PRODUCTS_DIR; };
+		A261C28E15C0E845008AE0C4 /* NoPL_Runtime_testing */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = NoPL_Runtime_testing; sourceTree = BUILT_PRODUCTS_DIR; };
 		A261C29215C0E846008AE0C4 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
 		A261C29415C0E846008AE0C4 /* NoPL_Runtime.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = NoPL_Runtime.1; sourceTree = "<group>"; };
 		A261C29C15C0E878008AE0C4 /* NoPLRuntime.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = NoPLRuntime.c; sourceTree = "<group>"; };
@@ -85,7 +88,7 @@
 		A261C28F15C0E845008AE0C4 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				A261C28E15C0E845008AE0C4 /* NoPL_Runtime */,
+				A261C28E15C0E845008AE0C4 /* NoPL_Runtime_testing */,
 				A24F59E6163098DB00FC9181 /* libNoPLRuntime.a */,
 				9B84F86516BDF21E00F34DF1 /* libNoPLRuntime(arm).a */,
 			);
@@ -108,6 +111,7 @@
 				9B70EF9916A7893E00C7459C /* NoPLValues.h */,
 				A261C29E15C0E892008AE0C4 /* NoPLRuntime.h */,
 				A261C29C15C0E878008AE0C4 /* NoPLRuntime.c */,
+				9B4D56511875C70700B9A619 /* NoPLDebug.h */,
 				A2807F3A15D6ACEF003FDDCD /* NoPLStandardFunctions.h */,
 				A2807F3715D6ACD9003FDDCD /* NoPLStandardFunctions.c */,
 			);
@@ -122,6 +126,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9B84F86116BDF21E00F34DF1 /* NoPLValues.h in Headers */,
+				9B4D56531875C70700B9A619 /* NoPLDebug.h in Headers */,
 				9B84F85F16BDF21E00F34DF1 /* NoPLStandardFunctions.h in Headers */,
 				9B84F86016BDF21E00F34DF1 /* NoPLRuntime.h in Headers */,
 			);
@@ -132,6 +137,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9B70EF9A16A7893E00C7459C /* NoPLValues.h in Headers */,
+				9B4D56521875C70700B9A619 /* NoPLDebug.h in Headers */,
 				A24F59ED1630990200FC9181 /* NoPLStandardFunctions.h in Headers */,
 				A24F59EC163098F900FC9181 /* NoPLRuntime.h in Headers */,
 			);
@@ -188,7 +194,7 @@
 			);
 			name = NoPL_Runtime_testing;
 			productName = NoPL_Runtime;
-			productReference = A261C28E15C0E845008AE0C4 /* NoPL_Runtime */;
+			productReference = A261C28E15C0E845008AE0C4 /* NoPL_Runtime_testing */;
 			productType = "com.apple.product-type.tool";
 		};
 /* End PBXNativeTarget section */
