@@ -18,13 +18,13 @@
 #pragma mark -
 #pragma mark fast hash for looking up function names
 
-int hash_djb2ToInt(unsigned char* str)
+int32_t hash_djb2ToInt(unsigned char* str)
 {
 	uint64_t hash = 5381;
-	int c;
+	int32_t c;
 	while ((c = *str++))
 		hash = ((hash << 5) + hash) + c;
-	return (int)(hash % 0xFFFFFF);
+	return (int32_t)(hash % 0xFFFFFF);
 }
 
 #pragma mark -
