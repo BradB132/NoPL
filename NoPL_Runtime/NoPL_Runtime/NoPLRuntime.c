@@ -960,6 +960,15 @@ void nopl_evaluateFunction(NoPL_Evaluation* eval, NoPL_FunctionValue* returnVal)
 			//release any strings that were allocated
 			for(int i = 0; i < releaseStringCount; i++)
 				freeNoPL_String(&releaseStrings[i]);
+			
+			//send an error if the function was uninitialized
+			if(returnVal->type == NoPL_DataType_Uninitialized && eval->callbacks->stringFeedback)
+			{
+				size_t errLength = strlen(funcName)+49;
+				char formattedErr[errLength];
+				sprintf(formattedErr, "Did not receive a return value from function '%s'.", funcName);
+				eval->callbacks->stringFeedback(formattedErr, NoPL_StringFeedbackType_RuntimeError, eval->context);
+			}
 		}
 			break;
 		case NoPL_BYTE_FUNCTION_INDEX:
@@ -976,6 +985,10 @@ void nopl_evaluateFunction(NoPL_Evaluation* eval, NoPL_FunctionValue* returnVal)
 				
 				//call the function
 				*returnVal = eval->callbacks->subscript(ptr, index, eval->context);
+				
+				//send an error if the function was uninitialized
+				if(returnVal->type == NoPL_DataType_Uninitialized && eval->callbacks->stringFeedback)
+					eval->callbacks->stringFeedback("Did not receive a value from numeric subscript.", NoPL_StringFeedbackType_RuntimeError, eval->context);
 			}
 			else if (argType == NoPL_BYTE_ARG_STRING)
 			{
@@ -990,6 +1003,10 @@ void nopl_evaluateFunction(NoPL_Evaluation* eval, NoPL_FunctionValue* returnVal)
 				
 				//clean up the string
 				freeNoPL_String(&strObj);
+				
+				//send an error if the function was uninitialized
+				if(returnVal->type == NoPL_DataType_Uninitialized && eval->callbacks->stringFeedback)
+					eval->callbacks->stringFeedback("Did not receive a value from string subscript.", NoPL_StringFeedbackType_RuntimeError, eval->context);
 			}
 			else
 				printf("Function Error: instruction #%d doesn't make sense here\n", (int)argType);
@@ -998,13 +1015,6 @@ void nopl_evaluateFunction(NoPL_Evaluation* eval, NoPL_FunctionValue* returnVal)
 		default:
 			printf("Function Error: instruction #%d doesn't make sense here\n", (int)instr);
 			break;
-	}
-	
-	//send an error if the function was uninitialized
-	if(returnVal->type == NoPL_DataType_Uninitialized && eval->callbacks->stringFeedback)
-	{
-		//TODO: make this error message more useful
-		eval->callbacks->stringFeedback("Did not receive a value from function call.", NoPL_StringFeedbackType_RuntimeError, eval->context);
 	}
 }
 
