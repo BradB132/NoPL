@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9B19264A18F33DD4003AEAEA /* NoPL_APILexer.c in Sources */ = {isa = PBXBuildFile; fileRef = 9B19264618F33DD4003AEAEA /* NoPL_APILexer.c */; };
+		9B19264B18F33DD4003AEAEA /* NoPL_APILexer.h in Headers */ = {isa = PBXBuildFile; fileRef = 9B19264718F33DD4003AEAEA /* NoPL_APILexer.h */; };
+		9B19264C18F33DD4003AEAEA /* NoPL_APIParser.c in Sources */ = {isa = PBXBuildFile; fileRef = 9B19264818F33DD4003AEAEA /* NoPL_APIParser.c */; };
+		9B19264D18F33DD4003AEAEA /* NoPL_APIParser.h in Headers */ = {isa = PBXBuildFile; fileRef = 9B19264918F33DD4003AEAEA /* NoPL_APIParser.h */; };
 		A27FA8001632466D00D686E9 /* antlr3baserecognizer.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB8185153B42F20080E9FB /* antlr3baserecognizer.c */; };
 		A27FA8011632466D00D686E9 /* antlr3basetree.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB8186153B42F20080E9FB /* antlr3basetree.c */; };
 		A27FA8021632466D00D686E9 /* antlr3basetreeadaptor.c in Sources */ = {isa = PBXBuildFile; fileRef = A2AB8187153B42F20080E9FB /* antlr3basetreeadaptor.c */; };
@@ -82,6 +86,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		9B19264618F33DD4003AEAEA /* NoPL_APILexer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = NoPL_APILexer.c; sourceTree = "<group>"; };
+		9B19264718F33DD4003AEAEA /* NoPL_APILexer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NoPL_APILexer.h; sourceTree = "<group>"; };
+		9B19264818F33DD4003AEAEA /* NoPL_APIParser.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = NoPL_APIParser.c; sourceTree = "<group>"; };
+		9B19264918F33DD4003AEAEA /* NoPL_APIParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NoPL_APIParser.h; sourceTree = "<group>"; };
 		A27FA7FC1632464700D686E9 /* libNoPLc.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libNoPLc.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		A29783E6154A467300903BDD /* NoPLValues.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NoPLValues.h; path = ../../include/NoPLValues.h; sourceTree = "<group>"; };
 		A2AB8154153B42B60080E9FB /* NoPLc_testing */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = NoPLc_testing; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -201,6 +209,10 @@
 			isa = PBXGroup;
 			children = (
 				A2AB8162153B42F20080E9FB /* antlr3 */,
+				9B19264618F33DD4003AEAEA /* NoPL_APILexer.c */,
+				9B19264718F33DD4003AEAEA /* NoPL_APILexer.h */,
+				9B19264818F33DD4003AEAEA /* NoPL_APIParser.c */,
+				9B19264918F33DD4003AEAEA /* NoPL_APIParser.h */,
 				A2AB81BD153B71280080E9FB /* NoPLc.h */,
 				A2AB81C0153B715A0080E9FB /* NoPLc.c */,
 				A2AB819F153B42F20080E9FB /* NoPLLexer.h */,
@@ -299,7 +311,9 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9B19264D18F33DD4003AEAEA /* NoPL_APIParser.h in Headers */,
 				A27FA81C1632473700D686E9 /* NoPLc.h in Headers */,
+				9B19264B18F33DD4003AEAEA /* NoPL_APILexer.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -380,12 +394,14 @@
 				A27FA8021632466D00D686E9 /* antlr3basetreeadaptor.c in Sources */,
 				A27FA8031632466D00D686E9 /* antlr3bitset.c in Sources */,
 				A27FA8041632466D00D686E9 /* antlr3collections.c in Sources */,
+				9B19264C18F33DD4003AEAEA /* NoPL_APIParser.c in Sources */,
 				A27FA8051632466D00D686E9 /* antlr3commontoken.c in Sources */,
 				A27FA8061632466D00D686E9 /* antlr3commontree.c in Sources */,
 				A27FA8071632466D00D686E9 /* antlr3commontreeadaptor.c in Sources */,
 				A27FA8081632466D00D686E9 /* antlr3commontreenodestream.c in Sources */,
 				A27FA8091632466D00D686E9 /* antlr3convertutf.c in Sources */,
 				A27FA80A1632466D00D686E9 /* antlr3cyclicdfa.c in Sources */,
+				9B19264A18F33DD4003AEAEA /* NoPL_APILexer.c in Sources */,
 				A27FA80B1632466D00D686E9 /* antlr3debughandlers.c in Sources */,
 				A27FA80C1632466D00D686E9 /* antlr3encodings.c in Sources */,
 				A27FA80D1632466D00D686E9 /* antlr3exception.c in Sources */,

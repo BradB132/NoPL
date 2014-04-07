@@ -37,7 +37,8 @@ typedef enum
 	NoPL_TokenRangeType_syntax = 9,
 	NoPL_TokenRangeType_comments = 10,
 	NoPL_TokenRangeType_metadata = 11,
-	NoPL_TokenRangeType_count = 12,
+	NoPL_TokenRangeType_precompile = 12,
+	NoPL_TokenRangeType_count = 13,
 } NoPL_TokenRangeType;
 
 typedef struct

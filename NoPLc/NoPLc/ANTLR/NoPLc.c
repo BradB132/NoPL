@@ -1476,6 +1476,18 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				}
 			}
 				break;
+			case INCLUDE_API:
+			{
+				//load this include
+				pANTLR3_BASE_TREE var = treeIndex(tree,0);
+				if(var->getType(var) == STRING)
+				{
+					char* path = (char*)(var->getText(var)->chars);
+					
+					//TODO: how to get absolute path if this is relative?
+				}
+			}
+				break;
 			case INCREMENT:
 			{
 				//add the operator
@@ -2164,21 +2176,34 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 							case '0':
 								*copyTo = '\0';
 								break;
-							case 'f':
-								*copyTo = '\f';
-								break;
-							case 'n':
-								*copyTo = '\n';
-								break;
-							case 'r':
-								*copyTo = '\r';
+							case 'b':
+								*copyTo = '\b';
 								break;
 							case 't':
 								*copyTo = '\t';
 								break;
-							case 'v':
-								*copyTo = '\v';
+							case 'n':
+								*copyTo = '\n';
 								break;
+							case 'f':
+								*copyTo = '\f';
+								break;
+							case 'r':
+								*copyTo = '\r';
+								break;
+//							case '0':
+//							case '1':
+//							case '2':
+//							case '3':
+//							case '4':
+//							case '5':
+//							case '6':
+//							case '7':
+//								//TODO: octal, '\' character followed by 1-3 numbers values 0-7
+//								break;
+//							case 'u':
+//								//TODO: hex digits, '\' character followed by hex digits
+//								break;
 							default:
 								copyTo--;
 								break;
@@ -2581,6 +2606,8 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				nopl_appendContext(&switchCtx, context);
 				
 				nopl_popScope(context);
+				
+				nopl_freeInnerCompileContext(&switchCtx);
 			}
 				break;
 			case TYPE_CAST:
@@ -2782,6 +2809,10 @@ void nopl_compileWithInputStream(pANTLR3_INPUT_STREAM stream, const NoPL_Compile
 						break;
 					case METADATA:
 						nopl_addTokenRange(context, tok, NoPL_TokenRangeType_metadata);
+						break;
+					case INCLUDE_API:
+						nopl_addTokenRange(context, tok, NoPL_TokenRangeType_precompile);
+						break;
 				}
 			}
 		}

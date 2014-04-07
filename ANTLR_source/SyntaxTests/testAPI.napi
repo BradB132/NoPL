@@ -1,0 +1,13 @@
+
+class TestClass
+{
+	String getName();
+	bool checkNum(float num);
+}
+
+class TestList []
+{
+	int count();
+}
+
+void testGlobal(int a);

@@ -1,3 +1,5 @@
+#api "./testAPI.napi"
+
 //This script should test all of the syntax features
 <? as a sort of unit test ?>
 /* to make sure stuff is still working */
