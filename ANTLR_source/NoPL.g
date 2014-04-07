@@ -34,7 +34,8 @@ statement
 	|	CONTINUE STATEMENT_DELIMITER!
 	|	EXIT STATEMENT_DELIMITER!
 	|	METADATA
-	|	SCOPE_OPEN^ statement+ SCOPE_CLOSE!
+	|	SCOPE_OPEN^ statement* SCOPE_CLOSE!
+	|	INCLUDE_API^ STRING
 	;
 
 nonControlStatement
@@ -164,30 +165,26 @@ functionCall
 	;
 
 //CONTROL FLOW
-loopBody
-	:	SCOPE_OPEN! statement* SCOPE_CLOSE!
-	|	statement
-	;
 
 whileLoop
-	:	LOOP_WHILE^ PAREN_OPEN! expression PAREN_CLOSE! loopBody
+	:	LOOP_WHILE^ PAREN_OPEN! expression PAREN_CLOSE! statement
 	;
 
 forLoop
-	:	LOOP_FOR PAREN_OPEN decl=nonControlStatement? STATEMENT_DELIMITER cond=expression? STATEMENT_DELIMITER iter=nonControlStatement? PAREN_CLOSE loopBody
-		-> ^(LOOP_FOR ^(FOR_LOOP_DECL $decl)? ^(FOR_LOOP_COND $cond)? ^(FOR_LOOP_ITER $iter)? loopBody)
+	:	LOOP_FOR PAREN_OPEN decl=nonControlStatement? STATEMENT_DELIMITER cond=expression? STATEMENT_DELIMITER iter=nonControlStatement? PAREN_CLOSE statement
+		-> ^(LOOP_FOR ^(FOR_LOOP_DECL $decl)? ^(FOR_LOOP_COND $cond)? ^(FOR_LOOP_ITER $iter)? statement)
 	;
 
 doWhileLoop
-	:	LOOP_DO loopBody LOOP_WHILE PAREN_OPEN expression PAREN_CLOSE STATEMENT_DELIMITER -> ^(LOOP_DO expression loopBody)
+	:	LOOP_DO statement LOOP_WHILE PAREN_OPEN expression PAREN_CLOSE STATEMENT_DELIMITER -> ^(LOOP_DO expression statement)
 	;
 
 conditional
-	:	CONDITIONAL PAREN_OPEN expression PAREN_CLOSE loopBody (elseConditional)? -> ^(CONDITIONAL expression (elseConditional)? loopBody)
+	:	CONDITIONAL PAREN_OPEN expression PAREN_CLOSE statement (elseConditional)? -> ^(CONDITIONAL expression (elseConditional)? statement)
 	;
 
 elseConditional
-	:	CONDITIONAL_ELSE^ loopBody
+	:	CONDITIONAL_ELSE^ statement
 	;
 
 innerSwitchStatement
@@ -266,6 +263,9 @@ SCOPE_CLOSE:		'}';
 ASSIGN:			'=';
 STATEMENT_DELIMITER:	';';
 PRINT_VALUE:		'#';
+
+//interface
+INCLUDE_API:		'#api';
 
 //OTHER MISC LEXER
 METADATA:	'<?' ( options {greedy=false;} : . )* '?>';
