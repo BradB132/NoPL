@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "NoPLRuntime.h"
+#include "NoPLDebug.h"
 #include "NoPLStandardFunctions.h"
 
 char* mallocBufferFromFilePath(const char* filePath, unsigned long* outLength)
@@ -48,24 +49,24 @@ char* mallocBufferFromFilePath(const char* filePath, unsigned long* outLength)
 	return buffer;
 }
 
-NoPL_FunctionValue testingEvalFunc(void* calledOnObject, const char* functionName, const NoPL_FunctionValue* argv, unsigned int argc)
+NoPL_FunctionValue testingEvalFunc(void* calledOnObject, const char* functionName, const NoPL_FunctionValue* argv, unsigned int argc, void* context)
 {
-	NoPL_FunctionValue returnValue = NoPL_FunctionValue();
-	
 	//check standard functions for a value
-	returnValue = nopl_standardFunctions(calledOnObject, functionName, argv, argc);
+	NoPL_FunctionValue returnValue = nopl_standardFunctions(calledOnObject, functionName, argv, argc);
 	if(returnValue.type != NoPL_DataType_Void)
 		return returnValue;
+	
+	//TODO: check additional functions
 	
 	return returnValue;
 }
 
-NoPL_FunctionValue testingSubscript(void* calledOnObject, NoPL_FunctionValue index)
+NoPL_FunctionValue testingSubscript(void* calledOnObject, NoPL_FunctionValue index, void* context)
 {
 	return NoPL_FunctionValue();
 }
 
-void testStrings(const char* string, NoPL_StringFeedbackType type)
+void testStrings(const char* string, NoPL_StringFeedbackType type, void* context)
 {
 	switch (type) {
 		case NoPL_StringFeedbackType_PrintStatement:
@@ -106,14 +107,14 @@ int main(int argc, const char * argv[])
 	//runScript((NoPL_Instruction*)scriptBuffer, (unsigned int)fileLength, &callbacks);
 	
 	//try stepping through the script
-	NoPL_DebugHandle handle = createNoPL_DebugHandle((NoPL_Instruction*)scriptBuffer, (unsigned int)fileLength, &callbacks);
+	NoPL_DebugHandle handle = createNoPL_DebugHandle((NoPL_Instruction*)scriptBuffer, (unsigned int)fileLength, &callbacks, NULL);
 	
 	//delete the used script data
 	free(scriptBuffer);
 	
 	int keepGoing = 1;
 	while(keepGoing)
-		keepGoing = debugStep(handle);
+		keepGoing = nopl_debugStep(handle);
 	
 	freeNoPL_DebugHandle(handle);
 	

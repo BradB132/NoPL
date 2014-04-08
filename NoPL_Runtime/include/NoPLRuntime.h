@@ -56,10 +56,13 @@ typedef struct
 
 #pragma mark - Struct helpers
 
-#define NoPL_FunctionValue()				(NoPL_FunctionValue){0,NoPL_DataType_Uninitialized}
-#define NoPL_Callbacks()					(NoPL_Callbacks){0,0,0}
-#define NoPL_assignString(charStr, funcVal)	funcVal.type = NoPL_DataType_String;funcVal.stringValue = (char*)malloc(strlen(charStr)+1);strcpy(funcVal.stringValue, charStr);
-
+#define NoPL_Callbacks() (NoPL_Callbacks){0,0,0}
+#define NoPL_FunctionValue() (NoPL_FunctionValue){0,NoPL_DataType_Uninitialized}
+#define NoPL_assignString(charStr, funcVal) funcVal.type = NoPL_DataType_String;funcVal.stringValue = (char*)malloc(strlen(charStr)+1);strcpy(funcVal.stringValue, charStr);
+#define NoPL_assignNumber(num, funcVal) funcVal.type = NoPL_DataType_Number;funcVal.numberValue = num;
+#define NoPL_assignBoolean(bool, funcVal) funcVal.type = NoPL_DataType_Boolean;funcVal.booleanValue = bool;
+#define NoPL_assignPointer(pointer, funcVal) funcVal.type = NoPL_DataType_Pointer;funcVal.pointerValue = pointer;
+	
 #pragma mark - Script API
 
 void nopl_runScript(const NoPL_Instruction* scriptBuffer, uint32_t bufferLength, const NoPL_Callbacks* callbacks, void* context);
