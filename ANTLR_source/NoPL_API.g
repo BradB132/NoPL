@@ -13,7 +13,7 @@ options
 
 tokens
 {
-	FUNCTIONS;
+	API_FUNCTIONS;
 }
 
 //PARSER
@@ -27,54 +27,54 @@ statement
 	;
 
 classDecl
-	:	DECL_CLASS ID (SUBSCRIPT_OPEN SUBSCRIPT_CLOSE)? SCOPE_OPEN functionDecl* SCOPE_CLOSE -> ^(DECL_CLASS ID ^(FUNCTIONS functionDecl*) SUBSCRIPT_OPEN?)
+	:	API_DECL_CLASS API_ID (API_SUBSCRIPT_OPEN API_SUBSCRIPT_CLOSE)? API_SCOPE_OPEN functionDecl* API_SCOPE_CLOSE -> ^(API_DECL_CLASS API_ID ^(API_FUNCTIONS functionDecl*) API_SUBSCRIPT_OPEN?)
 	;
 
 functionDecl
-	:	returnType ID^ PAREN_OPEN! (functionArg (ARG_DELIMITER! functionArg)*)? PAREN_CLOSE! STATEMENT_DELIMITER!
+	:	returnType API_ID^ API_PAREN_OPEN! (functionArg (API_ARG_DELIMITER! functionArg)*)? API_PAREN_CLOSE! API_STATEMENT_DELIMITER!
 	;
 
 functionArg
-	:	(DECL_NUMBER^ | DECL_BOOL^ | DECL_STRING^ | DECL_OBJ^) ID
-	|	ARG_VARIADIC^ ARG_VARIADIC! ARG_VARIADIC!
+	:	(API_DECL_NUMBER^ | API_DECL_BOOL^ | API_DECL_STRING^ | API_DECL_OBJ^) API_ID
+	|	API_ARG_VARIADIC^ API_ARG_VARIADIC! API_ARG_VARIADIC!
 	;
 
 returnType
-	:	(DECL_NUMBER | DECL_BOOL | DECL_STRING | DECL_OBJ | DECL_VOID)
+	:	(API_DECL_NUMBER | API_DECL_BOOL | API_DECL_STRING | API_DECL_OBJ | API_DECL_VOID)
 	;
 
 //STRUCTURES
-DECL_CLASS:		(('C'|'c')'lass');
+API_DECL_CLASS:		(('C'|'c')'lass');
 
 //TYPES
-DECL_NUMBER:		(('n'|'N')'umber'|'int'|'float');
-DECL_BOOL:		('BOOL'|('b'|'B')'ool'('ean')?);
-DECL_STRING:		(('s'|'S')'tring');
-DECL_OBJ:		(('o'|'O')'bject'|('p'|'P')'ointer');
-DECL_VOID:		(('v'|'V')'oid');
+API_DECL_NUMBER:	(('n'|'N')'umber'|'int'|'float');
+API_DECL_BOOL:		('BOOL'|('b'|'B')'ool'('ean')?);
+API_DECL_STRING:	(('s'|'S')'tring');
+API_DECL_OBJ:		(('o'|'O')'bject'|('p'|'P')'ointer');
+API_DECL_VOID:		(('v'|'V')'oid');
 
 //FUNCTIONS
-ARG_DELIMITER:		',';
-ARG_VARIADIC:		'.';
-SUBSCRIPT_OPEN:		'[';
-SUBSCRIPT_CLOSE:	']';
+API_ARG_DELIMITER:		',';
+API_ARG_VARIADIC:		'.';
+API_SUBSCRIPT_OPEN:		'[';
+API_SUBSCRIPT_CLOSE:		']';
 
 //OTHER OPERATORS
-PAREN_OPEN:		'(';
-PAREN_CLOSE:		')';
-SCOPE_OPEN:		'{';
-SCOPE_CLOSE:		'}';
-STATEMENT_DELIMITER:	';';
+API_PAREN_OPEN:			'(';
+API_PAREN_CLOSE:		')';
+API_SCOPE_OPEN:			'{';
+API_SCOPE_CLOSE:		'}';
+API_STATEMENT_DELIMITER:	';';
 
-ID  :	('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'0'..'9'|'_')*
+API_ID  :	('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'0'..'9'|'_')*
     ;
 
-COMMENT
+API_COMMENT
     :   '//' ~('\n'|'\r')* '\r'? '\n' {$channel=HIDDEN;}
     |   '/*' ( options {greedy=false;} : . )* '*/' {$channel=HIDDEN;}
     ;
 
-WS  :   ( ' '
+API_WS  :   ( ' '
         | '\t'
         | '\r'
         | '\n'

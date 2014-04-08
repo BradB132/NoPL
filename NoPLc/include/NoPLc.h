@@ -75,7 +75,7 @@ typedef struct
 #pragma mark - Compiling APIs
 
 void compileContextWithFilePath(const char* path, const NoPL_CompileOptions* options, NoPL_CompileContext* context);
-void compileContextWithString(const char* scriptString, const NoPL_CompileOptions* options, NoPL_CompileContext* context);
+void compileContextWithString(const char* scriptString, const NoPL_CompileOptions* options, NoPL_CompileContext* context, const char* apiPath);
 
 #ifdef __cplusplus
 }

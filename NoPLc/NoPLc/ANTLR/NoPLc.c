@@ -10,6 +10,8 @@
 #include "NoPLc.h"
 #include "NoPLLexer.h"
 #include "NoPLParser.h"
+#include "NoPL_APILexer.h"
+#include "NoPL_APIParser.h"
 
 typedef struct
 {
@@ -30,6 +32,7 @@ typedef struct
 	NoPL_Index* stringTableSize;
 	ANTLR3_MARKER tokenStart;
 	unsigned int tokenArrayLengths[NoPL_TokenRangeType_count];
+	char* apiPath;
 	void* parentContext;
 }NoPL_CompileContextPrivate;
 
@@ -1482,9 +1485,25 @@ void nopl_traverseAST(const pANTLR3_BASE_TREE tree, const NoPL_CompileOptions* o
 				pANTLR3_BASE_TREE var = treeIndex(tree,0);
 				if(var->getType(var) == STRING)
 				{
-					char* path = (char*)(var->getText(var)->chars);
+					//get the include path
+					char* chars = (char*)(var->getText(var)->chars);
+					chars++;
+					size_t inputLength = strlen(chars)-1;
+					char pathSuffix[inputLength];
+					strncpy(pathSuffix, chars, inputLength);
 					
-					//TODO: how to get absolute path if this is relative?
+					//get the full path
+					size_t fullLength = inputLength+strlen(pContext->apiPath)+2;//add one extra for the '/' char in the path
+					char fullPath[fullLength];
+					snprintf(fullPath, fullLength, "%s/%s", pContext->apiPath, pathSuffix);
+					
+					pANTLR3_INPUT_STREAM inputStream = antlr3AsciiFileStreamNew((pANTLR3_UINT8)fullPath);
+					pNoPL_APILexer lex = NoPL_APILexerNew(inputStream);
+					pANTLR3_COMMON_TOKEN_STREAM tokenStream = antlr3CommonTokenStreamSourceNew(ANTLR3_SIZE_HINT, TOKENSOURCE(lex));
+					pNoPL_APIParser parser = NoPL_APIParserNew(tokenStream);
+					
+					NoPL_APIParser_api_return api = parser->api(parser);
+					
 				}
 			}
 				break;
@@ -2884,14 +2903,24 @@ void nopl_compileWithInputStream(pANTLR3_INPUT_STREAM stream, const NoPL_Compile
 
 void compileContextWithFilePath(const char* path, const NoPL_CompileOptions* options, NoPL_CompileContext* context)
 {
+	//copy the path of the script file and use it as the API path
+	char* lastChar = strrchr(path, '/');
+	size_t pathLength = lastChar - path;
+	pContext->apiPath = (char*)malloc(pathLength+1);
+	strncpy(pContext->apiPath, path, pathLength);
+	
 	//run the compiler with an input stream created from URL path
 	pANTLR3_INPUT_STREAM inputStream = antlr3AsciiFileStreamNew((pANTLR3_UINT8)path);
 	nopl_compileWithInputStream(inputStream, options, context);
 	inputStream->free(inputStream);
 }
 
-void compileContextWithString(const char* scriptString, const NoPL_CompileOptions* options, NoPL_CompileContext* context)
+void compileContextWithString(const char* scriptString, const NoPL_CompileOptions* options, NoPL_CompileContext* context, const char* apiPath)
 {
+	//copy the API path into the context
+	pContext->apiPath = (char*)malloc(strlen(apiPath)+1);
+	strcpy(pContext->apiPath, apiPath);
+	
 	//run the compiler with an input stream created from a C string
 	pANTLR3_INPUT_STREAM inputStream = antlr3NewAsciiStringCopyStream((pANTLR3_UINT8)scriptString, (int)strlen((const char*)scriptString), 0);
 	nopl_compileWithInputStream(inputStream, options, context);
@@ -2919,6 +2948,7 @@ NoPL_CompileContext newNoPL_CompileContext()
 	private(context)->allowsContinueStatements = 0;
 	private(context)->debugLine = -1;
 	private(context)->tokenStart = 0;
+	private(context)->apiPath = NULL;
 	memset(private(context)->tokenArrayLengths, 0, sizeof(unsigned int)*NoPL_TokenRangeType_count);
 	context.tokenRanges = malloc(sizeof(NoPL_TokenRanges));
 	memset(context.tokenRanges->ranges, 0, sizeof(NoPL_TokenRange*)*NoPL_TokenRangeType_count);
@@ -2962,6 +2992,8 @@ void freeNoPL_CompileContext(NoPL_CompileContext* context)
 			pContext->booleanStack->free(pContext->booleanStack);
 		if(pContext->stringStack)
 			pContext->stringStack->free(pContext->stringStack);
+		if(pContext->apiPath)
+			free(pContext->apiPath);
 		
 		free(context->privateAttributes);
 		context->privateAttributes = NULL;
